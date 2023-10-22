@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Text } from "@react-three/drei";
+import { useThree } from '@react-three/fiber';
 
 const SCALE = 100
 
@@ -25,23 +27,52 @@ function Dot({ word, coordinates, selected }) {
         setLocalSelected(!localSelected);
     }
 
+    const [isClicked, setIsClicked] = useState(false);
+    const handlePointerDown = () => {
+        setIsClicked(true);
+    }
+
+    const handlePointerUp = () => {
+        setIsClicked(false);
+    }
+
+    const {camera} = useThree()
+
+    const radius = 0.05 * (localSelected ? 3 : 1) * (isHovered ? 1.2 : 1)
+    const color = localSelected ? 'hotpink' : 'gray'
+
     return (
+        <>
         <mesh ref={meshRef}
+
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
             onClick={handleClick}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
         >
             <sphereGeometry args={[
-                0.05 * (localSelected ? 3 : 1) * (isHovered ? 1.2 : 1),
+                .05,
                 32,
                 32,
             ]} />
             <meshStandardMaterial 
-                color={localSelected ? 'hotpink' : 'gray'} 
+                color={color} 
                 transparent 
                 opacity={localSelected ? 1 : 0.5} 
             />
         </mesh>
+        {(isHovered || isClicked) && (
+            <Text
+                fontSize={0.4}
+                color={color}
+                position={[x * SCALE, y * SCALE + 0.5 + (radius), z * SCALE]}
+                rotation={camera.rotation}
+            >
+                {word}
+            </Text>
+        )}
+        </>
     );
 }
 
