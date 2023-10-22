@@ -8,16 +8,23 @@ import SearchBox from './SearchBox';
 
 const App = () => {
     const [backendData, setBackendData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleSearch = async (searchTerm) => {
-        const response = await fetch(`/api/search/${searchTerm}`);
-        const data = await response.json();
-        setBackendData(data);
+        setIsLoading(true)
+        try {
+            const response = await fetch(`/api/search/${searchTerm}`);
+            const data = await response.json();
+            setBackendData(data);
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
         <>
-            <SearchBox onSearch={handleSearch} />
+            <SearchBox onSearch={handleSearch} isLoading={isLoading} />
+            {isLoading && <div className="loading">Loading...</div>}
             <Canvas>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />

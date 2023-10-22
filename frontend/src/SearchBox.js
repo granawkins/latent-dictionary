@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SearchBox = ({ onSearch }) => {
+const SearchBox = ({ onSearch, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearch = (e) => {
@@ -17,6 +17,7 @@ const SearchBox = ({ onSearch }) => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     style={styles.input}
                     placeholder="Search..."
+                    disabled={isLoading}
                 />
             </form>
         </div>
