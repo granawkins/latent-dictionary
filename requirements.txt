@@ -1,0 +1,8 @@
+openai
+numpy
+plotly
+scikit-learn
+pytest
+pytest-mock
+requests
+typing
