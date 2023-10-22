@@ -7,18 +7,41 @@ import Dot from './Dot';
 import SearchBox from './SearchBox';
 
 const App = () => {
-    const [backendData, setBackendData] = useState(null);
+    const [corpus, setCorpus] = useState(null);
+    const [selected, setSelected] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
 
-    const handleSearch = async (searchTerm) => {
+    const fetchData = async () => {
         setIsLoading(true)
         try {
-            const response = await fetch(`/api/search/${searchTerm}`);
+            const response = await fetch('/api/oxford_3000');
             const data = await response.json();
-            setBackendData(data);
+            setCorpus(data);
+            setSelected(Array(data.length).fill(false))
         } finally {
             setIsLoading(false)
         }
+    };
+
+    useEffect(() => {
+        if (!corpus && !isLoading) {
+            setIsLoading(true)
+            fetchData()
+        }
+    }, []);
+
+    const handleSearch = (searchTerm) => {
+        const searchTerms = searchTerm.split(',').map(term => term.trim());
+        const newSelected = Array(corpus.length).fill(false);
+        searchTerms.forEach(term => {
+            const index = Object.keys(corpus).findIndex(word => (
+                word.toLowerCase() === term.toLowerCase()
+            ));
+            if (index !== -1) {
+                newSelected[index] = !newSelected[index];
+            }
+        });
+        setSelected(newSelected);
     }
 
     return (
@@ -30,9 +53,9 @@ const App = () => {
                 <pointLight position={[10, 10, 10]} />
                 <perspectiveCamera position={[0, 0, 5]} />
                 <OrbitControls />
-                {backendData &&
-                    Object.entries(backendData).map(([word, coordinates]) => (
-                        <Dot key={word} word={word} coordinates={coordinates} />
+                {corpus &&
+                    Object.entries(corpus).map(([word, coordinates], i) => (
+                        <Dot key={word} word={word} coordinates={coordinates} selected={selected[i]} />
                     ))}
             </Canvas>
         </>

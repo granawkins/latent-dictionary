@@ -1,5 +1,5 @@
 import argparse
-from backend.lib.oxford_3000 import oxford_3000
+from backend.lib.oxford_3000 import get_oxford_3000
 from backend.lib.embeddings import get_embeddings
 from backend.lib.plot import visualize_embeddings
 from backend.lib.pca import get_default_pca, get_pca
@@ -24,7 +24,7 @@ def main():
     
     words = words_to_highlight
     if args.oxford:
-        words = list(set(oxford_3000() + words_to_highlight))
+        words = list(set(get_oxford_3000() + words_to_highlight))
     print(f"{len(words)} words {args.oxford and 'including Oxford 3000'}")
     
     embeddings = get_embeddings(words)

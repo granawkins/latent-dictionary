@@ -1,6 +1,6 @@
 from sklearn.decomposition import PCA
 
-from .oxford_3000 import oxford_3000
+from .oxford_3000 import get_oxford_3000
 from .embeddings import get_embeddings
 
 
@@ -15,14 +15,14 @@ def get_pca(
     return pca.transform(items)
 
 
-oxford_3000_pca: PCA 
+oxford_3000_pca: PCA = None
 def get_default_pca(
     items: list[list[float]], n_components: int = COMPONENTS
 ) -> list[list[float]]:
     """Reduce dimensionality using a PCA fit on the Oxford 3000 Words."""
     global oxford_3000_pca
     if oxford_3000_pca is None:
-        words = oxford_3000()
+        words = get_oxford_3000()
         embeddings = get_embeddings(words)
         pca = PCA(n_components=n_components)
         pca.fit(embeddings)
