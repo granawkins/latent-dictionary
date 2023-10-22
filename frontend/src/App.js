@@ -7,37 +7,39 @@ import Dot from './Dot';
 import SearchBox from './SearchBox';
 
 const App = () => {
-    const [backendData, setBackendData] = useState(null);
+    const [corpus, setCorpus] = useState(null);
+    const [selected, setSelected] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
 
     const fetchData = async () => {
         setIsLoading(true)
         try {
-            console.log('fetching data')
             const response = await fetch('/api/oxford_3000');
-            console.log(response)
             const data = await response.json();
-            console.log(data)
-            setBackendData(data);
+            setCorpus(data);
+            setSelected(Array(data.length).fill(false))
         } finally {
             setIsLoading(false)
         }
     };
 
     useEffect(() => {
-        if (!backendData && !isLoading) {
+        if (!corpus && !isLoading) {
+            setIsLoading(true)
             fetchData()
         }
     }, []);
 
-    const handleSearch = async (searchTerm) => {
-        setIsLoading(true)
-        try {
-            const response = await fetch(`/api/search/${searchTerm}`);
-            const data = await response.json();
-            setBackendData(data);
-        } finally {
-            setIsLoading(false)
+    const handleSearch = (searchTerm) => {
+        // Get hte index that matches the searchTerm, if any
+        const index = Object.keys(corpus).findIndex(word => (
+            word.toLowerCase() === searchTerm.toLowerCase()
+        ));
+        if (index !== -1) {
+            const newSelected = [...selected]
+            newSelected[index] = !newSelected[index]
+            console.log(index)
+            setSelected(newSelected)
         }
     }
 
@@ -50,9 +52,9 @@ const App = () => {
                 <pointLight position={[10, 10, 10]} />
                 <perspectiveCamera position={[0, 0, 5]} />
                 <OrbitControls />
-                {backendData &&
-                    Object.entries(backendData).map(([word, coordinates]) => (
-                        <Dot key={word} coordinates={coordinates} />
+                {corpus &&
+                    Object.entries(corpus).map(([word, coordinates], i) => (
+                        <Dot key={word} word={word} coordinates={coordinates} selected={selected[i]} />
                     ))}
             </Canvas>
         </>
