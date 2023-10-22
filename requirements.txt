@@ -1,6 +1,8 @@
 openai
 numpy
 plotly
-sklearn
+scikit-learn
 pytest
 pytest-mock
+requests
+typing

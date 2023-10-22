@@ -17,7 +17,7 @@ def get_pca(
 oxford_3000_pca: PCA | None = None
 def get_default_pca(
     items: list[list[float]], n_components: int = COMPONENTS
-) -> dict[str, list[float]]:
+) -> list[list[float]]:
     """Reduce dimensionality using a PCA fit on the Oxford 3000 Words."""
     global oxford_3000_pca
     if oxford_3000_pca is None:
