@@ -10,6 +10,26 @@ const App = () => {
     const [backendData, setBackendData] = useState(null);
     const [isLoading, setIsLoading] = useState(false)
 
+    const fetchData = async () => {
+        setIsLoading(true)
+        try {
+            console.log('fetching data')
+            const response = await fetch('/api/oxford_3000');
+            console.log(response)
+            const data = await response.json();
+            console.log(data)
+            setBackendData(data);
+        } finally {
+            setIsLoading(false)
+        }
+    };
+
+    useEffect(() => {
+        if (!backendData && !isLoading) {
+            fetchData()
+        }
+    }, []);
+
     const handleSearch = async (searchTerm) => {
         setIsLoading(true)
         try {
@@ -32,7 +52,7 @@ const App = () => {
                 <OrbitControls />
                 {backendData &&
                     Object.entries(backendData).map(([word, coordinates]) => (
-                        <Dot key={word} word={word} coordinates={coordinates} />
+                        <Dot key={word} coordinates={coordinates} />
                     ))}
             </Canvas>
         </>

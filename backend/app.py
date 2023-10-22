@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 
 from lib.embeddings import get_embeddings
-from lib.oxford_3000 import oxford_3000
+from lib.oxford_3000 import get_oxford_3000
 from lib.related_words import get_related_words
 from lib.pca import get_pca, get_default_pca
 
@@ -12,8 +12,8 @@ def index():
     return "Flask App is working properly!"
 
 @app.route('/api/oxford_3000')
-def get_oxford_3000():
-    words = oxford_3000()
+def oxford_3000():
+    words = get_oxford_3000()
     embeddings = get_embeddings(words)
     pcas = get_default_pca(embeddings, 3)
     result = {word: list(pca) for word, pca in zip(words, pcas)}
