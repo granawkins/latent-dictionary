@@ -1,0 +1,6 @@
+openai
+numpy
+plotly
+sklearn
+pytest
+pytest-mock
