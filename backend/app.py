@@ -21,7 +21,7 @@ def get_oxford_3000():
 
 @app.route('/api/search/<word>')
 def search(word):
-    related_words = get_related_words(word)
+    related_words = get_related_words(word, 10)
     words = [word] + related_words
     embeddings = get_embeddings(words)
     pcas = get_pca(embeddings, 3)
