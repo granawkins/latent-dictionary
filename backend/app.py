@@ -1,7 +1,8 @@
 from flask import Flask, jsonify
-from embeddings import get_embeddings
-from oxford_3000 import oxford_3000
-from related_words import get_related_words
+
+from backend.lib.embeddings import get_embeddings
+from backend.lib.oxford_3000 import oxford_3000
+from backend.lib.related_words import get_related_words
 
 app = Flask(__name__)
 

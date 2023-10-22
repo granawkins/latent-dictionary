@@ -1,6 +1,6 @@
 import os
 import json
-from lib.database import Database
+from backend.lib.database import Database
 
 def test_database_set_get():
     table = "test_table"

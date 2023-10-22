@@ -1,6 +1,7 @@
 from sklearn.decomposition import PCA
-from oxford_3000 import oxford_3000
-from embeddings import get_embeddings
+
+from .oxford_3000 import oxford_3000
+from .embeddings import get_embeddings
 
 
 COMPONENTS = 3

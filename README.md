@@ -15,5 +15,5 @@ Example usage: `python3 main.py word1 word2 --oxford --related 5`
 
 ## Web Client
 1. Follow the instructions 1-3 above.
-2. To start the web server, run `python3 lib/app.py`.
+2. To start the web server, run `python3 backend.app`.
 3. Content is served to localhost:5000

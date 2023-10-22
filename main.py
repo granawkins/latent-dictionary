@@ -1,9 +1,9 @@
 import argparse
-from lib.oxford_3000 import oxford_3000
-from lib.embeddings import get_embeddings
-from lib.plot import visualize_embeddings
-from lib.pca import get_default_pca, get_pca
-from lib.related_words import get_related_words
+from backend.lib.oxford_3000 import oxford_3000
+from backend.lib.embeddings import get_embeddings
+from backend.lib.plot import visualize_embeddings
+from backend.lib.pca import get_default_pca, get_pca
+from backend.lib.related_words import get_related_words
 
 def main():
 
