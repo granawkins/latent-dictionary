@@ -5,17 +5,21 @@ const SCALE = 100
 
 function Dot({ word, coordinates, selected }) {
     const [localSelected, setLocalSelected] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
     useEffect(() => {
         setLocalSelected(selected)
     }, [selected])
     
     const meshRef = useRef();
     const [x, y, z] = coordinates;
-    useFrame((state, delta) => (meshRef.current.position.set(
-        x * SCALE, 
-        y * SCALE, 
-        z * SCALE,
-    )));
+    const targetScale = (localSelected ? 3 : 1) * (isHovered ? 1.2 : 1);
+    useFrame((state, delta) => {
+        meshRef.current.position.set(x * SCALE, y * SCALE, z * SCALE);
+        const currentScale = meshRef.current.scale.x;
+        const scaleDiff = targetScale - currentScale;
+        const easeInOutFactor = scaleDiff * delta * 5;
+        meshRef.current.scale.set(currentScale + easeInOutFactor, currentScale + easeInOutFactor, currentScale + easeInOutFactor);
+    });
 
     const handleClick = () => {
         setLocalSelected(!localSelected);
@@ -23,11 +27,13 @@ function Dot({ word, coordinates, selected }) {
 
     return (
         <mesh ref={meshRef}
+            onPointerOver={() => setIsHovered(true)}
+            onPointerOut={() => setIsHovered(false)}
             onClick={handleClick}
         >
             <sphereGeometry args={[
-                0.05 * (localSelected ? 3 : 1), 
-                32, 
+                0.05 * (localSelected ? 3 : 1) * (isHovered ? 1.2 : 1),
+                32,
                 32,
             ]} />
             <meshStandardMaterial 
