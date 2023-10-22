@@ -41,7 +41,7 @@ class Database:
 
 DB_TABLES = ['oxford_3000', 'embeddings']
 
-_database: Database | None = None
+_database: Database 
 def get_database() -> Database:
     global _database
     if _database is None:

@@ -15,7 +15,7 @@ def get_pca(
     return pca.transform(items)
 
 
-oxford_3000_pca: PCA | None = None
+oxford_3000_pca: PCA 
 def get_default_pca(
     items: list[list[float]], n_components: int = COMPONENTS
 ) -> list[list[float]]:

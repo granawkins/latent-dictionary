@@ -1,4 +1,7 @@
+import os
+
 import pytest
+
 from backend.lib.database import Database, DB_TABLES
 
 

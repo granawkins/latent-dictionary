@@ -1,8 +1,8 @@
 from flask import Flask, jsonify
 
-from backend.lib.embeddings import get_embeddings
-from backend.lib.oxford_3000 import oxford_3000
-from backend.lib.related_words import get_related_words
+from lib.embeddings import get_embeddings
+from lib.oxford_3000 import oxford_3000
+from lib.related_words import get_related_words
 
 app = Flask(__name__)
 
@@ -26,4 +26,4 @@ def search(word):
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)
