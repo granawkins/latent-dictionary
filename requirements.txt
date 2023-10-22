@@ -1,8 +1,9 @@
-openai
+flask
 numpy
+openai
 plotly
-scikit-learn
 pytest
 pytest-mock
 requests
+scikit-learn
 typing

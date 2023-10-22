@@ -1,7 +1,7 @@
 
 import os
 import openai
-from .database import get_database
+from database import get_database
 
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
