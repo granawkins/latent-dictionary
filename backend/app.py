@@ -10,14 +10,14 @@ app = Flask(__name__)
 def index():
     return "Flask App is working properly!"
 
-@app.route('/oxford_3000')
+@app.route('/api/oxford_3000')
 def get_oxford_3000():
     words = oxford_3000()
     embeddings = get_embeddings(words)
     result = {word: embedding for word, embedding in zip(words, embeddings)}
     return jsonify(result)
 
-@app.route('/search/<word>')
+@app.route('/api/search/<word>')
 def search(word):
     related_words = get_related_words(word)
     words = [word] + related_words

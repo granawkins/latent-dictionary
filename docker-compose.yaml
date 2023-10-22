@@ -21,3 +21,11 @@ services:
       - .env
     ports:
       - "5001:5001"
+      
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend
