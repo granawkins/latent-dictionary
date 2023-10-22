@@ -1,4 +1,5 @@
 from sklearn.decomposition import PCA
+
 from .oxford_3000 import oxford_3000
 from .embeddings import get_embeddings
 
@@ -14,7 +15,7 @@ def get_pca(
     return pca.transform(items)
 
 
-oxford_3000_pca: PCA | None = None
+oxford_3000_pca: PCA 
 def get_default_pca(
     items: list[list[float]], n_components: int = COMPONENTS
 ) -> list[list[float]]:

@@ -5,7 +5,8 @@ from typing import Any
 
 class Database:
     def __init__(self, tables: list[str] = None, name = None):
-        self.filename = f"{name or 'database'}.json"
+        self.db_dir = os.path.dirname(os.path.abspath(__file__))
+        self.filename = os.path.join(self.db_dir, f"{name or 'database'}.json")
         if os.path.exists(self.filename):
             self.load_data()
         elif tables is not None:
@@ -40,7 +41,7 @@ class Database:
 
 DB_TABLES = ['oxford_3000', 'embeddings']
 
-_database: Database | None = None
+_database: Database = None
 def get_database() -> Database:
     global _database
     if _database is None:

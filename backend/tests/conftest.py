@@ -1,5 +1,8 @@
+import os
+
 import pytest
-from lib.database import Database, DB_TABLES
+
+from backend.lib.database import Database, DB_TABLES
 
 
 @pytest.fixture

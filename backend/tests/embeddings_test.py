@@ -1,7 +1,7 @@
 import pytest
 
-from lib.database import get_database
-from lib.embeddings import get_embeddings, EMBEDDINGS_DIM
+from backend.lib.database import get_database
+from backend.lib.embeddings import get_embeddings, EMBEDDINGS_DIM
 
 def test_get_embeddings_single_word(mock_database):
     word = "hello"
