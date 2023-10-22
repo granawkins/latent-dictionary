@@ -31,16 +31,17 @@ const App = () => {
     }, []);
 
     const handleSearch = (searchTerm) => {
-        // Get hte index that matches the searchTerm, if any
-        const index = Object.keys(corpus).findIndex(word => (
-            word.toLowerCase() === searchTerm.toLowerCase()
-        ));
-        if (index !== -1) {
-            const newSelected = [...selected]
-            newSelected[index] = !newSelected[index]
-            console.log(index)
-            setSelected(newSelected)
-        }
+        const searchTerms = searchTerm.split(',').map(term => term.trim());
+        const newSelected = Array(corpus.length).fill(false);
+        searchTerms.forEach(term => {
+            const index = Object.keys(corpus).findIndex(word => (
+                word.toLowerCase() === term.toLowerCase()
+            ));
+            if (index !== -1) {
+                newSelected[index] = !newSelected[index];
+            }
+        });
+        setSelected(newSelected);
     }
 
     return (
