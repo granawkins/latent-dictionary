@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import React from 'react'
+import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
-import Box from './Box'
+import Dot from './Dot';
 
 const App = () => {
-    // const [backendData, setBackendData] = useState(null);
+    const [backendData, setBackendData] = useState(null);
 
     useEffect(() => {
         fetchBackendData();
@@ -13,16 +14,21 @@ const App = () => {
     const fetchBackendData = async () => {
         const response = await fetch('/api/search/king');
         const data = await response.json();
-        console.log(data);
+        setBackendData(data);
     };
+
     return (
         <Canvas>
             <ambientLight />
             <pointLight position={[10, 10, 10]} />
-            <Box position={[-1.2, 0, 0]} />
-            <Box position={[1.2, 0, 0]} />
+            <perspectiveCamera position={[0, 0, 5]} />
+            <OrbitControls />
+            {backendData &&
+                Object.entries(backendData).map(([word, coordinates]) => (
+                    <Dot key={word} word={word} coordinates={coordinates} />
+                ))}
         </Canvas>
-    )
-}
+    );
+};
 
 export default App
