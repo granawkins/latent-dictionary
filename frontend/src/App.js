@@ -14,8 +14,17 @@ const App = () => {
     const fetchData = async () => {
         setIsLoading(true)
         try {
-            const response = await fetch('/api/oxford_3000');
+            const response = await fetch('/api/get_vectors', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    highlight: ["aardvark", "abacus", "astrophysicist"]
+                })
+            });
             const data = await response.json();
+            console.log("got data", data)
             setCorpus(data);
             setSelected(Array(data.length).fill(false))
         } finally {
@@ -31,17 +40,15 @@ const App = () => {
     }, []);
 
     const handleSearch = (searchTerm) => {
-        const searchTerms = searchTerm.split(',').map(term => term.trim());
-        const newSelected = Array(corpus.length).fill(false);
-        searchTerms.forEach(term => {
-            const index = Object.keys(corpus).findIndex(word => (
-                word.toLowerCase() === term.toLowerCase()
-            ));
-            if (index !== -1) {
-                newSelected[index] = !newSelected[index];
-            }
-        });
-        setSelected(newSelected);
+        // Get hte index that matches the searchTerm, if any
+        const index = Object.keys(corpus).findIndex(word => (
+            word.toLowerCase() === searchTerm.toLowerCase()
+        ));
+        if (index !== -1) {
+            const newSelected = [...selected]
+            newSelected[index] = !newSelected[index]
+            setSelected(newSelected)
+        }  // Else, fetch from API
     }
 
     return (
