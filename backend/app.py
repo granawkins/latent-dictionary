@@ -12,12 +12,14 @@ CORS(app)
 model = DistilBertEmbeddingsModel()
 with open('oxford_3000.txt') as f:
     oxford_3000 = [w.strip() for w in f.readlines()]
-    oxford_3000 = oxford_3000[:500]
+    # oxford_3000 = oxford_3000[:100]
 
 
 # A dict of all the different PCAs, indexed by word basis
 pcas = {}
 
+# A database to store word embeddings
+embeddings_database = {}
 
 def get_word_vectors(
     highlight: list[str] = [], 
@@ -36,7 +38,11 @@ def get_word_vectors(
     _highlight = [w for w in highlight if w.isalpha()]
     _oxford_3000 = [w for w in oxford_3000 if w.isalpha()]
     words = list(set(_highlight + _oxford_3000))
-    embeddings = model.batch_get(words)
+    new_words = [w for w in words if w not in embeddings_database]
+    if new_words:
+        new_embeddings = model.batch_get(new_words)
+        embeddings_database.update({w: e for w, e in zip(new_words, new_embeddings)})
+    embeddings = [embeddings_database[w] for w in words]
     index = {w: e for w, e in zip(words, embeddings)}
 
     if set_pca or (pca_id == "default" and "default" not in pcas):
