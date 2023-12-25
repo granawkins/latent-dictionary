@@ -27,16 +27,19 @@ const SearchBox = ({ onSearch, isLoading }) => {
 const styles = {
     container: {
         position: 'absolute',
-        top: '10px',
+        top: '20px',
         left: '50%',
         transform: 'translateX(-50%)',
-        zIndex: 1000
+        zIndex: 1000,
     },
     input: {
-        padding: '10px 20px',
+        width: "80vw",
+        padding: '15px 15px',
         fontSize: '16px',
         borderRadius: '4px',
-        border: '1px solid #ccc'
+        border: '1px solid #ccc',
+        backgroundColor: 'black',
+        color: 'white',
     }
 };
 

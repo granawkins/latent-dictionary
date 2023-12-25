@@ -31,8 +31,10 @@ function Dot({ word, coordinates, selected }) {
                 32,
             ]} />
             <meshStandardMaterial 
-                color={localSelected ? 'hotpink' : 'gray'} 
-                transparent 
+                color='white' 
+                emissive={localSelected ? 'yellow' : 'black'}
+                transparent
+                emissiveIntensity={localSelected ? 1 : 0}
                 opacity={localSelected ? 1 : 0.5} 
             />
         </mesh>
