@@ -10,6 +10,7 @@ const App = () => {
     const [corpus, setCorpus] = useState(null);
     const [selected, setSelected] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [pcaId, setPcaId] = useState(null);
 
     const fetchData = async () => {
         setIsLoading(true)
@@ -20,13 +21,14 @@ const App = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    highlight: ["aardvark", "abacus", "astrophysicist"]
+                    highlight: selected,
                 })
             });
             const data = await response.json();
             console.log("got data", data)
-            setCorpus(data);
-            setSelected(Array(data.length).fill(false))
+            setCorpus(data.vectors);
+            setPcaId(data.pca_id);
+            setSelected(Array(Object.keys(data.vectors).length).fill(false));
         } finally {
             setIsLoading(false)
         }
