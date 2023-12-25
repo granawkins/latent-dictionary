@@ -1,5 +1,8 @@
+import pickle
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import redis
 
 from embeddings import DistilBertEmbeddingsModel
 from pca import get_pca_for
@@ -12,14 +15,13 @@ CORS(app)
 model = DistilBertEmbeddingsModel()
 with open('oxford_3000.txt') as f:
     oxford_3000 = [w.strip() for w in f.readlines()]
-    # oxford_3000 = oxford_3000[:100]
 
 
 # A dict of all the different PCAs, indexed by word basis
 pcas = {}
 
 # A database to store word embeddings
-embeddings_database = {}
+redis_client = redis.Redis(host='redis', port=6379, db=0)
 
 def get_word_vectors(
     highlight: list[str] = [], 
@@ -38,12 +40,14 @@ def get_word_vectors(
     _highlight = [w for w in highlight if w.isalpha()]
     _oxford_3000 = [w for w in oxford_3000 if w.isalpha()]
     words = list(set(_highlight + _oxford_3000))
-    new_words = [w for w in words if w not in embeddings_database]
+    new_words = [w for w in words if not redis_client.exists(w)]
     if new_words:
         new_embeddings = model.batch_get(new_words)
-        embeddings_database.update({w: e for w, e in zip(new_words, new_embeddings)})
-    embeddings = [embeddings_database[w] for w in words]
-    index = {w: e for w, e in zip(words, embeddings)}
+        for word, embedding in zip(new_words, new_embeddings):
+            redis_client.set(word, pickle.dumps(embedding.tolist()))
+    embeddings = [redis_client.get(w) for w in words]
+    embeddings = [pickle.loads(e) if e else None for e in embeddings]
+    index = {w: e for w, e in zip(words, embeddings) if e is not None}
 
     if set_pca or (pca_id == "default" and "default" not in pcas):
         if set_pca:
@@ -59,11 +63,16 @@ def get_word_vectors(
     return {k: list(v) for k, v in zip(words, vectors)}
 
 
-
+_index_cache = None
 @app.route('/api/get_vectors', methods=['POST'])
 def get_vectors():
     data = request.get_json()
     highlight = data.get("highlight", [])
+    if not highlight:
+        global _index_cache
+        if _index_cache is None:
+            _index_cache = get_word_vectors()
+        return jsonify(_index_cache)
     set_pca = data.get("set_pca", False)
     pca_id = data.get("pca_id", "default")
     vectors = get_word_vectors(highlight, set_pca, pca_id)

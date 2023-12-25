@@ -5,3 +5,5 @@
 
 frontend/node_modules
 frontend/package-lock.json
+
+redis/*
