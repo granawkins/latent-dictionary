@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import MagicWandIcon from './MagicWandIcon';
 
 
 const LogoButton = () => (
@@ -89,11 +90,7 @@ const MagicWandButton = ({ toggleMagicWand, isWandActive, pcaId }) => (
         disabled={!isWandActive}
         title={isWandActive ? "Reset Principle Components" : "Need at least 3 words!"}
     >
-        <img 
-            src="/magic-wand.svg" 
-            alt="Magic Wand" 
-            style={{ height: '100%', width: '100%' }} 
-        />
+        <MagicWandIcon />
     </button>
 );
 
