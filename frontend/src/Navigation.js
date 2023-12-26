@@ -2,8 +2,23 @@ import React, { useEffect, useState } from 'react';
 
 
 const LogoButton = () => (
-    <button onClick={() => console.log("height")} style={{ padding: "0px", border: '0', height: '50px' }}>
-        <img src="/latent-dictionary.png" alt="Latent Dictionary" style={{ height: '50px', margin: "0px" }} />
+    <button 
+        onClick={() => window.location.reload()} 
+        style={{ 
+            padding: "0px", 
+            border: '0', 
+            height: '50px',
+            cursor: 'pointer',
+        }}
+    >
+        <img 
+            src="/latent-dictionary.png" 
+            alt="Latent Dictionary" 
+            style={{ 
+                height: '50px', 
+                margin: "0px" 
+            }} 
+        />
     </button>
 );
 
@@ -68,12 +83,17 @@ const MagicWandButton = ({ setPca, isWandActive }) => (
             color: 'white',
             height: '50px',
             width: '50px',
-            opacity: !isWandActive ? 0.5 : 1
+            opacity: !isWandActive ? 0.5 : 1,
+            cursor: isWandActive ? 'pointer' : 'default',
         }}
         disabled={!isWandActive}
         title={isWandActive ? "Reset Principle Components" : "Need at least 3 words!"}
     >
-        <img src="/magic-wand.svg" alt="Magic Wand" style={{ height: '100%', width: '100%' }} />
+        <img 
+            src="/magic-wand.svg" 
+            alt="Magic Wand" 
+            style={{ height: '100%', width: '100%' }} 
+        />
     </button>
 );
 
@@ -91,8 +111,15 @@ const Navigation = ({ searchTerms, setSearchTerms, isLoading, setPca }) => (
         boxSizing: 'border-box',
     }}>
         <LogoButton />
-        <SearchBar searchTerms={searchTerms} setSearchTerms={setSearchTerms} isLoading={isLoading} />
-        <MagicWandButton setPca={setPca} isWandActive={!isLoading && searchTerms.length > 2} />
+        <SearchBar 
+            searchTerms={searchTerms} 
+            setSearchTerms={setSearchTerms} 
+            isLoading={isLoading} 
+        />
+        <MagicWandButton 
+            setPca={setPca} 
+            isWandActive={!isLoading && searchTerms.length > 2} 
+        />
     </div>
 );
 
