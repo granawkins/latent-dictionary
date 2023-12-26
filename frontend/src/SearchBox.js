@@ -27,9 +27,14 @@ const SearchBox = ({ searchTerms, setSearchTerms, isLoading, setPca }) => {
         }
     }, [searchTerms])
 
+    const isWandActive = !isLoading && searchTerms.length > 2
+
     return (
         <div style={styles.container}>
-            <form onSubmit={handleSearch}>
+            <button onClick={() => console.log("height")} style={styles.logoButton}>
+                <img src="/latent-dictionary.png" alt="Latent Dictionary" style={styles.logo} />
+            </button>
+            <form onSubmit={handleSearch} style={{flexGrow: 1}}>
                 <input
                     type="text"
                     value={searchTerm}
@@ -41,10 +46,12 @@ const SearchBox = ({ searchTerms, setSearchTerms, isLoading, setPca }) => {
             </form>
             <button
                 onClick={setPca}
-                style={styles.button}
-                disabled={isLoading}
+                style={{ ...styles.magicWandButton, opacity: !isWandActive ? 0.5 : 1 }}
+                disabled={!isWandActive}
+                /* hover text */
+                title={isWandActive ? "Reset Principle Components" : "Need at least 3 words!"}
             >
-                Set PCA
+                <img src="/magic-wand.svg" alt="Magic Wand" style={{height: '100%', width: '100%'}} />
             </button>
         </div>
     );
@@ -53,30 +60,45 @@ const SearchBox = ({ searchTerms, setSearchTerms, isLoading, setPca }) => {
 const styles = {
     container: {
         position: 'absolute',
-        top: '20px',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 1000,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'row',
+        padding: '10px',
+        boxSizing: 'border-box',
     },
     input: {
-        width: "80vw",
+        width: '100%',
         padding: '15px 15px',
         fontSize: '16px',
         borderRadius: '4px',
         border: '1px solid #ccc',
         backgroundColor: 'black',
         color: 'white',
+        boxSizing: 'border-box',
     },
-    button: {
-        marginLeft: '10px',
-        padding: '15px 20px',
+    magicWandButton: {
+        // marginLeft: '10px',
         fontSize: '16px',
         borderRadius: '4px',
         border: '1px solid #ccc',
-        backgroundColor: 'white',
-        color: 'black',
-        cursor: 'pointer',
+        backgroundColor: 'black',
+        color: 'white',
+        height: '50px',
+        width: '50px',
     },
+    logo: {
+        height: '50px',
+        margin: "0px",
+    },
+    logoButton: {
+        // marginRight: '10px',
+        padding: "0px",
+        border: '0',
+        height: '50px',
+    }
 };
 
 export default SearchBox;
