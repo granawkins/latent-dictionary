@@ -1,7 +1,7 @@
 import { Text } from '@react-three/drei';
 import React, { useRef } from 'react';
 
-const SCALE = 10
+export const SCALE = 10
 
 function Dot({ word, coordinates, selected, select }) {
     
