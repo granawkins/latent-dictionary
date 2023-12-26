@@ -1,4 +1,5 @@
 import React from 'react'
+import { useCallback } from 'react';
 import { useState, useEffect } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
@@ -25,6 +26,9 @@ const fetchApi = async (route="/api", method="GET", args={}) => {
         console.log(error);
     }
 }
+
+
+const DotMemo = React.memo(Dot);
 
 
 const App = () => {
@@ -55,7 +59,6 @@ const App = () => {
     };
     useEffect(() => {
         if (Object.keys(corpus).length === 0 && !isLoading) {
-            console.log('ello')
             fetchIndex()
         }
     }, []);
@@ -67,22 +70,28 @@ const App = () => {
         try {
             const newWords = words.filter(word => !Object.keys(corpus).includes(word))
             const newCorpus = { ...corpus }
+            let modified = false
             if (newWords.length > 0) {
                 const data = await fetchApi("/api/search", "POST", {words: newWords, pca_id: pcaId});
                 Object.entries(data.vectors).forEach(([word, coordinates]) => {
                     newCorpus[word] = { coordinates, selected: false }
                 })
                 setPcaId(data.pca_id);
+                modified = true
             }
             for (let word in newCorpus) {
-                if (words.includes(word)) {
+                if (words.includes(word) && !newCorpus[word].selected) {
                     newCorpus[word].selected = true
-                } else {
+                    modified = true
+                } else if (!words.includes(word) && newCorpus[word].selected) {
                     newCorpus[word].selected = false
+                    modified = true
                 }
             }
-            setCorpus(newCorpus);
-            setSearchHistory(oldSearchHistory => [...oldSearchHistory, ...words]);
+            if (modified) {
+                setCorpus(newCorpus);
+                setSearchHistory(oldSearchHistory => [...oldSearchHistory, ...words]);
+            }
         } catch (error) {
             console.log(error);
         } finally {
@@ -90,10 +99,17 @@ const App = () => {
         }
     }
     useEffect(() => {
-        if (!searchTerm || searchTerm.length === 0) {
-            return
+        if (searchTerm.length === 0) {
+            if (corpus) {
+                const newCorpus = { ...corpus }
+                for (let word in newCorpus) {
+                    newCorpus[word].selected = false
+                }
+                setCorpus(newCorpus)
+            }
+        } else {
+            search(searchTerm)
         }
-        search(searchTerm)
     }, [searchTerm])
 
 
@@ -122,17 +138,23 @@ const App = () => {
 
 
     // Click on a dot -> it's selected
-    const select = (word) => {
+    const select = useCallback((word) => {
         const newCorpus = { ...corpus }
-        newCorpus[word].selected = !newCorpus[word].selected
+        const newSelected = !newCorpus[word].selected
+        newCorpus[word].selected = newSelected
         setCorpus(newCorpus)
-    }
+        if (newSelected && !searchTerm.includes(word)) {
+            setSearchTerm(oldSearchTerm => [...oldSearchTerm, word])
+        } else if (!newSelected && searchTerm.includes(word)) {
+            setSearchTerm(oldSearchTerm => oldSearchTerm.filter(w => w !== word))
+        }
+    }, [corpus]);
 
 
     return (
         <>
-            <SearchBox setSearchTerms={setSearchTerm} isLoading={isLoading} />
-            {isLoading && <div className="loading">Loading...</div>}
+            <SearchBox searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} />
+            {/* {isLoading && <div className="loading">Loading...</div>} NOT FLOATING PROPERLY */}  
             <Canvas>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
@@ -140,7 +162,7 @@ const App = () => {
                 <OrbitControls />
                 {corpus &&
                     Object.entries(corpus).map(([word, data], i) => (
-                        <Dot key={word} word={word} coordinates={data.coordinates} selected={data.selected} select={select} />
+                        <DotMemo key={word} word={word} coordinates={data.coordinates} selected={data.selected} select={select} />
                     ))}
             </Canvas>
         </>

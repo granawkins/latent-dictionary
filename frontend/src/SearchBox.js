@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const SearchBox = ({ setSearchTerms, isLoading }) => {
+
+const splitSearchTerm = (term) => {
+    return term
+        .split(/[ ,]+/)
+        .map(word => word.toLowerCase().trim())
+        .filter(word => word.length > 0)
+}
+
+const SearchBox = ({ searchTerms, setSearchTerms, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearch = (e) => {
         e.preventDefault();
-        setSearchTerms(searchTerm.split(/[ ,]+/).map(word => word.toLowerCase().trim()));
+        setSearchTerms(splitSearchTerm(searchTerm));
     }
+
+    useEffect(() => {
+        if (searchTerms.length > 0) {
+            // Update local when items are added/removed by select, but not otherwise
+            const newWords = searchTerms.filter(word => !searchTerm.includes(word))
+            const removedWords = splitSearchTerm(searchTerm).filter(word => !searchTerms.includes(word))
+            if (newWords.length > 0 || removedWords.length > 0) {
+                setSearchTerm(searchTerms.join(" "))
+            }
+        }
+    }, [searchTerms])
 
     return (
         <div style={styles.container}>
