@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
-import Navigation from './Navigation';
+import Navigation from './navigation/Navigation';
 
 /*
 ACTIONS TO SUPPORT
@@ -99,7 +99,7 @@ const App = () => {
         }
     }
     useEffect(() => {
-        if (searchTerm.length === 0) {
+        if (!searchTerm || searchTerm.length === 0) {
             if (corpus) {
                 const newCorpus = { ...corpus }
                 for (let word in newCorpus) {
