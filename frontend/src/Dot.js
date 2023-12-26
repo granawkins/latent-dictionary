@@ -1,5 +1,5 @@
+import { Text } from '@react-three/drei';
 import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
 
 const SCALE = 10
 
@@ -7,14 +7,10 @@ function Dot({ word, coordinates, selected, select }) {
     
     const meshRef = useRef();
     const [x, y, z] = coordinates;
-    useFrame((state, delta) => (meshRef.current.position.set(
-        x * SCALE, 
-        y * SCALE, 
-        z * SCALE,
-    )));
 
     return (
         <mesh ref={meshRef}
+            position={[x * SCALE, y * SCALE, z * SCALE]}
             onClick={() => select(word)}
         >
             <sphereGeometry args={[
@@ -29,6 +25,15 @@ function Dot({ word, coordinates, selected, select }) {
                 emissiveIntensity={selected ? 1 : 0}
                 opacity={selected ? 1 : 0.5} 
             />
+            {selected && (
+                <Text
+                    position={[0, 0.5, 0]}
+                    fontSize={0.5}
+                    color="white"
+                >
+                    {word}
+                </Text>
+            )}
         </mesh>
     );
 }
