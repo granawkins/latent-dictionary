@@ -53,8 +53,9 @@ def set_pca():
         words = data.get("words")
         [validate_word(w) for w in words]
         search_history = data.get("search_history") or []
+        reset = data.get("reset")
 
-        pca_id = get_pca_id(words)
+        pca_id = "default" if reset else get_pca_id(words)
         corpus = list(set(oxford_3000 + search_history + words))
         vectors = get_coordinates(corpus, pca_id)
         vectors = {w: v for w, v in zip(corpus, vectors)}

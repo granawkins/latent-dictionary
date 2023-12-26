@@ -114,11 +114,10 @@ const App = () => {
 
 
     // Click on setPCA -> update all coordinates, old and new, based on searchTerm
-    const setPca = async () => {
+    const toggleMagicWand = async () => {
         setIsLoading(true)
         try {
-            const args = {words: searchTerm, search_history: searchHistory}
-            console.log('sending', args)
+            const args = {words: searchTerm, search_history: searchHistory, reset: pcaId !== "default"}
             const data = await fetchApi("/api/set_pca", "POST", args);
             console.log('got', data)
             const expectedKeys = new Set([ ...Object.keys(corpus), ...searchHistory, ...searchTerm ]);
@@ -156,7 +155,13 @@ const App = () => {
 
     return (
         <>
-            <Navigation searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} setPca={setPca} />
+            <Navigation 
+                searchTerms={searchTerm} 
+                setSearchTerms={setSearchTerm} 
+                isLoading={isLoading} 
+                toggleMagicWand={toggleMagicWand} 
+                pcaId={pcaId}
+            />
             {/* {isLoading && <div className="loading">Loading...</div>} NOT FLOATING PROPERLY */}  
             <Canvas>
                 <ambientLight />

@@ -72,15 +72,15 @@ const SearchBar = ({ searchTerms, setSearchTerms, isLoading }) => {
 };
 
 
-const MagicWandButton = ({ setPca, isWandActive }) => (
+const MagicWandButton = ({ toggleMagicWand, isWandActive, pcaId }) => (
     <button
-        onClick={setPca}
+        onClick={toggleMagicWand}
         style={{
             fontSize: '16px',
             borderRadius: '4px',
             border: '1px solid #ccc',
-            backgroundColor: 'black',
-            color: 'white',
+            backgroundColor: pcaId === 'default' ? 'black' : 'white',
+            color: pcaId === 'default' ? 'white' : 'black',
             height: '50px',
             width: '50px',
             opacity: !isWandActive ? 0.5 : 1,
@@ -98,7 +98,7 @@ const MagicWandButton = ({ setPca, isWandActive }) => (
 );
 
 
-const Navigation = ({ searchTerms, setSearchTerms, isLoading, setPca }) => (
+const Navigation = ({ searchTerms, setSearchTerms, isLoading, toggleMagicWand, pcaId }) => (
     <div style={{
         position: 'absolute',
         left: '50%',
@@ -117,8 +117,9 @@ const Navigation = ({ searchTerms, setSearchTerms, isLoading, setPca }) => (
             isLoading={isLoading} 
         />
         <MagicWandButton 
-            setPca={setPca} 
+            toggleMagicWand={toggleMagicWand} 
             isWandActive={!isLoading && searchTerms.length > 2} 
+            pcaId={pcaId}
         />
     </div>
 );
