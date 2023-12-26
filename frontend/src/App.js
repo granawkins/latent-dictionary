@@ -5,6 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
+import Camera from './Camera';
 import Navigation from './navigation/Navigation';
 
 /*
@@ -31,6 +32,7 @@ const fetchApi = async (route="/api", method="GET", args={}) => {
 const DotMemo = React.memo(Dot);
 
 
+const STARTING_WORDS = ['man', 'woman', 'king', 'queen']
 const App = () => {
 
     const [isLoading, setIsLoading] = useState(false)
@@ -41,7 +43,7 @@ const App = () => {
 
 
     // On page load -> set default corpus, oxford 3000
-    const fetchIndex = async () => {
+    const fetchIndex = async (initialize=false) => {
         setIsLoading(true)
         try {
             const response = await fetch("/api/index")
@@ -49,7 +51,7 @@ const App = () => {
             console.log(data)
             const newCorpus = { ...corpus }
             Object.entries(data.vectors).forEach(([word, coordinates]) => {
-                newCorpus[word] = { coordinates, selected: false }
+                newCorpus[word] = { coordinates, selected: initialize && STARTING_WORDS.includes(word) }
             })
             setPcaId(data.pca_id)
             setCorpus(newCorpus)
@@ -59,7 +61,9 @@ const App = () => {
     };
     useEffect(() => {
         if (Object.keys(corpus).length === 0 && !isLoading) {
-            fetchIndex()
+            fetchIndex(true).then(() => {
+                setSearchTerm(STARTING_WORDS)
+            })
         }
     }, []);
 
@@ -151,6 +155,9 @@ const App = () => {
             setSearchTerm(oldSearchTerm => oldSearchTerm.filter(w => w !== word))
         }
     }, [corpus]);
+    const selectedCorpus = Object.fromEntries(
+        Object.entries(corpus).filter(([word, data]) => data.selected).map(([word, data]) => [word, data.coordinates])
+    )
 
 
     return (
@@ -166,7 +173,7 @@ const App = () => {
             <Canvas>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
-                <perspectiveCamera position={[0, 0, 5]} />
+                <Camera selectedCorpus={selectedCorpus} />
                 <OrbitControls />
                 {corpus &&
                     Object.entries(corpus).map(([word, data], i) => (
