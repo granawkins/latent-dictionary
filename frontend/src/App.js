@@ -127,7 +127,8 @@ const App = () => {
                 if (!Object.keys(data.vectors).includes(word)) {
                     throw new Error("PCA returned wrong number of results");
                 }
-                newCorpus[word] = { coordinates: data.vectors[word], selected: false }
+                const isSelected = corpus[word]?.selected || false;
+                newCorpus[word] = { coordinates: data.vectors[word], selected: isSelected }
             })
             setPcaId(data.pca_id);
             setCorpus(newCorpus);
