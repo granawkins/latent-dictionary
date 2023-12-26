@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
-import SearchBox from './SearchBox';
+import Navigation from './Navigation';
 
 /*
 ACTIONS TO SUPPORT
@@ -155,7 +155,7 @@ const App = () => {
 
     return (
         <>
-            <SearchBox searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} setPca={setPca} />
+            <Navigation searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} setPca={setPca} />
             {/* {isLoading && <div className="loading">Loading...</div>} NOT FLOATING PROPERLY */}  
             <Canvas>
                 <ambientLight />
