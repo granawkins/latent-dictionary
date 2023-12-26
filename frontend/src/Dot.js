@@ -1,13 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 const SCALE = 10
 
-function Dot({ word, coordinates, selected }) {
-    const [localSelected, setLocalSelected] = useState(false);
-    useEffect(() => {
-        setLocalSelected(selected)
-    }, [selected])
+function Dot({ word, coordinates, selected, select }) {
     
     const meshRef = useRef();
     const [x, y, z] = coordinates;
@@ -17,25 +13,21 @@ function Dot({ word, coordinates, selected }) {
         z * SCALE,
     )));
 
-    const handleClick = () => {
-        setLocalSelected(!localSelected);
-    }
-
     return (
         <mesh ref={meshRef}
-            onClick={handleClick}
+            onClick={() => select(word)}
         >
             <sphereGeometry args={[
-                0.05 * (localSelected ? 3 : 1), 
+                0.05 * (selected ? 3 : 1), 
                 32, 
                 32,
             ]} />
             <meshStandardMaterial 
                 color='white' 
-                emissive={localSelected ? 'yellow' : 'black'}
+                emissive={selected ? 'yellow' : 'black'}
                 transparent
-                emissiveIntensity={localSelected ? 1 : 0}
-                opacity={localSelected ? 1 : 0.5} 
+                emissiveIntensity={selected ? 1 : 0}
+                opacity={selected ? 1 : 0.5} 
             />
         </mesh>
     );

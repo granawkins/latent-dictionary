@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 
-const SearchBox = ({ onSearch, isLoading }) => {
+const SearchBox = ({ setSearchTerms, isLoading }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (onSearch) onSearch(searchTerm);
-    };
+        setSearchTerms(searchTerm.split(/[ ,]+/).map(word => word.toLowerCase().trim()));
+    }
 
     return (
         <div style={styles.container}>
