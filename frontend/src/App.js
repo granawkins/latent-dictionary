@@ -118,8 +118,10 @@ const App = () => {
         setIsLoading(true)
         try {
             const args = {words: searchTerm, search_history: searchHistory}
-            const data = await fetchApi("/api/pca", "POST", args);
-            const expectedKeys = Set([ ...Object.keys(corpus), ...searchHistory, ...searchTerm ]);
+            console.log('sending', args)
+            const data = await fetchApi("/api/set_pca", "POST", args);
+            console.log('got', data)
+            const expectedKeys = new Set([ ...Object.keys(corpus), ...searchHistory, ...searchTerm ]);
             const newCorpus = {}
             expectedKeys.forEach(word => {
                 if (!Object.keys(data.vectors).includes(word)) {
@@ -153,7 +155,7 @@ const App = () => {
 
     return (
         <>
-            <SearchBox searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} />
+            <SearchBox searchTerms={searchTerm} setSearchTerms={setSearchTerm} isLoading={isLoading} setPca={setPca} />
             {/* {isLoading && <div className="loading">Loading...</div>} NOT FLOATING PROPERLY */}  
             <Canvas>
                 <ambientLight />

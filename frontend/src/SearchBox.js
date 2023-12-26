@@ -8,7 +8,7 @@ const splitSearchTerm = (term) => {
         .filter(word => word.length > 0)
 }
 
-const SearchBox = ({ searchTerms, setSearchTerms, isLoading }) => {
+const SearchBox = ({ searchTerms, setSearchTerms, isLoading, setPca }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleSearch = (e) => {
@@ -39,6 +39,13 @@ const SearchBox = ({ searchTerms, setSearchTerms, isLoading }) => {
                     disabled={isLoading}
                 />
             </form>
+            <button
+                onClick={setPca}
+                style={styles.button}
+                disabled={isLoading}
+            >
+                Set PCA
+            </button>
         </div>
     );
 };
@@ -59,7 +66,17 @@ const styles = {
         border: '1px solid #ccc',
         backgroundColor: 'black',
         color: 'white',
-    }
+    },
+    button: {
+        marginLeft: '10px',
+        padding: '15px 20px',
+        fontSize: '16px',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        backgroundColor: 'white',
+        color: 'black',
+        cursor: 'pointer',
+    },
 };
 
 export default SearchBox;

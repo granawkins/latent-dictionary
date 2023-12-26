@@ -24,7 +24,6 @@ def index():
     global _index_cache
     try:
         if _index_cache is None:
-            print("Getting embeddings for oxford 3000")
             vectors = get_coordinates(oxford_3000, pca_id="default")
             _index_cache = {w: v for w, v in zip(oxford_3000, vectors)}
         return jsonify({"vectors": _index_cache, "pca_id": "default"})
@@ -58,7 +57,7 @@ def set_pca():
         pca_id = get_pca_id(words)
         corpus = list(set(oxford_3000 + search_history + words))
         vectors = get_coordinates(corpus, pca_id)
-        vectors = {w: v for w, v in zip(words, vectors)}
+        vectors = {w: v for w, v in zip(corpus, vectors)}
         return jsonify({"vectors": vectors, "pca_id": pca_id})
     except Exception as e:
         return jsonify({"error": str(e)})
