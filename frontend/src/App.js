@@ -1,7 +1,6 @@
 import React from 'react'
 import { useCallback } from 'react';
 import { useState, useEffect } from 'react';
-import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
@@ -174,7 +173,6 @@ const App = () => {
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
                 <Camera selectedCorpus={selectedCorpus} />
-                <OrbitControls />
                 {corpus &&
                     Object.entries(corpus).map(([word, data], i) => (
                         <DotMemo key={word} word={word} coordinates={data.coordinates} selected={data.selected} select={select} />

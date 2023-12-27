@@ -1,11 +1,13 @@
 import * as THREE from 'three';
-import { useEffect, useState } from 'react';
+import { OrbitControls } from '@react-three/drei';
+import { useEffect, useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { SCALE } from './Dot';
 
 const Camera = ({ selectedCorpus }) => {
 
     // When selectedCorpus updates, spin/move the camera to get all selected words in view
+    const controlsRef = useRef()
     const [targetCoordinates, setTargetCoordinates] = useState(null)
     const [lookAtPosition, setLookAtPosition] = useState(null)
     useEffect(() => {
@@ -49,13 +51,16 @@ const Camera = ({ selectedCorpus }) => {
             const step = 0.05; // Define the step size
             const camera = state.camera;
             camera.position.lerp(targetCoordinates, step);
-            camera.lookAt(lookAtPosition)
+            controlsRef.current.target.lerp(lookAtPosition, step);
         }
     });
 
     
     return (
-        <perspectiveCamera />
+        <>
+            <perspectiveCamera />
+            <OrbitControls ref={controlsRef} />
+        </>
     );
 };
 
