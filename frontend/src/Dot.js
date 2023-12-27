@@ -1,40 +1,39 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { Text } from '@react-three/drei';
+import React, { useRef } from 'react';
 
-const SCALE = 10
+export const SCALE = 10
 
-function Dot({ word, coordinates, selected }) {
-    const [localSelected, setLocalSelected] = useState(false);
-    useEffect(() => {
-        setLocalSelected(selected)
-    }, [selected])
+function Dot({ word, coordinates, selected, select }) {
     
     const meshRef = useRef();
     const [x, y, z] = coordinates;
-    useFrame((state, delta) => (meshRef.current.position.set(
-        x * SCALE, 
-        y * SCALE, 
-        z * SCALE,
-    )));
-
-    const handleClick = () => {
-        setLocalSelected(!localSelected);
-    }
 
     return (
         <mesh ref={meshRef}
-            onClick={handleClick}
+            position={[x * SCALE, y * SCALE, z * SCALE]}
+            onClick={() => select(word)}
         >
             <sphereGeometry args={[
-                0.05 * (localSelected ? 3 : 1), 
+                0.05 * (selected ? 3 : 1), 
                 32, 
                 32,
             ]} />
             <meshStandardMaterial 
-                color={localSelected ? 'hotpink' : 'gray'} 
-                transparent 
-                opacity={localSelected ? 1 : 0.5} 
+                color='white' 
+                emissive={selected ? 'yellow' : 'black'}
+                transparent
+                emissiveIntensity={selected ? 1 : 0}
+                opacity={selected ? 1 : 0.5} 
             />
+            {selected && (
+                <Text
+                    position={[0, 0.5, 0]}
+                    fontSize={0.5}
+                    color="white"
+                >
+                    {word}
+                </Text>
+            )}
         </mesh>
     );
 }
