@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
 import Camera from './Camera';
+import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
 import Navigation from './navigation/Navigation';
 
@@ -179,6 +180,7 @@ const App = () => {
                         <DotMemo key={word} word={word} coordinates={data.coordinates} selected={data.selected} select={select} />
                     ))}
             </Canvas>
+            <FAQButton />
         </>
     );
 };
