@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
 import Camera from './Camera';
+import LoadingHandler from './LoadingHandler';
 import Navigation from './navigation/Navigation';
 
 /*
@@ -168,7 +169,7 @@ const App = () => {
                 toggleMagicWand={toggleMagicWand} 
                 pcaId={pcaId}
             />
-            {/* {isLoading && <div className="loading">Loading...</div>} NOT FLOATING PROPERLY */}  
+            <LoadingHandler isLoading={isLoading} />
             <Canvas>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
