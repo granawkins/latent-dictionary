@@ -6,17 +6,17 @@ services:
     build: ./frontend
     volumes:
       - ./frontend:/app
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - ldnet
 
   backend:
     build: ./backend
     volumes:
       - ./backend:/app
-    ports:
-      - "5001:5001"
+    networks:
+      - ldnet
       
   nginx:
     build: ./nginx
@@ -25,10 +25,16 @@ services:
     depends_on:
       - frontend
       - backend
+    networks:
+      - ldnet
       
   redis:
     image: "redis:alpine"
-    ports:
-      - "6379:6379"
     volumes:
       - ./redis:/data
+    networks:
+      - ldnet
+
+networks:
+  ldnet:
+    driver: bridge
