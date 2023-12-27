@@ -30,6 +30,9 @@ const Camera = ({ selectedCorpus }) => {
             const cameraDistance = maxDim / 2 / Math.tan(THREE.MathUtils.degToRad(fov / 2));
 
             const target = new THREE.Vector3(center.x, center.y, center.z + cameraDistance);
+            if (Object.keys(selectedCorpus).length === 1) {
+                target.z += 5;
+            }
             setTargetCoordinates(target);
         }
     }, [selectedCorpus])
