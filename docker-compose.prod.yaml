@@ -6,8 +6,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    volumes:
-      - ./frontend:/app
     depends_on:
       - backend
     networks:
