@@ -7,55 +7,68 @@ import Dot from './Dot';
 import Camera from './Camera';
 import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
+import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
 
-/*
-ACTIONS TO SUPPORT
-1. Load page (/api)
-2. Search for word ()
-*/
 
-const fetchApi = async (route="/api", method="GET", args={}) => {
-    try {
-        const response = await fetch(route, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(args),
-        });
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.log(error);
-    }
-}
+const STARTING_WORDS = ['man', 'woman', 'king', 'queen']
 
 
 const DotMemo = React.memo(Dot);
 
 
-const STARTING_WORDS = ['man', 'woman', 'king', 'queen']
 const App = () => {
-
+    
     const [isLoading, setIsLoading] = useState(false)
     const [pcaId, setPcaId] = useState("default");
     const [corpus, setCorpus] = useState({});
     const [searchTerm, setSearchTerm] = useState([])
     const [searchHistory, setSearchHistory] = useState([])
-
-
+    const [error, setError] = useState(null);
+    
+    const fetchApi = async (route="/api", method="GET", args={}) => {
+        const token = localStorage.getItem('userToken')
+        try {
+            const headers = { 'Content-Type': 'application/json'}
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`
+            }    
+            const response = await fetch(route, {
+                method,
+                headers,
+                ...(method === "GET" ? {} : {body: JSON.stringify(args)}),
+            });
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            } else if (data.token) {
+                localStorage.setItem('userToken', data.token);
+            }
+            return data;
+        } catch (error) {
+            if (method === "GET" && token) {
+                localStorage.removeItem('userToken')
+                return fetchApi(route, method, args)
+            } else {
+                setError(error.message);
+                setTimeout(() => setError(null), 5000);
+            }
+        }
+    }
+    
     // On page load -> set default corpus, oxford 3000
     const fetchIndex = async (initialize=false) => {
         setIsLoading(true)
         try {
-            const response = await fetch("/api/index")
-            const data = await response.json()
-            console.log(data)
+            const data = await fetchApi("/api/index");
             const newCorpus = { ...corpus }
             Object.entries(data.vectors).forEach(([word, coordinates]) => {
                 newCorpus[word] = { coordinates, selected: initialize && STARTING_WORDS.includes(word) }
             })
             setPcaId(data.pca_id)
             setCorpus(newCorpus)
+        }  catch (error) {
+            console.log(error);
         } finally {
             setIsLoading(false)
         }
@@ -112,7 +125,8 @@ const App = () => {
                 }
                 setCorpus(newCorpus)
             }
-        } else {
+        } else if (!(searchTerm === STARTING_WORDS && searchHistory.length === 0)) {
+            // don't search for starting words
             search(searchTerm)
         }
     }, [searchTerm])
@@ -124,7 +138,6 @@ const App = () => {
         try {
             const args = {words: searchTerm, search_history: searchHistory, reset: pcaId !== "default"}
             const data = await fetchApi("/api/set_pca", "POST", args);
-            console.log('got', data)
             const expectedKeys = new Set([ ...Object.keys(corpus), ...searchHistory, ...searchTerm ]);
             const newCorpus = {}
             expectedKeys.forEach(word => {
@@ -181,6 +194,7 @@ const App = () => {
                     ))}
             </Canvas>
             <FAQButton />
+            {error && <ErrorModal message={error} onClose={() => setError(null)} />}
         </>
     );
 };
