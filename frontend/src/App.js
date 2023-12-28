@@ -56,13 +56,14 @@ const App = () => {
         setIsLoading(true)
         try {
             const data = await fetchApi("/api/index");
-            console.log(data)
             const newCorpus = { ...corpus }
             Object.entries(data.vectors).forEach(([word, coordinates]) => {
                 newCorpus[word] = { coordinates, selected: initialize && STARTING_WORDS.includes(word) }
             })
             setPcaId(data.pca_id)
             setCorpus(newCorpus)
+        }  catch (error) {
+            console.log(error);
         } finally {
             setIsLoading(false)
         }
@@ -131,7 +132,6 @@ const App = () => {
         try {
             const args = {words: searchTerm, search_history: searchHistory, reset: pcaId !== "default"}
             const data = await fetchApi("/api/set_pca", "POST", args);
-            console.log('got', data)
             const expectedKeys = new Set([ ...Object.keys(corpus), ...searchHistory, ...searchTerm ]);
             const newCorpus = {}
             expectedKeys.forEach(word => {
