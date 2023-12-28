@@ -17,14 +17,25 @@ ACTIONS TO SUPPORT
 
 const fetchApi = async (route="/api", method="GET", args={}) => {
     try {
+        const headers = { 'Content-Type': 'application/json'}
+        const token = localStorage.getItem('userToken')
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+        }    
         const response = await fetch(route, {
-            method: method,
-            headers: { 'Content-Type': 'application/json' },
+            method,
+            headers,
             ...(method === "GET" ? {} : {body: JSON.stringify(args)}),
         });
         const data = await response.json();
+        if (data.error) {
+            throw new Error(data.error);
+        } else if (data.token) {
+            localStorage.setItem('userToken', data.token);
+        }
         return data;
     } catch (error) {
+        // TODO: Show the user, intercept captcha errors
         console.log(error);
     }
 }

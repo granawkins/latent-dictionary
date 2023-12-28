@@ -1,16 +1,108 @@
-import re
+import os
+import datetime
+import secrets
 
+import jwt
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from functools import wraps
 
 from word_vectors import get_coordinates, get_pca_id
-
-app = Flask(__name__)
-CORS(app)
 
 with open('oxford_3000.txt') as f:
     oxford_3000 = [w.strip() for w in f.readlines()]
 
+app = Flask(__name__)
+CORS(app)
+
+
+"""
+USER MANAGEMENT
+
+Scheme:
+- When a user first visits the site, they're assigned a user id
+- This is used to create a json web token, which is stored in the browser and included with each subsequent request
+- The token can be decoded to bet the user_id, and keep a record of user_ids.
+"""
+SECRET_KEY = "please_be_nice"
+def get_token_for(user_id, days=365):
+    return jwt.encode({
+        "user_id": user_id,
+        "exp": datetime.datetime.now() + datetime.timedelta(days=days),
+    }, SECRET_KEY)
+
+
+users = {}
+def create_user():
+    user_id = secrets.token_hex(16)
+    users[user_id] = {
+        "created_at": datetime.datetime.now(),
+        "search_history": [],
+        "requireCaptcha": False,
+    }
+    token = get_token_for(user_id)
+    return user_id, token
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        global users
+        token = None
+        if "Authorization" in request.headers:
+            token = request.headers['Authorization'].split(" ")[1]
+        if not token:
+            return jsonify({"error": "Missing token"}), 401
+        try:
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            user_id = data['user_id']
+            user = users[user_id]
+        except:
+            return jsonify({"error": "Invalid token"}), 401
+        return f(user, *args, **kwargs)
+    return decorated
+
+
+"""
+API
+- /api/index: Get the index of oxford_3000 with default pca
+- /api/search: Get the coordinates of a list of words with a specified pca
+- /api/set_pca: Generate a new pca from a list of words, and return the complete corpus set to the new pca
+
+Endpoints generally return a json object like
+{
+    "vectors": {
+        "word1": [x1, y1, z1],
+        "word2": [x2, y2, z2],
+        ...
+    },
+    "pca_id": "default",
+    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+"""
+_index_cache = None
+@app.route('/api/index', methods=['GET'])
+def index():
+    global _index_cache
+    try:
+        # Check for Authentication token
+        token = request.headers.get("Authorization")
+        if token:
+            token = token.split(" ")[1]
+            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            user_id = data['user_id']
+            if user_id not in users:
+                token = None
+        if not token:
+            user_id, token = create_user()
+
+        if _index_cache is None:
+            vectors = get_coordinates(oxford_3000, pca_id="default")
+            _index_cache = {w: v for w, v in zip(oxford_3000, vectors)}
+        return jsonify({"vectors": _index_cache, "pca_id": "default", "token": token})
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    
 
 def validate_word(word):
     assert word, "Word must not be empty"
@@ -18,21 +110,9 @@ def validate_word(word):
     assert len(word) <= 20, "Word must be less than 20 characters"
 
 
-_index_cache = None
-@app.route('/api/index', methods=['GET'])
-def index():
-    global _index_cache
-    try:
-        if _index_cache is None:
-            vectors = get_coordinates(oxford_3000, pca_id="default")
-            _index_cache = {w: v for w, v in zip(oxford_3000, vectors)}
-        return jsonify({"vectors": _index_cache, "pca_id": "default"})
-    except Exception as e:
-        return jsonify({"error": str(e)})
-    
-
 @app.route('/api/search', methods=['POST'])
-def search():
+@token_required
+def search(user):
     try:
         data = request.get_json()
         words = data.get("words")
@@ -47,7 +127,8 @@ def search():
     
 
 @app.route('/api/set_pca', methods=["POST"])
-def set_pca():
+@token_required
+def set_pca(user):
     try:
         data = request.get_json()
         words = data.get("words")
@@ -64,5 +145,6 @@ def set_pca():
         return jsonify({"error": str(e)})
 
 
+# Development server
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
