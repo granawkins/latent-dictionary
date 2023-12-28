@@ -28,7 +28,7 @@ function Dot({ word, coordinates, selected, select }) {
             {selected && (
                 <Text
                     position={[0, 0.5, 0]}
-                    fontSize={0.5}
+                    fontSize={1}
                     color="white"
                 >
                     {word}
