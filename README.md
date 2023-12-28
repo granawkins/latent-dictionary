@@ -17,9 +17,10 @@ docker-compose up --build
 
 ### Production Install (on Debian 11)
 1. Run `server_setup.sh` to setup your deps, install docker-compose and clone the project
-2. Run the project using the production script
+2. Setup SSL certificates following the Certbot Instructions
+3. Run the project using the production script
 ```
 cd latent-dictionary
 docker-compose -f docker-compose.prod.yaml up --build -d
 ```
-3. View logs stream with `docker-compose logs -f`
+4. View logs stream with `docker-compose logs -f`

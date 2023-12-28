@@ -24,6 +24,7 @@ services:
     image: nginx
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt/archive/latentdictionary.com:/etc/nginx/ssl:ro
     ports:
       - "80:80"
     depends_on:
