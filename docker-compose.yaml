@@ -19,7 +19,9 @@ services:
       - ldnet
       
   nginx:
-    build: ./nginx
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     depends_on:
