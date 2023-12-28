@@ -1,15 +1,9 @@
-import os
-import datetime
-import secrets
-import pickle
-
-import jwt
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from functools import wraps
 
 from word_vectors import get_coordinates, get_pca_id
-from redis_client import get_redis_client
+from user_handler import UserHandler
 
 with open('oxford_3000.txt') as f:
     oxford_3000 = [w.strip() for w in f.readlines()]
@@ -18,39 +12,7 @@ app = Flask(__name__)
 CORS(app)
 
 
-"""
-USER MANAGEMENT
-
-Scheme:
-- When a user first visits the site, they're assigned a user id
-- This is used to create a json web token, which is stored in the browser and included with each subsequent request
-- The token can be decoded to bet the user_id, and keep a record of user_ids.
-"""
-SECRET_KEY = "please_be_gentle"
-def get_token_for(user_id, days=365):
-    return jwt.encode({
-        "user_id": user_id,
-        "exp": datetime.datetime.now() + datetime.timedelta(days=days),
-    }, SECRET_KEY)
-
-def get_user_data(user_id):
-    user_data = get_redis_client().get(user_id)
-    if user_data:
-        return pickle.loads(user_data)
-    else:
-        return None
-
-def create_user():
-    user_id = secrets.token_hex(16)
-    user_data = {
-        "created_at": datetime.datetime.now(),
-        "search_history": [],
-        "requireCaptcha": False,
-    }
-    get_redis_client().set(user_id, pickle.dumps(user_data))
-    token = get_token_for(user_id)
-    return user_id, token
-
+user_handler = UserHandler()
 
 def token_required(f):
     @wraps(f)
@@ -61,9 +23,9 @@ def token_required(f):
         if not token:
             return jsonify({"error": "Missing token"}), 401
         try:
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            data = user_handler.decode(token)
             user_id = data['user_id']
-            user = get_user_data(user_id)
+            user = user_handler.get(user_id)
         except:
             return jsonify({"error": "Invalid token"}), 401
         return f(user, *args, **kwargs)
@@ -96,12 +58,12 @@ def index():
         token = request.headers.get("Authorization")
         if token:
             token = token.split(" ")[1]
-            data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            data = user_handler.decode(token)
             user_id = data['user_id']
-            if get_user_data(user_id) is None:
+            if user_handler.exists(user_id):
                 token = None
         if not token:
-            user_id, token = create_user()
+            user_id, token = user_handler.create()
 
         if _index_cache is None:
             vectors = get_coordinates(oxford_3000, pca_id="default")
