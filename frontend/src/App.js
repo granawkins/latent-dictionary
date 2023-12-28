@@ -27,9 +27,9 @@ const App = () => {
     const [error, setError] = useState(null);
     
     const fetchApi = async (route="/api", method="GET", args={}) => {
+        const token = localStorage.getItem('userToken')
         try {
             const headers = { 'Content-Type': 'application/json'}
-            const token = localStorage.getItem('userToken')
             if (token) {
                 headers['Authorization'] = `Bearer ${token}`
             }    
@@ -46,8 +46,13 @@ const App = () => {
             }
             return data;
         } catch (error) {
-            setError(error.message);
-            setTimeout(() => setError(null), 5000);
+            if (method === "GET" && token) {
+                localStorage.removeItem('userToken')
+                return fetchApi(route, method, args)
+            } else {
+                setError(error.message);
+                setTimeout(() => setError(null), 5000);
+            }
         }
     }
     
