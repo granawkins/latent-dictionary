@@ -20,7 +20,7 @@ const fetchApi = async (route="/api", method="GET", args={}) => {
         const response = await fetch(route, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(args),
+            ...(method === "GET" ? {} : {body: JSON.stringify(args)}),
         });
         const data = await response.json();
         return data;
@@ -47,8 +47,7 @@ const App = () => {
     const fetchIndex = async (initialize=false) => {
         setIsLoading(true)
         try {
-            const response = await fetch("/api/index")
-            const data = await response.json()
+            const data = await fetchApi("/api/index");
             console.log(data)
             const newCorpus = { ...corpus }
             Object.entries(data.vectors).forEach(([word, coordinates]) => {
