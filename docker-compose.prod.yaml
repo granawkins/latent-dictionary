@@ -3,34 +3,44 @@ version: '3.8'
 services:
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     volumes:
       - ./frontend:/app
-    ports:
-      - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - ldnet
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     volumes:
       - ./backend:/app
-    ports:
-      - "5001:5001"
+    networks:
+      - ldnet
       
   nginx:
     image: nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     depends_on:
       - frontend
       - backend
+    networks:
+      - ldnet
       
   redis:
     image: "redis:alpine"
-    ports:
-      - "6379:6379"
     volumes:
       - ./redis:/data
+    networks:
+      - ldnet
+
+networks:
+  ldnet:
+    driver: bridge
