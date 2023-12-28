@@ -7,53 +7,50 @@ import Dot from './Dot';
 import Camera from './Camera';
 import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
+import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
 
-/*
-ACTIONS TO SUPPORT
-1. Load page (/api)
-2. Search for word ()
-*/
 
-const fetchApi = async (route="/api", method="GET", args={}) => {
-    try {
-        const headers = { 'Content-Type': 'application/json'}
-        const token = localStorage.getItem('userToken')
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`
-        }    
-        const response = await fetch(route, {
-            method,
-            headers,
-            ...(method === "GET" ? {} : {body: JSON.stringify(args)}),
-        });
-        const data = await response.json();
-        if (data.error) {
-            throw new Error(data.error);
-        } else if (data.token) {
-            localStorage.setItem('userToken', data.token);
-        }
-        return data;
-    } catch (error) {
-        // TODO: Show the user, intercept captcha errors
-        console.log(error);
-    }
-}
+const STARTING_WORDS = ['man', 'woman', 'king', 'queen']
 
 
 const DotMemo = React.memo(Dot);
 
 
-const STARTING_WORDS = ['man', 'woman', 'king', 'queen']
 const App = () => {
-
+    
     const [isLoading, setIsLoading] = useState(false)
     const [pcaId, setPcaId] = useState("default");
     const [corpus, setCorpus] = useState({});
     const [searchTerm, setSearchTerm] = useState([])
     const [searchHistory, setSearchHistory] = useState([])
-
-
+    const [error, setError] = useState(null);
+    
+    const fetchApi = async (route="/api", method="GET", args={}) => {
+        try {
+            const headers = { 'Content-Type': 'application/json'}
+            const token = localStorage.getItem('userToken')
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`
+            }    
+            const response = await fetch(route, {
+                method,
+                headers,
+                ...(method === "GET" ? {} : {body: JSON.stringify(args)}),
+            });
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            } else if (data.token) {
+                localStorage.setItem('userToken', data.token);
+            }
+            return data;
+        } catch (error) {
+            setError(error.message);
+            setTimeout(() => setError(null), 5000);
+        }
+    }
+    
     // On page load -> set default corpus, oxford 3000
     const fetchIndex = async (initialize=false) => {
         setIsLoading(true)
@@ -191,6 +188,7 @@ const App = () => {
                     ))}
             </Canvas>
             <FAQButton />
+            {error && <ErrorModal message={error} onClose={() => setError(null)} />}
         </>
     );
 };
