@@ -3,7 +3,9 @@ version: '3.8'
 services:
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     volumes:
       - ./frontend:/app
     depends_on:
@@ -12,7 +14,9 @@ services:
       - ldnet
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     volumes:
       - ./backend:/app
     networks:
@@ -21,7 +25,7 @@ services:
   nginx:
     image: nginx
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     depends_on:
