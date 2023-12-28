@@ -1,6 +1,7 @@
 import os
 import datetime
 import secrets
+import pickle
 
 import jwt
 from flask import Flask, jsonify, request
@@ -8,6 +9,7 @@ from flask_cors import CORS
 from functools import wraps
 
 from word_vectors import get_coordinates, get_pca_id
+from redis_client import get_redis_client
 
 with open('oxford_3000.txt') as f:
     oxford_3000 = [w.strip() for w in f.readlines()]
@@ -24,22 +26,28 @@ Scheme:
 - This is used to create a json web token, which is stored in the browser and included with each subsequent request
 - The token can be decoded to bet the user_id, and keep a record of user_ids.
 """
-SECRET_KEY = "please_be_nice"
+SECRET_KEY = "please_be_gentle"
 def get_token_for(user_id, days=365):
     return jwt.encode({
         "user_id": user_id,
         "exp": datetime.datetime.now() + datetime.timedelta(days=days),
     }, SECRET_KEY)
 
+def get_user_data(user_id):
+    user_data = get_redis_client().get(user_id)
+    if user_data:
+        return pickle.loads(user_data)
+    else:
+        return None
 
-users = {}
 def create_user():
     user_id = secrets.token_hex(16)
-    users[user_id] = {
+    user_data = {
         "created_at": datetime.datetime.now(),
         "search_history": [],
         "requireCaptcha": False,
     }
+    get_redis_client().set(user_id, pickle.dumps(user_data))
     token = get_token_for(user_id)
     return user_id, token
 
@@ -47,7 +55,6 @@ def create_user():
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        global users
         token = None
         if "Authorization" in request.headers:
             token = request.headers['Authorization'].split(" ")[1]
@@ -56,7 +63,7 @@ def token_required(f):
         try:
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             user_id = data['user_id']
-            user = users[user_id]
+            user = get_user_data(user_id)
         except:
             return jsonify({"error": "Invalid token"}), 401
         return f(user, *args, **kwargs)
@@ -91,7 +98,7 @@ def index():
             token = token.split(" ")[1]
             data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
             user_id = data['user_id']
-            if user_id not in users:
+            if get_user_data(user_id) is None:
                 token = None
         if not token:
             user_id, token = create_user()

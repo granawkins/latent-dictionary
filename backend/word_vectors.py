@@ -1,11 +1,10 @@
 import pickle
-import redis
 
 from embeddings import DistilBertEmbeddingsModel
 from pca import get_pca_for
+from redis_client import get_redis_client
 
 model = DistilBertEmbeddingsModel()
-redis_client = redis.Redis(host="redis", port=6379, db=0)
 
 
 pcas = {}
@@ -18,6 +17,7 @@ def get_pca_id(words: list[str] = []) -> str:
 
 
 def get_embeddings(words: list[str] = []) -> list[list[float]]:
+    redis_client = get_redis_client()
     # Get from redis and/or model
     new_words = [w for w in words if not redis_client.exists(w)]
     if new_words:

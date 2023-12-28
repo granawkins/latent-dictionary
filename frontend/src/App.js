@@ -120,7 +120,8 @@ const App = () => {
                 }
                 setCorpus(newCorpus)
             }
-        } else {
+        } else if (!(searchTerm === STARTING_WORDS && searchHistory.length === 0)) {
+            // don't search for starting words
             search(searchTerm)
         }
     }, [searchTerm])
