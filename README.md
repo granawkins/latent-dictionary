@@ -1,5 +1,5 @@
 # Latent Dictionary
-An interactive 3D map of DistilBert word embeddings.
+An interactive 3D map of DistilBert word embeddings: https://www.latentdictionary.com
 
 ### Dev Install
 1. Get `docker-compose`
