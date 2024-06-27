@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from functools import wraps
+import subprocess
 
 from word_vectors import get_coordinates, get_pca_id
 from user_handler import UserHandler
@@ -11,6 +12,7 @@ with open('oxford_3000.txt') as f:
 app = Flask(__name__)
 CORS(app)
 
+subprocess.run(['python', 'fetch_word_lists.py'])
 
 user_handler = UserHandler()
 
