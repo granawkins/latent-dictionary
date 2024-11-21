@@ -1,19 +1,15 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Header
+import os
+from typing import Optional
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-from typing import Optional
-import os
+from sklearn.decomposition import PCA
 
-from word_vectors import get_coordinates, get_pca_id
-from user_handler import UserHandler
+from db import collection
 
-# Load oxford words
-with open("oxford_3000.txt") as f:
-    oxford_3000 = [w.strip() for w in f.readlines()]
-
+# Server
 app = FastAPI()
-
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,89 +18,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-user_handler = UserHandler()
 
-
-# Authentication dependency
-async def get_current_user(authorization: Optional[str] = Header(None)):
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Missing token")
-    try:
-        token = authorization.split(" ")[1]
-        data = user_handler.decode(token)
-        user_id = data["user_id"]
-        user = user_handler.get(user_id)
-        return user
-    except:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-
-def validate_word(word: str):
-    if not word:
-        raise HTTPException(status_code=400, detail="Word must not be empty")
-    if not word.isalpha():
-        raise HTTPException(status_code=400, detail="Word must be alphabetic")
-    if len(word) > 20:
-        raise HTTPException(
-            status_code=400, detail="Word must be less than 20 characters"
+@app.get("/api/search")
+async def search(word: str, l1: str, l2: Optional[str], words_per_l=20):
+    # Get embeddings
+    l1_records = collection.query(
+        word,
+        where={"language": l1},
+        n_results=words_per_l,
+        include=["embeddings"],
+    )
+    words = l1_records["documents"]
+    embeddings = l1_records["embeddings"]
+    languages = [l1] * len(l1_records)
+    if l2:
+        l2_records = collection.query(
+            word,
+            where={"language": l2},
+            n_results=words_per_l,
+            include=["embeddings"],
         )
+        words = l2_records["documents"]
+        embeddings = l2_records["embeddings"]
+        languages = [l2] * len(l2_records)
+    
+    # Transform to coordiantes
+    pca = PCA(n_components=3)
+    pca.fit(embeddings)
+    coordinates = pca.transform(embeddings)
+    return [
+        {"word": word, "language": language, "x": c[0], "y": c[1], "z": c[2]}
+        for word, language, c in zip(words, languages, coordinates)
+    ]
 
 
-_index_cache = None
-
-
-@app.get("/api/index")
-async def index(authorization: Optional[str] = Header(None)):
-    global _index_cache
-    try:
-        token = None
-        if authorization:
-            token = authorization.split(" ")[1]
-            data = user_handler.decode(token)
-            user_id = data["user_id"]
-            if user_handler.exists(user_id):
-                token = None
-
-        if not token:
-            user_id, token = user_handler.create()
-
-        if _index_cache is None:
-            vectors = get_coordinates(oxford_3000, pca_id="default")
-            _index_cache = {w: v for w, v in zip(oxford_3000, vectors)}
-
-        return {"vectors": _index_cache, "pca_id": "default", "token": token}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.post("/api/search")
-async def search(request: Request, user: dict = Depends(get_current_user)):
-    try:
-        for word in request.words:
-            validate_word(word)
-
-        vectors = get_coordinates(request.words, request.pca_id)
-        vectors = {w: v for w, v in zip(request.words, vectors)}
-        return {"vectors": vectors, "pca_id": request.pca_id}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.post("/api/set_pca")
-async def set_pca(request: Request, user: dict = Depends(get_current_user)):
-    try:
-        for word in request.words:
-            validate_word(word)
-
-        pca_id = "default" if request.reset else get_pca_id(request.words)
-        corpus = list(set(oxford_3000 + request.search_history + request.words))
-        vectors = get_coordinates(corpus, pca_id)
-        vectors = {w: v for w, v in zip(corpus, vectors)}
-        return {"vectors": vectors, "pca_id": pca_id}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
+# Frontend
 @app.get("/favicon.png")
 async def favicon():
     return FileResponse("frontend/dist/favicon.png")
