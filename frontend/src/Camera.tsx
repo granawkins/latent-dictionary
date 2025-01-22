@@ -3,13 +3,28 @@ import { OrbitControls } from '@react-three/drei';
 import { useEffect, useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { SCALE } from './Dot';
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 
-const Camera = ({ selectedCorpus }) => {
+interface DotData {
+    x: number;
+    y: number;
+    z: number;
+    word: string;
+}
 
-    // When selectedCorpus updates, spin/move the camera to get all selected words in view
-    const controlsRef = useRef()
-    const [targetCoordinates, setTargetCoordinates] = useState(null)
-    const [lookAtPosition, setLookAtPosition] = useState(null)
+interface SelectedCorpus {
+    [key: string]: DotData;
+}
+
+interface CameraProps {
+    selectedCorpus: SelectedCorpus | null;
+}
+
+const Camera: React.FC<CameraProps> = ({ selectedCorpus }) => {
+    const controlsRef = useRef<OrbitControlsImpl>(null);
+    const [targetCoordinates, setTargetCoordinates] = useState<THREE.Vector3 | null>(null);
+    const [lookAtPosition, setLookAtPosition] = useState<THREE.Vector3 | null>(null);
+
     useEffect(() => {
         if (selectedCorpus) {
             // 1. Compute the bounding box
@@ -25,7 +40,7 @@ const Camera = ({ selectedCorpus }) => {
             // 3. Determine the Camera Distance
             const size = bbox.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            const fov = 45; // Assuming a field of view of 75 degrees
+            const fov = 45; // Assuming a field of view of 45 degrees
             const cameraDistance = maxDim / 2 / Math.tan(THREE.MathUtils.degToRad(fov / 2));
 
             const target = new THREE.Vector3(center.x, center.y, center.z + cameraDistance);
@@ -34,8 +49,7 @@ const Camera = ({ selectedCorpus }) => {
             }
             setTargetCoordinates(target);
         }
-    }, [selectedCorpus])
-
+    }, [selectedCorpus]);
 
     // Cancel animation on user interaction
     useEffect(() => {
@@ -45,11 +59,10 @@ const Camera = ({ selectedCorpus }) => {
         return () => {
             events.forEach(event => window.removeEventListener(event, reset));
         };
-    }, [])
-
+    }, []);
 
     useFrame((state) => {
-        if (targetCoordinates !== null) {
+        if (targetCoordinates !== null && lookAtPosition !== null && controlsRef.current) {
             const step = 0.05; // Define the step size
             const camera = state.camera;
             camera.position.lerp(targetCoordinates, step);
@@ -57,7 +70,6 @@ const Camera = ({ selectedCorpus }) => {
         }
     });
 
-    
     return (
         <>
             <perspectiveCamera />

@@ -1,7 +1,19 @@
+import React from 'react';
 import LogoButton from './LogoButton';
 
+interface NavigationProps {
+    inputText: string;
+    setInputText: (text: string) => void;
+    handleSearch: () => void;
+    loading: boolean;
+}
 
-const Navigation = ({ inputText, setInputText, handleSearch, loading }) => (
+const Navigation: React.FC<NavigationProps> = ({ 
+    inputText, 
+    setInputText, 
+    handleSearch, 
+    loading 
+}) => (
     <div style={{
         position: 'absolute',
         left: '50%',
@@ -14,11 +26,14 @@ const Navigation = ({ inputText, setInputText, handleSearch, loading }) => (
         boxSizing: 'border-box',
     }}>
         <LogoButton />
-        <form onSubmit={handleSearch} style={{ flexGrow: 1 }}>
+        <form onSubmit={(e: React.FormEvent) => {
+            e.preventDefault();
+            handleSearch();
+        }} style={{ flexGrow: 1 }}>
             <input
                 type="text"
                 value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputText(e.target.value)}
                 style={{
                     width: '100%',
                     padding: '15px 15px',
