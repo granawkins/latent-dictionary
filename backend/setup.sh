@@ -18,4 +18,3 @@ echo "Installing/updating requirements..."
 pip install -r requirements.txt
 
 # Run db.py from the script's directory
-python3 db.py
