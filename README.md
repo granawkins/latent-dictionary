@@ -10,4 +10,3 @@ An interactive 3D map of DistilBert word embeddings: https://www.latentdictionar
 # TODO
 - Make a backend route to serve dist/
 - Add proxy info to frontend
-- 

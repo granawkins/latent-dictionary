@@ -14,7 +14,7 @@ const env = () => {
   return "PROD";
 };
 
-export const backendUrl = () => `${origin()}${env() === "DEV" ? ":8000" : ""}`;
+export const backendUrl = () => `${origin()}${env() === "DEV" ? ":5001" : ""}`;
 
 export const fetchWithAuth = async (route, method = "GET", body) => {
   const jwt = localStorage.getItem("jwt") || "";
@@ -30,4 +30,16 @@ export const fetchWithAuth = async (route, method = "GET", body) => {
   console.log(`${backendUrl()}${route}`, options);
   const res = await fetch(`${backendUrl()}${route}`, options);
   return await res.json();
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+export const debounce = (func, delay) => {
+  let timerId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (...args) => {
+    if (timerId) clearTimeout(timerId);
+    timerId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
 };

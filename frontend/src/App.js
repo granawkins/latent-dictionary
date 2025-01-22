@@ -1,6 +1,6 @@
 import React from 'react'
 import { useCallback } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Canvas } from '@react-three/fiber'
 
 import Dot from './Dot';
@@ -9,7 +9,7 @@ import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
 import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
-import { fetchWithAuth } from './utils.js';
+import { debounce, fetchWithAuth } from './utils.js';
 
 
 const DotMemo = React.memo(Dot);
@@ -22,30 +22,37 @@ const App = () => {
     const [corpus, setCorpus] = useState([]);
     const [inputText, setInputText] = useState("when u don't wanna get out of bed")
     const [activeText, setActiveText] = useState("")
+    const wordsPerL = 20
+
+    const timer = useRef(null)
     
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
-        setLoading(true)
-        try {
-            fetchWithAuth(
-                "/api/search",
-                "POST",
-                {
-                    word: inputText,
-                    l1: "english",
-                    l2: null,
-                }
-            )
-                .then(data => {
-                    console.log(data)
-                    setActiveText(inputText)
-                    setCorpus(data)
-                })
-        } catch (error) {
-            setError(error)
-        } finally {
-            setLoading(false)
-        }
+        if (timer.current) clearTimeout(timer.current)
+        timer.current = setTimeout(() => {
+            setLoading(true)
+            try {
+                fetchWithAuth(
+                    "/api/search",
+                    "POST",
+                    {
+                        word: inputText,
+                        l1: "english",
+                        l2: null,
+                        words_per_l: wordsPerL,
+                    }
+                )
+                    .then(data => {
+                        console.log(data)
+                        setActiveText(inputText)
+                        setCorpus(data)
+                    })
+            } catch (error) {
+                setError(error)
+            } finally {
+                    setLoading(false)
+            }
+        }, 1000)
     }, [inputText, activeText]);
     
     useEffect(() => {
@@ -67,8 +74,26 @@ const App = () => {
                 <Camera selectedCorpus={corpus} />
                 {corpus &&
                     Object.entries(corpus).map(([word, data], i) => (
-                        <DotMemo key={word} word={word} coordinates={data.coordinates} selected={data.selected} />
+                        <DotMemo 
+                            key={word} 
+                            word={data.word} 
+                            x={data.x} 
+                            y={data.y} 
+                            z={data.z}
+                            language={data.language}
+                            selected={true}
+                        />
                     ))}
+                {/* A red dot at the origin to represent the search term */}
+                <DotMemo 
+                    word={inputText} 
+                    x={0} 
+                    y={0} 
+                    z={0}
+                    language={null}
+                    selected={true}
+                    color="red"
+                />
             </Canvas>
             <FAQButton />
             {error && <ErrorModal message={error} onClose={() => setError(null)} />}

@@ -14,9 +14,8 @@ const Camera = ({ selectedCorpus }) => {
         if (selectedCorpus) {
             // 1. Compute the bounding box
             const bbox = new THREE.Box3();
-            Object.values(selectedCorpus).forEach(coordinates => {
-                coordinates = coordinates.map(c => c * SCALE);
-                bbox.expandByPoint(new THREE.Vector3(...coordinates));
+            Object.values(selectedCorpus).forEach(dot => {
+                bbox.expandByPoint(new THREE.Vector3(dot.x * SCALE, dot.y * SCALE, dot.z * SCALE));
             });
 
             // 2. Calculate the center point
