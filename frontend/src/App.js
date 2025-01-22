@@ -22,6 +22,7 @@ const App = () => {
     const [corpus, setCorpus] = useState([]);
     const [inputText, setInputText] = useState("when u don't wanna get out of bed")
     const [activeText, setActiveText] = useState("")
+    const [searchPending, setSearchPending] = useState(false)
     const wordsPerL = 20
 
     const timer = useRef(null)
@@ -29,6 +30,7 @@ const App = () => {
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
         if (timer.current) clearTimeout(timer.current)
+        setSearchPending(true)
         timer.current = setTimeout(() => {
             setLoading(true)
             try {
@@ -46,9 +48,11 @@ const App = () => {
                         console.log(data)
                         setActiveText(inputText)
                         setCorpus(data)
+                        setSearchPending(false)
                     })
             } catch (error) {
                 setError(error)
+                setSearchPending(false)
             } finally {
                     setLoading(false)
             }
@@ -82,6 +86,7 @@ const App = () => {
                             z={data.z}
                             language={data.language}
                             selected={true}
+                            searchPending={searchPending}
                         />
                     ))}
                 {/* A red dot at the origin to represent the search term */}
@@ -93,6 +98,7 @@ const App = () => {
                     language={null}
                     selected={true}
                     color="red"
+                    searchPending={searchPending}
                 />
             </Canvas>
             <FAQButton />
