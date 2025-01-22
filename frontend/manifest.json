@@ -1,0 +1,9 @@
+{
+  "short_name": "Latent Dictionary",
+  "name": "Latent Dictionary",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}
