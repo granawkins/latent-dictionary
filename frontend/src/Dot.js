@@ -11,8 +11,8 @@ function Dot({ word, x, y, z, selected, select, color = "white", searchPending =
         console.log(word)
     }
 
-    // Base opacity for dots is 0.5, reduced by half when search is pending
-    const dotOpacity = (selected ? 1 : 0.5) * (searchPending ? 0.5 : 1);
+    // Base opacity: 1.0 for selected, 0.2 for unselected, reduced by half when search is pending
+    const dotOpacity = (selected ? 1 : 0.2) * (searchPending ? 0.5 : 1);
     
     return (
         <mesh ref={meshRef}
