@@ -1,4 +1,6 @@
 chromadb
+python-dotenv
 fastapi
-scikit-learn
+numpy
+openai
 uvicorn

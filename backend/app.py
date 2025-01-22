@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
-from sklearn.decomposition import PCA
+import numpy as np
 
 from db import collection
 
@@ -18,6 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def pca(data: list[list[float]]) -> list[list[float]]:
+    "Basic 3-dimensional Principal Component Analysis"
+    X = np.array(data) - np.mean(data, axis=0)
+    _, _, Vt = np.linalg.svd(X, full_matrices=False)
+    return np.dot(X, Vt.T[:, :3])
 
 @app.get("/api/search")
 async def search(word: str, l1: str, l2: Optional[str], words_per_l=20):
@@ -42,15 +47,12 @@ async def search(word: str, l1: str, l2: Optional[str], words_per_l=20):
         embeddings = l2_records["embeddings"]
         languages = [l2] * len(l2_records)
     
-    # Transform to coordiantes
-    pca = PCA(n_components=3)
-    pca.fit(embeddings)
-    coordinates = pca.transform(embeddings)
+    # Transform to coordinates
+    coordinates = pca(embeddings)
     return [
-        {"word": word, "language": language, "x": c[0], "y": c[1], "z": c[2]}
+        {"word": word, "language": language, "x": float(c[0]), "y": float(c[1]), "z": float(c[2])}
         for word, language, c in zip(words, languages, coordinates)
     ]
-
 
 # Frontend
 @app.get("/favicon.png")
