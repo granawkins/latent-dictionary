@@ -73,8 +73,8 @@ async def favicon():
 
 @app.get("/{full_path:path}")
 async def serve_index(request: Request, full_path: str):
-    public_file_path = os.path.join("../frontend/dist", full_path)
+    public_file_path = os.path.join("../frontend/build", full_path)
     if os.path.exists(public_file_path) and os.path.isfile(public_file_path):
         return FileResponse(public_file_path)
-    with open("../frontend/dist/index.html") as file:
+    with open("../frontend/build/index.html") as file:
         return HTMLResponse(content=file.read())

@@ -32,10 +32,8 @@ export const fetchWithAuth = async (route, method = "GET", body) => {
   return await res.json();
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 export const debounce = (func, delay) => {
   let timerId;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (...args) => {
     if (timerId) clearTimeout(timerId);
     timerId = setTimeout(() => {
