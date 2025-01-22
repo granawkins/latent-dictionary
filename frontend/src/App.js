@@ -22,13 +22,22 @@ const App = () => {
     const [corpus, setCorpus] = useState([]);
     const [inputText, setInputText] = useState("when u don't wanna get out of bed")
     const [activeText, setActiveText] = useState("")
+    const [searchPending, setSearchPending] = useState(false)
     const wordsPerL = 20
 
     const timer = useRef(null)
+    const [selected, setSelected] = useState([])
+    const select = (word) => {
+        setSelected(oldSelected => {
+            if (oldSelected.includes(word)) return oldSelected.filter(w => w !== word)
+            return [...oldSelected, word]
+        })
+    }
     
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
         if (timer.current) clearTimeout(timer.current)
+        setSearchPending(true)
         timer.current = setTimeout(() => {
             setLoading(true)
             try {
@@ -46,9 +55,11 @@ const App = () => {
                         console.log(data)
                         setActiveText(inputText)
                         setCorpus(data)
+                        setSearchPending(false)
                     })
             } catch (error) {
                 setError(error)
+                setSearchPending(false)
             } finally {
                     setLoading(false)
             }
@@ -73,15 +84,17 @@ const App = () => {
                 <pointLight position={[10, 10, 10]} />
                 <Camera selectedCorpus={corpus} />
                 {corpus &&
-                    Object.entries(corpus).map(([word, data], i) => (
+                    Object.entries(corpus).map(([i, data]) => (
                         <DotMemo 
-                            key={word} 
+                            key={data.word} 
                             word={data.word} 
                             x={data.x} 
                             y={data.y} 
                             z={data.z}
                             language={data.language}
-                            selected={true}
+                            selected={selected.includes(data.word)}
+                            select={() => select(data.word)}
+                            searchPending={searchPending}
                         />
                     ))}
                 {/* A red dot at the origin to represent the search term */}
@@ -91,8 +104,10 @@ const App = () => {
                     y={0} 
                     z={0}
                     language={null}
-                    selected={true}
+                    selected={selected.includes(inputText)}
+                    select={() => select(inputText)}
                     color="red"
+                    searchPending={searchPending}
                 />
             </Canvas>
             <FAQButton />
