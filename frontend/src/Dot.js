@@ -3,15 +3,18 @@ import React, { useRef } from 'react';
 
 export const SCALE = 10
 
-function Dot({ word, coordinates, selected, select }) {
+function Dot({ word, x, y, z, selected, select, color = "white" }) {
     
     const meshRef = useRef();
-    const [x, y, z] = coordinates;
+
+    const handleClick = () => {
+        console.log(word)
+    }
 
     return (
         <mesh ref={meshRef}
             position={[x * SCALE, y * SCALE, z * SCALE]}
-            onClick={() => select(word)}
+            onClick={handleClick}
         >
             <sphereGeometry args={[
                 0.05 * (selected ? 3 : 1), 
@@ -19,8 +22,8 @@ function Dot({ word, coordinates, selected, select }) {
                 32,
             ]} />
             <meshStandardMaterial 
-                color='white' 
-                emissive={selected ? 'yellow' : 'black'}
+                color={color}
+                emissive={color}
                 transparent
                 emissiveIntensity={selected ? 1 : 0}
                 opacity={selected ? 1 : 0.5} 
@@ -28,7 +31,7 @@ function Dot({ word, coordinates, selected, select }) {
             {selected && (
                 <Text
                     position={[0, 0.5, 0]}
-                    fontSize={1}
+                    fontSize={0.5}
                     color="white"
                     font='/NotoSans-Regular.ttf'
                 >

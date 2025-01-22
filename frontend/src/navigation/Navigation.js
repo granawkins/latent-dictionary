@@ -1,9 +1,7 @@
 import LogoButton from './LogoButton';
-import SearchBar from './SearchBar';
-import MagicWandButton from './MagicWandButton';
 
 
-const Navigation = ({ searchTerms, setSearchTerms, isLoading, toggleMagicWand, pcaId }) => (
+const Navigation = ({ inputText, setInputText, handleSearch, loading }) => (
     <div style={{
         position: 'absolute',
         left: '50%',
@@ -16,16 +14,24 @@ const Navigation = ({ searchTerms, setSearchTerms, isLoading, toggleMagicWand, p
         boxSizing: 'border-box',
     }}>
         <LogoButton />
-        <SearchBar 
-            searchTerms={searchTerms} 
-            setSearchTerms={setSearchTerms} 
-            isLoading={isLoading} 
-        />
-        <MagicWandButton 
-            toggleMagicWand={toggleMagicWand} 
-            isWandActive={!isLoading && searchTerms.length > 2} 
-            pcaId={pcaId}
-        />
+        <form onSubmit={handleSearch} style={{ flexGrow: 1 }}>
+            <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                style={{
+                    width: '100%',
+                    padding: '15px 15px',
+                    fontSize: '16px',
+                    border: '1px solid #ccc',
+                    backgroundColor: 'black',
+                    color: 'white',
+                    boxSizing: 'border-box',
+                }}
+                placeholder="Search..."
+                disabled={loading}
+            />
+        </form>
     </div>
 );
 
