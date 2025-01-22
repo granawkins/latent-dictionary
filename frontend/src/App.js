@@ -26,6 +26,13 @@ const App = () => {
     const wordsPerL = 20
 
     const timer = useRef(null)
+    const [selected, setSelected] = useState([])
+    const select = (word) => {
+        setSelected(oldSelected => {
+            if (oldSelected.includes(word)) return oldSelected.filter(w => w !== word)
+            return [...oldSelected, word]
+        })
+    }
     
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
@@ -77,15 +84,16 @@ const App = () => {
                 <pointLight position={[10, 10, 10]} />
                 <Camera selectedCorpus={corpus} />
                 {corpus &&
-                    Object.entries(corpus).map(([word, data], i) => (
+                    Object.entries(corpus).map(([i, data]) => (
                         <DotMemo 
-                            key={word} 
+                            key={data.word} 
                             word={data.word} 
                             x={data.x} 
                             y={data.y} 
                             z={data.z}
                             language={data.language}
-                            selected={true}
+                            selected={selected.includes(data.word)}
+                            select={() => select(data.word)}
                             searchPending={searchPending}
                         />
                     ))}
@@ -96,7 +104,8 @@ const App = () => {
                     y={0} 
                     z={0}
                     language={null}
-                    selected={true}
+                    selected={selected.includes(inputText)}
+                    select={() => select(inputText)}
                     color="red"
                     searchPending={searchPending}
                 />

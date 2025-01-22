@@ -7,42 +7,30 @@ function Dot({ word, x, y, z, selected, select, color = "white", searchPending =
     
     const meshRef = useRef();
 
-    const handleClick = () => {
-        console.log(word)
-    }
-
-    // Base opacity: 1.0 for selected, 0.2 for unselected, reduced by half when search is pending
-    const dotOpacity = (selected ? 1 : 0.2) * (searchPending ? 0.5 : 1);
-    
     return (
         <mesh ref={meshRef}
             position={[x * SCALE, y * SCALE, z * SCALE]}
-            onClick={handleClick}
+            onClick={select}
         >
             <sphereGeometry args={[
-                0.05 * (selected ? 3 : 1), 
-                32, 
+                0.15 * (selected ? 1.2 : 1), 
+                32,
                 32,
             ]} />
             <meshStandardMaterial 
                 color={color}
                 emissive={color}
                 transparent
-                emissiveIntensity={selected ? 1 : 0}
-                opacity={dotOpacity}
+                opacity={searchPending ? 0.25 : selected ? 1 : 0.5}
             />
-            {selected && (
-                <Text
-                    position={[0, 0.5, 0]}
-                    fontSize={0.5}
-                    color="white"
-                    font='/NotoSans-Regular.ttf'
-                    transparent
-                    opacity={0.8 * (searchPending ? 0.5 : 1)} // Base text opacity is 0.8, reduced by half when search is pending
-                >
-                    {word}
-                </Text>
-            )}
+            <Text
+                position={[0, 0.5, 0]}
+                fontSize={0.3}
+                color="white"
+                transparent={!selected}
+            >
+                {word}
+            </Text>
         </mesh>
     );
 }
