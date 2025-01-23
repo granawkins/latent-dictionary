@@ -6,6 +6,7 @@ from typing import List, Tuple, Set, cast
 import chromadb
 from chromadb.api.types import Include
 from chromadb.utils import embedding_functions
+from chromadb.utils.embedding_functions.openai_embedding_function import OpenAIEmbeddingFunction
 from dotenv import load_dotenv
 
 # Define valid include parameters
@@ -22,7 +23,7 @@ except KeyError:
 client = chromadb.PersistentClient(
     path=DB_PATH.as_posix()
 )
-embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+embedding_function = OpenAIEmbeddingFunction(
     api_key=openai_api_key,
     model_name="text-embedding-3-small"
 )

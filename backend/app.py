@@ -5,8 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 import numpy as np
-from chromadb.api.types import Include
-from chromadb.utils.embedding_functions import PyEmbedding
+from chromadb.api.types import Include, Embeddings
 
 from db import collection
 
@@ -24,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def pca(data: Union[List[List[float]], List[List[List[float]]], List[PyEmbedding]]) -> List[List[float]]:
+def pca(data: Embeddings) -> Embeddings:
     "Basic 3-dimensional Principal Component Analysis"
     # Convert input to numpy array
     data_array = np.array(data, dtype=np.float64)
@@ -54,14 +53,14 @@ async def search(request: Request) -> List[Dict[str, Any]]:
         n_results=words_per_l,
         include=include,
     )
-    l1_docs = l1_records.get("documents", [[]])[0]
-    l1_embeddings = l1_records.get("embeddings", [[]])[0]
+    l1_docs = l1_records.get("documents", [[]])
+    l1_embeddings = l1_records.get("embeddings", [[]])
     
     if not l1_docs or not l1_embeddings:
         return []
         
-    words = l1_docs
-    embeddings = l1_embeddings
+    words = l1_docs[0]
+    embeddings = l1_embeddings[0]
     languages = [l1] * len(words)
     
     if l2:
@@ -72,13 +71,13 @@ async def search(request: Request) -> List[Dict[str, Any]]:
             n_results=words_per_l,
             include=include_l2,
         )
-        l2_docs = l2_records.get("documents", [[]])[0]
-        l2_embeddings = l2_records.get("embeddings", [[]])[0]
+        l2_docs = l2_records.get("documents", [[]])
+        l2_embeddings = l2_records.get("embeddings", [[]])
         
         if l2_docs and l2_embeddings:
-            words.extend(l2_docs)
-            embeddings.extend(l2_embeddings)
-            languages.extend([l2] * len(l2_docs))
+            words.extend(l2_docs[0])
+            embeddings.extend(l2_embeddings[0])
+            languages.extend([l2] * len(l2_docs[0]))
     
     # Transform to coordinates
     coordinates = pca(embeddings)
