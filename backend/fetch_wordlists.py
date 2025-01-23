@@ -82,7 +82,8 @@ def fetch_wiktionary_words(
             )
             for match in re.finditer(word_pattern, html_content):
                 title, word = match.groups()
-                if word == title:  # Only use when title matches word (avoid disambiguation)
+                # Skip disambiguation pages by only using exact matches
+                if word == title:
                     if word and len(word) > 1 and not any(c.isdigit() for c in word):
                         all_words.append(word)
                 
