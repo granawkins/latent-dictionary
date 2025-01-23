@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Script to fetch and process word lists for multiple languages.
 Primary source: Wiktionary frequency lists
-Backup: NLTK corpus
 """
 
 import sys
 import logging
 import requests
-import time
+import re
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -17,67 +16,62 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# Language configurations with Wiktionary language codes
+# Language configurations with Wiktionary frequency list paths
 LANGUAGES = {
-    "en": {"name": "English", "wiktionary": "English"},
-    "es": {"name": "Spanish", "wiktionary": "Spanish"},
-    "fr": {"name": "French", "wiktionary": "French"},
-    "de": {"name": "German", "wiktionary": "German"},
-    "it": {"name": "Italian", "wiktionary": "Italian"},
-    "pt": {"name": "Portuguese", "wiktionary": "Portuguese"},
-    "ru": {"name": "Russian", "wiktionary": "Russian"},
-    "zh": {"name": "Chinese", "wiktionary": "Mandarin"},
-    "ja": {"name": "Japanese", "wiktionary": "Japanese"},
-    "ko": {"name": "Korean", "wiktionary": "Korean"},
-    "ar": {"name": "Arabic", "wiktionary": "Arabic"},
-    "vi": {"name": "Vietnamese", "wiktionary": "Vietnamese"},
+    "en": {
+        "name": "English",
+        "freq_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
+        "section": "1"  # Section containing 1-1000
+    }
 }
 
 WIKTIONARY_API_URL = "https://en.wiktionary.org/w/api.php"
 
-def fetch_wiktionary_words(lang_code: str, lang_info: Dict, target_words: int) -> Optional[List[str]]:
-    """Fetch words from Wiktionary for a given language using the API."""
-    words: Set[str] = set()
-    continue_param = None
-    
-    while len(words) < target_words:
+def fetch_frequency_list(
+    lang_code: str,
+    lang_info: Dict,
+    target_words: int,
+) -> Optional[List[str]]:
+    """Fetch frequency list from Wiktionary for a given language."""
+    try:
         params = {
-            "action": "query",
+            "action": "parse",
+            "page": lang_info["freq_path"],
+            "section": lang_info.get("section", "0"),
             "format": "json",
-            "list": "categorymembers",
-            "cmtitle": f"Category:{lang_info['wiktionary']}_lemmas",
-            "cmlimit": 500,
-            "cmprop": "title"
+            "prop": "text"
         }
         
-        if continue_param:
-            params["cmcontinue"] = continue_param
-            
-        try:
-            response = requests.get(WIKTIONARY_API_URL, params=params)
-            response.raise_for_status()
-            data = response.json()
-            
-            # Extract words from response
-            for item in data["query"]["categorymembers"]:
-                word = item["title"].split(":")[-1].strip()
-                if word and len(word) > 1:  # Skip single characters
-                    words.add(word)
-            
-            # Check if there are more results
-            if "continue" in data:
-                continue_param = data["continue"]["cmcontinue"]
-                time.sleep(1)  # Be nice to the API
-            else:
-                break
-                
-        except Exception as e:
-            logging.error(
-                f"Error fetching {lang_info['name']} words from Wiktionary: {str(e)}"
-            )
+        response = requests.get(WIKTIONARY_API_URL, params=params)
+        response.raise_for_status()
+        data = response.json()
+        
+        if "parse" not in data:
+            logging.error(f"No content found for {lang_info['name']} frequency list")
             return None
             
-    return list(words)[:target_words]
+        # Extract words from the HTML content
+        html_content = data["parse"]["text"]["*"]
+        
+        # Extract words from links, format: <a href="/wiki/word#English" title="word">word</a>
+        words = []
+        for match in re.finditer(r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>', html_content):
+            title, word = match.groups()
+            if word == title:  # Only use when title matches word (avoid disambiguation)
+                if word and len(word) > 1 and not any(c.isdigit() for c in word):
+                    words.append(word)
+                
+        if not words:
+            logging.error(f"No words found in {lang_info['name']} frequency list")
+            return None
+            
+        return words[:target_words]
+                
+    except Exception as e:
+        logging.error(
+            f"Error fetching {lang_info['name']} frequency list: {str(e)}"
+        )
+        return None
 
 def save_wordlist(words: List[str], lang_code: str) -> bool:
     """Save processed words to a file in the wordlists directory."""
@@ -108,23 +102,27 @@ def main():
     for lang_code, lang_info in LANGUAGES.items():
         logging.info(f"Processing {lang_info['name']}...")
         
-        # Try Wiktionary
-        words = fetch_wiktionary_words(lang_code, lang_info, args.num_words)
+        # Try Wiktionary frequency lists
+        words = fetch_frequency_list(lang_code, lang_info, args.num_words)
         
-        if words and len(words) >= args.num_words:
+        if words:
             if save_wordlist(words, lang_code):
                 success_count += 1
-                logging.info(f"Successfully processed {lang_info['name']}")
+                logging.info(
+                    f"Successfully processed {lang_info['name']} "
+                    f"({len(words)} words)"
+                )
             else:
                 logging.error(f"Failed to save {lang_info['name']} wordlist")
         else:
-            logging.error(f"Failed to fetch {lang_info['name']} words from Wiktionary")
-            # TODO: Implement NLTK fallback if needed
+            logging.error(
+                f"Failed to fetch {lang_info['name']} frequency list"
+            )
     
     logging.info(
         f"Completed processing {success_count} out of {len(LANGUAGES)} languages"
     )
-    return 0 if success_count == len(LANGUAGES) else 1
+    return 0 if success_count > 0 else 1
 
 if __name__ == "__main__":
     sys.exit(main())

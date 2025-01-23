@@ -1,11 +1,11 @@
 # German word list
-100-Mark-Schein
-10-fach
-10-minütig
-33-minütig
-2.
-10.
-35-minütig
-15-monatig
-11-eckig
-24-tägig
+<a href="/wiki/Wiktionary:Frequency_lists/German/Mixed_web_3M" title="Wiktionary:Frequency lists/German/Mixed web 3M">3M most frequently occurring German words from a variety of web sources (2011-21)</a>
+<a href="/wiki/Wiktionary:Frequency_lists/German/TV_and_movie_subtitles_(2009)" title="Wiktionary:Frequency lists/German/TV and movie subtitles (2009)">Unformatted German frequency list generated in 2009 from TV and movie subtitles</a>.
+<a href="/wiki/User:Bigbossfarin/10000_German_words" title="User:Bigbossfarin/10000 German words">User:Bigbossfarin/10000 German words</a>
+<a href="/wiki/User:Matthias_Buchmeier#German_frequency_list" title="User:Matthias Buchmeier">User:Matthias_Buchmeier#German_frequency_list</a>
+<a href="/wiki/User:Jberkel/lists/BedrohteW%C3%B6rter" title="User:Jberkel/lists/BedrohteWörter">User:Jberkel/lists/BedrohteWörter</a>
+Top 2000 German words from subtitles: <a href="/wiki/Wiktionary:Frequency_lists/German_subtitles_1000" title="Wiktionary:Frequency lists/German subtitles 1000">1-1000</a>, <a href="/wiki/Wiktionary:Frequency_lists/German_subtitles_1001-2000" title="Wiktionary:Frequency lists/German subtitles 1001-2000">1001-2000</a>
+<a rel="nofollow" class="external text" href="https://frequencylists.blogspot.com/2014/05/300-most-frequently-used-german-verbs.html">Most Commonly Used German Verbs - With Detailed Explanations and Examples</a>
+<a rel="nofollow" class="external text" href="https://wortschatz.uni-leipzig.de/en/download/">Word frequency lists for German and other languages from 10K up to 1M</a>, available for download as part of the Leipzig Corpora Collection <sup>(CC BY-4.0)</sup>
+<a rel="nofollow" class="external text" href="https://github.com/hermitdave/FrequencyWords/">50K and larger word lists</a> based on www.opensubtitles.org for German and other languages <sup>(CC BY-SA-4.0)</sup>
+<a rel="nofollow" class="external text" href="http://web.archive.org/web/20170227200416/http://wortschatz.uni-leipzig.de/html/wliste.html">The Leipzig Wortschatz 100, 1000, or 10 000 most frequent German words (2001)</a>.

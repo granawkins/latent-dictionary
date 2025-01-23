@@ -1,11 +1,9 @@
 # Arabic word list
-أبيدجان
-أثناء
-أبدع
-آخر الزمان
-« »
-أجهد
-أدنى
-أرسطو
-آية الله
-أبى
+<a href="/wiki/Appendix:Arabic_Frequency_List_from_Quran" title="Appendix:Arabic Frequency List from Quran">Appendix:Arabic Frequency List from Quran</a>
+<a href="/wiki/Appendix:Arabic_Quranic_Verbs" title="Appendix:Arabic Quranic Verbs">Appendix:Arabic Quranic Verbs</a>
+<a rel="nofollow" class="external text" href="https://wortschatz.uni-leipzig.de/en/download/">Word frequency lists for Arabic and other languages from 10K up to 1M</a>, available for download as part of the Leipzig Corpora Collection <sup>(CC BY-4.0)</sup>
+<a rel="nofollow" class="external text" href="https://github.com/hermitdave/FrequencyWords/">50K and larger word lists</a> based on www.opensubtitles.org for Arabic and other languages <sup>(CC BY-SA-4.0)</sup>
+<a rel="nofollow" class="external text" href="http://corpus.leeds.ac.uk/list.html">Frequency lists</a> for Arabic and other languages derived from corpora assembled by Leeds University's Centre for Translation Studies <sup>(CC BY-2.5)</sup>
+<a rel="nofollow" class="external text" href="http://corpus.leeds.ac.uk/serge/kelly/">Frequency lists for language learners</a> and <a rel="nofollow" class="external text" href="https://web.archive.org/web/20230521010956/http://corpus.leeds.ac.uk/serge/kelly/">Backup link for Frequency lists for language learners (if the previous one is down</a>  of Arabic and other languages available as part of the Kelly project. <sup>(CC BY-ND-NC-SA 2.0)<sup id="cite_ref-1" class="reference"><a href="#cite_note-1"><span class="cite-bracket">[</span>1<span class="cite-bracket">]</span></a></sup></sup>
+Buckwalter, Tim, and Dilworth Parkinson. <a rel="nofollow" class="external text" href="https://archive.org/details/routledge-frequency-dictionaries-buckwalter-tim-parkinson-dilworth-a-frequency-d"><i>A Frequency Dictionary of Arabic: Core Vocabulary for Learners</i></a>. Routledge, February 2011.
+Laila Familiar: A frequency dictionary of contemporary Arabic fiction : core vocabulary for learners and material developers, Routledge, Taylor &amp; Francis Group, Abingdon, Oxon, 2021, <a href="/wiki/Special:BookSources/9781138590779" title="Special:BookSources/9781138590779">→ISBN</a>
