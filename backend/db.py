@@ -59,11 +59,15 @@ def main():
     for i in range(0, len(documents), batch_size):
         _end = min(i + batch_size, len(documents))
         try:
-            collection.add(ids=ids[i:_end], documents=documents[i:_end], metadatas=metadatas[i:_end])
+            collection.add(
+                ids=ids[i:_end],
+                documents=documents[i:_end],
+                metadatas=metadatas[i:_end]
+            )
         except Exception as e:
             print(f"Error adding {documents[i:_end]}: {e}")
             return
-    print(f"Success!")
+    print("Success!")
 
 
 if __name__ == "__main__":

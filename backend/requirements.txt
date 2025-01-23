@@ -4,3 +4,4 @@ fastapi
 numpy
 openai
 uvicorn
+ruff
