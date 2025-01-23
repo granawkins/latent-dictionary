@@ -1,10 +1,8 @@
-# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
-select = ["E", "F"]
-ignore = []
+# Same as Black.
+line-length = 88
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["A", "B", "C", "D", "E", "F"]
-unfixable = []
+# Assume Python 3.8
+target-version = "py38"
 
 # Exclude a variety of commonly ignored directories.
 exclude = [
@@ -31,11 +29,14 @@ exclude = [
     "venv",
 ]
 
-# Same as Black.
-line-length = 88
+[lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E", "F"]
+ignore = []
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["A", "B", "C", "D", "E", "F"]
+unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
-
-# Assume Python 3.8
-target-version = "py38"
