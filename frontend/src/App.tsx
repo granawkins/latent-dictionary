@@ -96,9 +96,9 @@ const App: React.FC = () => {
         disabled={loading}
       />
       <Canvas>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error - Three.js components not properly typed */}
         <ambientLight />
-        {/* @ts-ignore */}
+        {/* @ts-expect-error - Three.js components not properly typed */}
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
