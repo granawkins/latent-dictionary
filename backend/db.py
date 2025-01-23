@@ -17,17 +17,21 @@ load_dotenv()
 
 DB_PATH = Path("~/.latentdictionary").expanduser()
 DB_PATH.parent.mkdir(exist_ok=True)
-try:
-    openai_api_key = os.getenv("OPENAI_API_KEY")
-except KeyError:
-    openai_api_key = input("Enter your OpenAI API key: ")
-client = chromadb.PersistentClient(path=DB_PATH.as_posix())
-embedding_function = OpenAIEmbeddingFunction(
-    api_key=openai_api_key, model_name="text-embedding-3-small"
-)
-collection = client.get_or_create_collection(
-    name="latent-dictionary", embedding_function=embedding_function
-)
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key:
+    client = chromadb.PersistentClient(
+        path=DB_PATH.as_posix(),
+        api_key=openai_api_key,
+    )
+    embedding_function = OpenAIEmbeddingFunction(
+        api_key=openai_api_key, model_name="text-embedding-3-small"
+    )
+    collection = client.get_or_create_collection(
+        name="latent-dictionary", embedding_function=embedding_function
+    )
+else:
+    client = chromadb.PersistentClient(path=DB_PATH.as_posix())
+    collection = client.get_or_create_collection(name="latent-dictionary")
 
 
 def main() -> None:
