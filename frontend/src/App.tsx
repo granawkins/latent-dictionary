@@ -1,15 +1,14 @@
-import React from "react";
-import { useCallback } from "react";
-import { useState, useEffect, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import React from 'react';
+import { useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Canvas } from '@react-three/fiber';
 
-import Dot from "./Dot";
-import Camera from "./Camera";
-import FAQButton from "./navigation/FAQ";
-import LoadingHandler from "./LoadingHandler";
-import ErrorModal from "./ErrorModal";
-import Navigation from "./navigation/Navigation";
-import { fetchWithAuth } from "./utils";
+import Dot from './Dot';
+import Camera from './Camera';
+import FAQButton from './navigation/FAQ';
+import ErrorModal from './ErrorModal';
+import Navigation from './navigation/Navigation';
+import { fetchWithAuth } from './utils';
 
 interface CorpusItem {
   word: string;
@@ -26,9 +25,9 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
   const [inputText, setInputText] = useState<string>(
-    "when u don't wanna get out of bed",
+    "when u don't wanna get out of bed"
   );
-  const [activeText, setActiveText] = useState<string>("");
+  const [activeText, setActiveText] = useState<string>('');
   const wordsPerL = 20;
 
   const timer = useRef<NodeJS.Timeout | null>(null);
@@ -36,31 +35,21 @@ const App: React.FC = () => {
 
   const select = (word: string) => {
     setSelected((oldSelected) => {
-      if (oldSelected.includes(word))
-        return oldSelected.filter((w) => w !== word);
+      if (oldSelected.includes(word)) return oldSelected.filter((w) => w !== word);
       return [...oldSelected, word];
     });
   };
 
   const fetchSearch = useCallback(
-    async (
-      inputText: string,
-      l1: string,
-      l2: string | null,
-      wordsPerL: number,
-    ) => {
+    async (inputText: string, l1: string, l2: string | null, wordsPerL: number) => {
       setLoading(true);
       try {
-        const response: Record<string, CorpusItem> = await fetchWithAuth(
-          "/api/search",
-          "POST",
-          {
-            word: inputText,
-            l1: "english",
-            l2: null,
-            words_per_l: wordsPerL,
-          },
-        );
+        const response: Record<string, CorpusItem> = await fetchWithAuth('/api/search', 'POST', {
+          word: inputText,
+          l1: l1,
+          l2: l2,
+          words_per_l: wordsPerL,
+        });
         if (response) {
           setActiveText(inputText);
           setCorpus(response);
@@ -69,21 +58,23 @@ const App: React.FC = () => {
         setLoading(false);
       }
     },
-    [inputText, wordsPerL],
+    []
   );
 
   const handleSearch = useCallback(() => {
     if (!inputText || inputText === activeText) return;
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
-    timer.current = setTimeout(
-      () => fetchSearch(inputText, "english", null, wordsPerL),
-      1000,
-    );
-  }, [inputText, activeText]);
+    timer.current = setTimeout(() => {
+      fetchSearch(inputText, 'english', null, wordsPerL);
+    }, 1000);
+  }, [inputText, activeText, fetchSearch, wordsPerL]);
 
   useEffect(() => {
-    fetchSearch(inputText, "english", null, wordsPerL);
+    handleSearch();
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
   }, [handleSearch]);
 
   return (
@@ -92,9 +83,8 @@ const App: React.FC = () => {
         inputText={inputText}
         setInputText={setInputText}
         handleSearch={handleSearch}
-        loading={loading}
+        disabled={loading}
       />
-      <LoadingHandler loading={loading} />
       <Canvas>
         <ambientLight />
         <pointLight position={[10, 10, 10]} />

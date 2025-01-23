@@ -4,3 +4,6 @@ fastapi
 numpy
 openai
 uvicorn
+ruff
+pyright
+pytest
