@@ -39,18 +39,18 @@ const App: React.FC = () => {
         })
     }
     
-    const fetchSearch = useCallback(async (inputText, l1, l2, wordsPerL) => {
+    const fetchSearch = useCallback(async (inputText: string, l1: string, l2: string | null, wordsPerL: number) => {
         setLoading(true)
         try {
-            const response = await fetchWithAuth(
+            const response: Record<string, CorpusItem> = await fetchWithAuth(
                 "/api/search",
                 "POST",
                 {
-                word: inputText,
-                l1: "english",
-                l2: null,
-                words_per_l: wordsPerL,
-            }
+                    word: inputText,
+                    l1: "english",
+                    l2: null,
+                    words_per_l: wordsPerL,
+                }
             )
             if (response) {
                 setActiveText(inputText)
