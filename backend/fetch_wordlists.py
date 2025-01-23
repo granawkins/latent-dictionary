@@ -3,9 +3,9 @@
 
 Currently supported languages:
 - English (Wikipedia 2016 frequency list)
+- Spanish (Spanish Wikipedia frequency list)
 
 Future languages to be added:
-- Spanish (es)
 - French (fr)
 - German (de)
 - Italian (it)
@@ -80,12 +80,15 @@ def fetch_wiktionary_words(
             word_pattern = (
                 r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
             )
+            seen_words = set()  # Track unique words
             for match in re.finditer(word_pattern, html_content):
                 title, word = match.groups()
                 # Skip disambiguation pages by only using exact matches
                 if word == title:
                     if word and len(word) > 1 and not any(c.isdigit() for c in word):
-                        all_words.append(word)
+                        if word not in seen_words:
+                            seen_words.add(word)
+                            all_words.append(word)
                 
         if not all_words:
             logging.error(f"No words found in {language} frequency list")
@@ -133,16 +136,39 @@ def main():
         default=10000,
         help="Number of words to fetch (default: 10000)"
     )
+    parser.add_argument(
+        "-l", "--language",
+        type=str,
+        choices=["english", "spanish"],
+        default="english",
+        help="Language to fetch (default: english)"
+    )
     args = parser.parse_args()
     
-    # English Wikipedia frequency list
-    language = "english"
-    page_path = "Wiktionary:Frequency_lists/English/Wikipedia_(2016)"
-    # Sections 1-1000 through 9001-10000
-    sections = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    # Language configurations
+    configs = {
+        "english": {
+            "page_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
+            # Sections 1-1000 through 9001-10000
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+        },
+        "spanish": {
+            "page_path": "Wiktionary:Frequency_lists/Spanish1000",
+            # Spanish frequency list (top 1000 words)
+            "sections": ["0"]  # Main section containing the word list
+        }
+    }
+    
+    language = args.language
+    config = configs[language]
     
     logging.info(f"Fetching {language} frequency list...")
-    words = fetch_wiktionary_words(language, page_path, sections, args.num_words)
+    words = fetch_wiktionary_words(
+        language,
+        config["page_path"],
+        config["sections"],
+        args.num_words
+    )
     
     if words:
         if save_wordlist(words, language):
