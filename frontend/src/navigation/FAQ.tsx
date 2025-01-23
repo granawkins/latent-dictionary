@@ -1,8 +1,17 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-const faqData = [
+interface FAQItem {
+    question: string;
+    answer: string;
+}
+
+interface FAQModalProps {
+    onClose: () => void;
+}
+
+const faqData: FAQItem[] = [
     { question: "What am I looking at exactly?", answer: "DistilBert embeddings of the <a href='https://www.oxfordlearnersdictionaries.com/wordlist/american_english/oxford3000/' target='_blank'>Oxford 3000</a> word set + whatever you search for, reduced to 3 dimensions using PCA." },
     { question: "Excuse me?", answer: "AI's like ChatGPT convert text into embeddings, or long lists of numbers that represent their meanings. I've used one such model (<a href='https://huggingface.co/docs/transformers/model_doc/distilbert' target='_blank'>DistilBert</a>) to take a list of 3000 common words and convert them to embeddings.<br /><br />However, embeddings are very large - hundreds or thousands of numbers. I convert each one to just 3 numbers (x, y, and z) using a process called <a href='https://en.wikipedia.org/wiki/Principal_component_analysis' target='_blank'>Principal Components Analysis (PCA)</a>. This boils each embedding down to 3 numbers, which statistically best represent the differences found in that set of (3000) words. <br /><br />Those 3 numbers are the x, y, and z coordinates of each dot." },
     { question: "What does the magic wand do?", answer: "The magic wand resets the PCA based on the words selected when you click it." },
@@ -12,7 +21,7 @@ const faqData = [
     { question: "Can I check out the code?", answer: "<a href='https://github.com/granawkins/latent-dictionary' target='_blank'>Absolutely</a>." },
 ];
 
-const FAQModal = ({ onClose }) => (
+const FAQModal: React.FC<FAQModalProps> = ({ onClose }) => (
     <div
         style={{
             position: 'fixed',
@@ -38,7 +47,7 @@ const FAQModal = ({ onClose }) => (
                 maxHeight: '80vh',
                 overflowY: 'auto',
             }}
-            onClick={e => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
         >
             <div style={{width: '100%', textAlign: 'center'}}>
                 <img 
@@ -56,11 +65,11 @@ const FAQModal = ({ onClose }) => (
     </div>
 );
 
-const FAQButton = () => {
-    const [showModal, setShowModal] = useState(false);
+const FAQButton: React.FC = () => {
+    const [showModal, setShowModal] = useState<boolean>(false);
 
-    const openModal = () => setShowModal(true);
-    const closeModal = () => setShowModal(false);
+    const openModal = (): void => setShowModal(true);
+    const closeModal = (): void => setShowModal(false);
 
     return (
         <>

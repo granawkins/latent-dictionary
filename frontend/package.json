@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.36",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.17",
     "@react-three/drei": "^9.88.4",
     "@react-three/fiber": "^8.15.1",
@@ -15,7 +15,11 @@
     "three": "^0.157.0"
   },
   "devDependencies": {
+    "@types/node": "^22.10.8",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.7.3",
     "vite": "^5.0.0"
   },
   "scripts": {

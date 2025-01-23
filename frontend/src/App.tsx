@@ -9,25 +9,31 @@ import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
 import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
-import { fetchWithAuth } from './utils.js';
+import { fetchWithAuth } from './utils';
 
+interface CorpusItem {
+    word: string;
+    x: number;
+    y: number;
+    z: number;
+    language: string | null;
+}
 
 const DotMemo = React.memo(Dot);
 
-
-const App = () => {
-    
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null);
-    const [corpus, setCorpus] = useState([]);
-    const [inputText, setInputText] = useState("when u don't wanna get out of bed")
-    const [activeText, setActiveText] = useState("")
-    const [searchPending, setSearchPending] = useState(false)
+const App: React.FC = () => {
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string | null>(null);
+    const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
+    const [inputText, setInputText] = useState<string>("when u don't wanna get out of bed")
+    const [activeText, setActiveText] = useState<string>("")
+    const [searchPending, setSearchPending] = useState<boolean>(false)
     const wordsPerL = 20
 
-    const timer = useRef(null)
-    const [selected, setSelected] = useState([])
-    const select = (word) => {
+    const timer = useRef<NodeJS.Timeout | null>(null)
+    const [selected, setSelected] = useState<string[]>([])
+    
+    const select = (word: string) => {
         setSelected(oldSelected => {
             if (oldSelected.includes(word)) return oldSelected.filter(w => w !== word)
             return [...oldSelected, word]
@@ -51,17 +57,17 @@ const App = () => {
                         words_per_l: wordsPerL,
                     }
                 )
-                    .then(data => {
+                    .then((data: Record<string, CorpusItem>) => {
                         console.log(data)
                         setActiveText(inputText)
                         setCorpus(data)
                         setSearchPending(false)
                     })
-            } catch (error) {
-                setError(error)
+            } catch (err) {
+                setError(err instanceof Error ? err.message : String(err))
                 setSearchPending(false)
             } finally {
-                    setLoading(false)
+                setLoading(false)
             }
         }, 1000)
     }, [inputText, activeText]);
@@ -116,4 +122,4 @@ const App = () => {
     );
 };
 
-export default App
+export default App;

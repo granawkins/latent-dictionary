@@ -1,7 +1,11 @@
 import React from 'react';
 import './App.css'; // Ensure the CSS file is imported
 
-const LoadingHandler = ({ isLoading }) => {
+interface LoadingHandlerProps {
+    isLoading: boolean;
+}
+
+const LoadingHandler: React.FC<LoadingHandlerProps> = ({ isLoading }) => {
     if (!isLoading) return null;
 
     return (
