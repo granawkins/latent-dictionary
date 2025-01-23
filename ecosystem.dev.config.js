@@ -12,8 +12,7 @@ module.exports = {
       {
         name: 'latentdictionary-frontend',
         cwd: './frontend',
-        script: 'npm',
-        args: 'start',
+        script: 'npm run dev',
         watch: true,
         env: {
           NODE_ENV: 'development',
