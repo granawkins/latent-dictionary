@@ -8,18 +8,18 @@
   background-color: rgba(0, 0, 0, 0.3);
   padding: 20px;
   border-radius: 50%;
-  animation: flashTwice 3s ease-in-out forwards;
+  animation: swipeAndFlash 3s ease-in-out forwards;
   pointer-events: none;
 }
 
-@keyframes flashTwice {
+@keyframes swipeAndFlash {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5);
+    transform: translate(-60%, -50%) scale(0.5);
   }
   15% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: translate(-40%, -50%) scale(1.2);
   }
   30% {
     opacity: 0.3;
@@ -27,11 +27,11 @@
   }
   45% {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: translate(-40%, -50%) scale(1.2);
   }
   60% {
     opacity: 0.3;
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-60%, -50%) scale(1);
   }
   100% {
     opacity: 0;
