@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import List, Tuple, Set
 
 import chromadb
-from chromadb.api.types import Documents, Embeddings, Metadatas
 from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
 
