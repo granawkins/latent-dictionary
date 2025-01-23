@@ -31,3 +31,8 @@ jobs:
     - name: Run Pyright
       working-directory: ./backend
       run: pyright .
+
+    - name: Run Pytest
+      working-directory: ./backend
+      run: |
+        python -m pytest tests/ -v

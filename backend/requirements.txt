@@ -6,3 +6,4 @@ openai
 uvicorn
 ruff
 pyright
+pytest
