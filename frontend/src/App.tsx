@@ -46,8 +46,8 @@ const App: React.FC = () => {
                 "POST",
                 {
                     word: inputText,
-                    l1: "english",
-                    l2: null,
+                    l1: l1,
+                    l2: l2,
                     words_per_l: wordsPerL,
                 }
             )
@@ -58,17 +58,22 @@ const App: React.FC = () => {
         } finally {
             setLoading(false)
         }
-    }, [inputText, wordsPerL])
+    }, [])
     
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
         if (timer.current) clearTimeout(timer.current)
         setLoading(true)
-        timer.current = setTimeout(() => fetchSearch(inputText, "english", null, wordsPerL), 1000)
-    }, [inputText, activeText]);
+        timer.current = setTimeout(() => {
+            fetchSearch(inputText, "english", null, wordsPerL)
+        }, 1000)
+    }, [inputText, activeText, fetchSearch, wordsPerL]);
     
     useEffect(() => {
-        fetchSearch(inputText, "english", null, wordsPerL)
+        handleSearch()
+        return () => {
+            if (timer.current) clearTimeout(timer.current)
+        }
     }, [handleSearch])
 
     return (

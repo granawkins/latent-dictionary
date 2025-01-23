@@ -5,7 +5,7 @@ interface NavigationProps {
     inputText: string;
     setInputText: (text: string) => void;
     handleSearch: (e: React.FormEvent) => void;
-    disabled: boolean;
+    disabled?: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ 
