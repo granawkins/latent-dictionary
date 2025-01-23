@@ -29,10 +29,7 @@ const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({ show }) => {
 
   return (
     <div className="swipe-indicator">
-      <FontAwesomeIcon
-        icon={faHandPointRight}
-        style={{ fontSize: "3em" }}
-      />
+      <FontAwesomeIcon icon={faHandPointRight} style={{ fontSize: "3em" }} />
     </div>
   );
 };
