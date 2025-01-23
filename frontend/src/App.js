@@ -9,7 +9,7 @@ import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
 import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
-import { debounce, fetchWithAuth } from './utils.js';
+import { fetchWithAuth } from './utils.js';
 
 
 const DotMemo = React.memo(Dot);
