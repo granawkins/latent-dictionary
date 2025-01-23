@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Tuple, Set, cast
 
 import chromadb
-from chromadb.api.types import QueryResult, Include, Document
+from chromadb.api.types import Include
 from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from dotenv import load_dotenv
 

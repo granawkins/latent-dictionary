@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 import numpy as np
-from chromadb.api.types import Include, QueryResult
+from chromadb.api.types import Include
 
 from db import collection
 
@@ -18,8 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-from typing import Union, List
 
 def pca(data: Union[List[List[float]], List[List[List[float]]]]) -> List[List[float]]:
     "Basic 3-dimensional Principal Component Analysis"
