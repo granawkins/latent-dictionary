@@ -16,17 +16,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def pca(data: list[list[float]]) -> list[list[float]]:
+def pca(data: "list[list[float]]") -> "list[list[float]]":
     "Basic 3-dimensional Principal Component Analysis"
-    # Reshape if we have a 3D array
-    data = np.array(data)
-    if len(data.shape) == 3:
-        data = data.reshape(-1, data.shape[-1])  # Flatten to 2D: (batch*n_embeddings, embedding_dim)
+    # Convert input to numpy array
+    data_array = np.array(data, dtype=np.float64)
     
-    X = data - np.mean(data, axis=0)
+    # Reshape if we have a 3D array
+    if len(data_array.shape) == 3:
+        # Flatten to 2D: (batch*n_embeddings, embedding_dim)
+        data_array = data_array.reshape(-1, data_array.shape[-1])
+    
+    X = data_array - np.mean(data_array, axis=0)
     _, _, Vt = np.linalg.svd(X, full_matrices=False)
     coordinates = np.dot(X, Vt.T[:, :3])
-    return coordinates
+    return coordinates.tolist()
 
 @app.post("/api/search")
 async def search(request: Request):
@@ -60,7 +63,13 @@ async def search(request: Request):
     coordinates = pca(embeddings)
     dots = []
     for word, language, c in zip(words, languages, list(coordinates)):
-        dots.append({"word": word, "language": language, "x": float(c[0]), "y": float(c[1]), "z": float(c[2])})
+        dots.append({
+            "word": word,
+            "language": language,
+            "x": float(c[0]),
+            "y": float(c[1]),
+            "z": float(c[2])
+        })
     return dots
 
 # Frontend

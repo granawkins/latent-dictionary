@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
 
+from typing import List, Tuple, Set
+
 import chromadb
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from chromadb.api.types import Documents, Embeddings, Metadatas
+from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,7 +19,7 @@ except KeyError:
 client = chromadb.PersistentClient(
     path=DB_PATH.as_posix()
 )
-embedding_function = OpenAIEmbeddingFunction(
+embedding_function = embedding_functions.OpenAIEmbeddingFunction(
     api_key=openai_api_key,
     model_name="text-embedding-3-small"
 )
@@ -26,15 +29,21 @@ collection = client.get_or_create_collection(
 )
 
 
-def main():
+def main() -> None:
     all_records = collection.get(include=["documents", "metadatas"])
-    all_words: set[tuple[str, str]] = {
-        (document, metadata["language"]) 
-        for document, metadata in zip(all_records["documents"], all_records["metadatas"])
-    }
+    if not all_records["documents"] or not all_records["metadatas"]:
+        all_words: Set[Tuple[str, str]] = set()
+    else:
+        all_words = {
+            (document, metadata["language"]) 
+            for document, metadata in zip(
+                all_records["documents"],
+                all_records["metadatas"]
+            )
+        }
     print(f"Found {len(all_words)} records in db")
 
-    new_words: list[tuple[str, str]] = []
+    new_words: List[Tuple[str, str]] = []
     wordlists_dir = Path(__file__).parent / "wordlists"
     for file in wordlists_dir.glob("*.txt"):
         language = file.name[:-4]

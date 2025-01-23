@@ -27,3 +27,7 @@ jobs:
     - name: Run Ruff
       working-directory: ./backend
       run: ruff check .
+
+    - name: Run Pyright
+      working-directory: ./backend
+      run: pyright .
