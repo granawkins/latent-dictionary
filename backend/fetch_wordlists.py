@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Script to fetch English word frequency list from Wiktionary.
-Source: English Wikipedia (2016) frequency list
-https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/English/Wikipedia_(2016)
+"""Functions for fetching word frequency lists from Wiktionary.
+
+Currently supported languages:
+- English (Wikipedia 2016 frequency list)
 
 Future languages to be added:
 - Spanish (es)
@@ -30,27 +31,41 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-WIKTIONARY_API_URL = "https://en.wiktionary.org/w/api.php"
-FREQUENCY_LIST_PATH = "Wiktionary:Frequency_lists/English/Wikipedia_(2016)"
-FREQUENCY_LIST_SECTION = "1"  # Section containing 1-1000
-
-def fetch_frequency_list(target_words: int) -> Optional[List[str]]:
-    """Fetch English frequency list from Wiktionary."""
+def fetch_wiktionary_words(
+    language: str,
+    page_path: str,
+    section: str,
+    num_words: int,
+) -> Optional[List[str]]:
+    """Fetch word frequency list from Wiktionary.
+    
+    Args:
+        language: Language name (e.g., "english")
+        page_path: Wiktionary page path (e.g., "Wiktionary:Frequency_lists/English/Wikipedia_(2016)")
+        section: Section number containing the word list
+        num_words: Maximum number of words to fetch
+    
+    Returns:
+        List of words in frequency order, or None if fetch fails
+    """
     try:
         params = {
             "action": "parse",
-            "page": FREQUENCY_LIST_PATH,
-            "section": FREQUENCY_LIST_SECTION,
+            "page": page_path,
+            "section": section,
             "format": "json",
             "prop": "text"
         }
         
-        response = requests.get(WIKTIONARY_API_URL, params=params)
+        response = requests.get(
+            "https://en.wiktionary.org/w/api.php",
+            params=params
+        )
         response.raise_for_status()
         data = response.json()
         
         if "parse" not in data:
-            logging.error("No content found in frequency list")
+            logging.error(f"No content found in {language} frequency list")
             return None
             
         # Extract words from the HTML content
@@ -68,56 +83,69 @@ def fetch_frequency_list(target_words: int) -> Optional[List[str]]:
                     words.append(word)
                 
         if not words:
-            logging.error("No words found in frequency list")
+            logging.error(f"No words found in {language} frequency list")
             return None
             
-        return words[:target_words]
+        return words[:num_words]
                 
     except Exception as e:
-        logging.error(f"Error fetching frequency list: {str(e)}")
+        logging.error(f"Error fetching {language} frequency list: {str(e)}")
         return None
 
-def save_wordlist(words: List[str]) -> bool:
-    """Save English word list to a file."""
+def save_wordlist(words: List[str], language: str) -> bool:
+    """Save word list to a file.
+    
+    Args:
+        words: List of words to save
+        language: Language name (used for filename, e.g., "english.txt")
+    
+    Returns:
+        True if save successful, False otherwise
+    """
     try:
         wordlists_dir = Path(__file__).parent / "wordlists"
         wordlists_dir.mkdir(exist_ok=True)
         
-        output_file = wordlists_dir / "en.txt"
+        output_file = wordlists_dir / f"{language}.txt"
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write("# English word list\n")
+            f.write(f"# {language.title()} word list\n")
             for word in words:
                 f.write(f"{word}\n")
         return True
     except Exception as e:
-        logging.error(f"Error saving word list: {str(e)}")
+        logging.error(f"Error saving {language} word list: {str(e)}")
         return False
 
 def main():
     """Fetch and save English frequency list."""
     import argparse
     parser = argparse.ArgumentParser(
-        description="Fetch English word frequency list from Wiktionary"
+        description="Fetch word frequency lists from Wiktionary"
     )
     parser.add_argument(
         "-n", "--num-words",
         type=int,
-        default=100,
-        help="Number of words to fetch (default: 100)"
+        default=10000,
+        help="Number of words to fetch (default: 10000)"
     )
     args = parser.parse_args()
     
-    logging.info("Fetching English frequency list...")
-    words = fetch_frequency_list(args.num_words)
+    # English Wikipedia frequency list
+    language = "english"
+    page_path = "Wiktionary:Frequency_lists/English/Wikipedia_(2016)"
+    section = "1"  # Section containing 1-1000
+    
+    logging.info(f"Fetching {language} frequency list...")
+    words = fetch_wiktionary_words(language, page_path, section, args.num_words)
     
     if words:
-        if save_wordlist(words):
+        if save_wordlist(words, language):
             logging.info(f"Successfully saved {len(words)} words")
             return 0
         else:
-            logging.error("Failed to save word list")
+            logging.error(f"Failed to save {language} word list")
     else:
-        logging.error("Failed to fetch frequency list")
+        logging.error(f"Failed to fetch {language} frequency list")
     
     return 1
 
