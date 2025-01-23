@@ -34,14 +34,13 @@ LANGUAGES = {
 }
 
 WIKTIONARY_API_URL = "https://en.wiktionary.org/w/api.php"
-TARGET_WORDS_PER_LANGUAGE = 10000
 
-def fetch_wiktionary_words(lang_code: str, lang_info: Dict) -> Optional[List[str]]:
+def fetch_wiktionary_words(lang_code: str, lang_info: Dict, target_words: int) -> Optional[List[str]]:
     """Fetch words from Wiktionary for a given language using the API."""
     words: Set[str] = set()
     continue_param = None
     
-    while len(words) < TARGET_WORDS_PER_LANGUAGE:
+    while len(words) < target_words:
         params = {
             "action": "query",
             "format": "json",
@@ -78,7 +77,7 @@ def fetch_wiktionary_words(lang_code: str, lang_info: Dict) -> Optional[List[str
             )
             return None
             
-    return list(words)[:TARGET_WORDS_PER_LANGUAGE]
+    return list(words)[:target_words]
 
 def save_wordlist(words: List[str], lang_code: str) -> bool:
     """Save processed words to a file in the wordlists directory."""
@@ -98,15 +97,21 @@ def save_wordlist(words: List[str], lang_code: str) -> bool:
 
 def main():
     """Main function to fetch and process word lists for all languages."""
+    import argparse
+    parser = argparse.ArgumentParser(description="Fetch word lists from Wiktionary")
+    parser.add_argument("-n", "--num-words", type=int, default=100,
+                      help="Number of words to fetch per language (default: 100)")
+    args = parser.parse_args()
+    
     success_count = 0
     
     for lang_code, lang_info in LANGUAGES.items():
         logging.info(f"Processing {lang_info['name']}...")
         
         # Try Wiktionary
-        words = fetch_wiktionary_words(lang_code, lang_info)
+        words = fetch_wiktionary_words(lang_code, lang_info, args.num_words)
         
-        if words and len(words) >= TARGET_WORDS_PER_LANGUAGE:
+        if words and len(words) >= args.num_words:
             if save_wordlist(words, lang_code):
                 success_count += 1
                 logging.info(f"Successfully processed {lang_info['name']}")
