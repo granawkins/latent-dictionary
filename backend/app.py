@@ -1,8 +1,11 @@
 import os
+from typing import Union, List, Dict, Any, Optional
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 import numpy as np
+from chromadb.api.types import Include, QueryResult
 
 from db import collection
 
@@ -16,7 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def pca(data: "list[list[float]]") -> "list[list[float]]":
+from typing import Union, List
+
+def pca(data: Union[List[List[float]], List[List[List[float]]]]) -> List[List[float]]:
     "Basic 3-dimensional Principal Component Analysis"
     # Convert input to numpy array
     data_array = np.array(data, dtype=np.float64)
@@ -32,32 +37,45 @@ def pca(data: "list[list[float]]") -> "list[list[float]]":
     return coordinates.tolist()
 
 @app.post("/api/search")
-async def search(request: Request):
+async def search(request: Request) -> List[Dict[str, Any]]:
     data = await request.json()
-    word = data["word"]
-    l1 = data["l1"]
-    l2 = data["l2"]
-    words_per_l = data["words_per_l"]
+    word: str = data["word"]
+    l1: str = data["l1"]
+    l2: Optional[str] = data["l2"]
+    words_per_l: int = data["words_per_l"]
     # Get embeddings
+    include: Include = ["embeddings", "documents"]
     l1_records = collection.query(
         query_texts=[word],
         where={"language": l1},
         n_results=words_per_l,
-        include=["embeddings", "documents"],
+        include=include,
     )
-    words = l1_records["documents"][0]
-    embeddings = l1_records["embeddings"][0]
+    l1_docs = l1_records.get("documents", [[]])[0]
+    l1_embeddings = l1_records.get("embeddings", [[]])[0]
+    
+    if not l1_docs or not l1_embeddings:
+        return []
+        
+    words = l1_docs
+    embeddings = l1_embeddings
     languages = [l1] * len(words)
+    
     if l2:
+        include_l2: Include = ["embeddings", "documents"]
         l2_records = collection.query(
-            word,
+            query_texts=[word],
             where={"language": l2},
             n_results=words_per_l,
-            include=["embeddings"],
+            include=include_l2,
         )
-        words += l2_records["documents"][0]
-        embeddings += l2_records["embeddings"][0]
-        languages += [l2] * len(words)
+        l2_docs = l2_records.get("documents", [[]])[0]
+        l2_embeddings = l2_records.get("embeddings", [[]])[0]
+        
+        if l2_docs and l2_embeddings:
+            words.extend(l2_docs)
+            embeddings.extend(l2_embeddings)
+            languages.extend([l2] * len(l2_docs))
     
     # Transform to coordinates
     coordinates = pca(embeddings)

@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
 
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, cast
 
 import chromadb
-from chromadb.utils import embedding_functions
+from chromadb.api.types import QueryResult, Include, Document
+from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +19,7 @@ except KeyError:
 client = chromadb.PersistentClient(
     path=DB_PATH.as_posix()
 )
-embedding_function = embedding_functions.OpenAIEmbeddingFunction(
+embedding_function = OpenAIEmbeddingFunction(
     api_key=openai_api_key,
     model_name="text-embedding-3-small"
 )
@@ -29,16 +30,18 @@ collection = client.get_or_create_collection(
 
 
 def main() -> None:
-    all_records = collection.get(include=["documents", "metadatas"])
-    if not all_records["documents"] or not all_records["metadatas"]:
+    include: Include = ["documents", "metadatas"]
+    all_records = collection.get(include=include)
+    
+    documents = all_records.get("documents", [])
+    metadatas = all_records.get("metadatas", [])
+    
+    if not documents or not metadatas:
         all_words: Set[Tuple[str, str]] = set()
     else:
         all_words = {
-            (document, metadata["language"]) 
-            for document, metadata in zip(
-                all_records["documents"],
-                all_records["metadatas"]
-            )
+            (cast(str, doc), cast(str, meta.get("language", "")))
+            for doc, meta in zip(documents, metadatas)
         }
     print(f"Found {len(all_words)} records in db")
 
