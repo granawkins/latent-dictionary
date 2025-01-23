@@ -77,7 +77,6 @@ const App: React.FC = () => {
                 inputText={inputText}
                 setInputText={setInputText}
                 handleSearch={handleSearch}
-                loading={loading}
             />
             <Canvas>
                 <ambientLight />

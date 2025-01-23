@@ -5,14 +5,14 @@ interface NavigationProps {
     inputText: string;
     setInputText: (text: string) => void;
     handleSearch: (e: React.FormEvent) => void;
-    loading: boolean;
+    disabled: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({ 
     inputText, 
     setInputText, 
     handleSearch, 
-    loading 
+    disabled = false 
 }) => (
     <div style={{
         position: 'absolute',
@@ -41,7 +41,7 @@ const Navigation: React.FC<NavigationProps> = ({
                     boxSizing: 'border-box',
                 }}
                 placeholder="Search..."
-                disabled={loading}
+                disabled={disabled}
             />
         </form>
     </div>
