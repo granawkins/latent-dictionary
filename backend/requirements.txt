@@ -1,9 +1,17 @@
-chromadb
-python-dotenv
+# API and Server
 fastapi
+uvicorn
+
+# Database and ML
+chromadb
 numpy
 openai
-uvicorn
+
+# Utilities
+python-dotenv
+requests
+
+# Development and Testing
 ruff
 pyright
 pytest

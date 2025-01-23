@@ -68,7 +68,7 @@ async def search(request: Request) -> List[Dict[str, Any]]:
         return []
 
     words = l1_docs[0]
-    embeddings = l1_embeddings[0]
+    embeddings = list(l1_embeddings[0])
     languages = [l1] * len(words)
 
     if l2:
@@ -84,9 +84,8 @@ async def search(request: Request) -> List[Dict[str, Any]]:
 
         if l2_docs and l2_embeddings:
             words.extend(l2_docs[0])
-            embeddings.extend(l2_embeddings[0])
             languages.extend([l2] * len(l2_docs[0]))
-
+            embeddings.extend(list(l2_embeddings[0]))
     # Transform to coordinates
     coordinates = pca(embeddings)
     dots = []
