@@ -6,7 +6,6 @@ import { Canvas } from '@react-three/fiber'
 import Dot from './Dot';
 import Camera from './Camera';
 import FAQButton from './navigation/FAQ';
-import LoadingHandler from './LoadingHandler';
 import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
 import { fetchWithAuth } from './utils';
@@ -80,7 +79,6 @@ const App: React.FC = () => {
                 handleSearch={handleSearch}
                 loading={loading}
             />
-            <LoadingHandler loading={loading} />
             <Canvas>
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
