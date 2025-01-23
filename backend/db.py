@@ -5,8 +5,11 @@ from typing import List, Tuple, Set, cast
 
 import chromadb
 from chromadb.api.types import Include
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+from chromadb.utils import embedding_functions
 from dotenv import load_dotenv
+
+# Define valid include parameters
+DOCUMENTS_AND_METADATAS: Include = ["documents", "metadatas"]  # type: ignore
 
 load_dotenv()
 
@@ -19,7 +22,7 @@ except KeyError:
 client = chromadb.PersistentClient(
     path=DB_PATH.as_posix()
 )
-embedding_function = OpenAIEmbeddingFunction(
+embedding_function = embedding_functions.OpenAIEmbeddingFunction(
     api_key=openai_api_key,
     model_name="text-embedding-3-small"
 )
@@ -30,7 +33,7 @@ collection = client.get_or_create_collection(
 
 
 def main() -> None:
-    include: Include = ["documents", "metadatas"]
+    include: Include = DOCUMENTS_AND_METADATAS
     all_records = collection.get(include=include)
     
     documents = all_records.get("documents", [])

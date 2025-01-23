@@ -6,8 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 import numpy as np
 from chromadb.api.types import Include
+from chromadb.utils.embedding_functions import PyEmbedding
 
 from db import collection
+
+# Define valid include parameters
+EMBEDDINGS_AND_DOCUMENTS: Include = ["embeddings", "documents"]  # type: ignore
+DOCUMENTS_AND_METADATAS: Include = ["documents", "metadatas"]  # type: ignore
 
 # Server
 app = FastAPI()
@@ -19,7 +24,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def pca(data: Union[List[List[float]], List[List[List[float]]]]) -> List[List[float]]:
+def pca(data: Union[List[List[float]], List[List[List[float]]], List[PyEmbedding]]) -> List[List[float]]:
     "Basic 3-dimensional Principal Component Analysis"
     # Convert input to numpy array
     data_array = np.array(data, dtype=np.float64)
@@ -42,7 +47,7 @@ async def search(request: Request) -> List[Dict[str, Any]]:
     l2: Optional[str] = data["l2"]
     words_per_l: int = data["words_per_l"]
     # Get embeddings
-    include: Include = ["embeddings", "documents"]
+    include: Include = EMBEDDINGS_AND_DOCUMENTS
     l1_records = collection.query(
         query_texts=[word],
         where={"language": l1},
@@ -60,7 +65,7 @@ async def search(request: Request) -> List[Dict[str, Any]]:
     languages = [l1] * len(words)
     
     if l2:
-        include_l2: Include = ["embeddings", "documents"]
+        include_l2: Include = EMBEDDINGS_AND_DOCUMENTS
         l2_records = collection.query(
             query_texts=[word],
             where={"language": l2},
