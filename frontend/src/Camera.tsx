@@ -2,16 +2,35 @@ import * as THREE from 'three';
 import { OrbitControls } from '@react-three/drei';
 import { useEffect, useState, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { SCALE } from './Dot';
 
-const DEFAULT_TARGET = {x: 1.5, y: -0.5, z: 11.5}
+interface Vector3Like {
+    x: number;
+    y: number;
+    z: number;
+}
 
-const Camera = ({ selectedCorpus }) => {
+interface CorpusItem {
+    word: string;
+    x: number;
+    y: number;
+    z: number;
+    language: string | null;
+}
 
+interface CameraProps {
+    selectedCorpus: Record<string, CorpusItem>;
+}
+
+const DEFAULT_TARGET: Vector3Like = { x: 1.5, y: -0.5, z: 11.5 };
+
+const Camera: React.FC<CameraProps> = ({ selectedCorpus }) => {
     // When selectedCorpus updates, spin/move the camera to get all selected words in view
-    const controlsRef = useRef()
-    const [targetCoordinates, setTargetCoordinates] = useState(DEFAULT_TARGET)
-    const [lookAtPosition, setLookAtPosition] = useState(null)
+    const controlsRef = useRef<OrbitControlsImpl>(null);
+    const [targetCoordinates, setTargetCoordinates] = useState<Vector3Like | null>(DEFAULT_TARGET);
+    const [lookAtPosition, setLookAtPosition] = useState<THREE.Vector3 | null>(null);
+
     useEffect(() => {
         if (selectedCorpus) {
             if (Object.keys(selectedCorpus).length === 1) {
@@ -37,12 +56,11 @@ const Camera = ({ selectedCorpus }) => {
                 target.z += 5;
             }
             if (target.z === 0 && target.y === 0 && target.x === 0) {
-                return
+                return;
             }
             setTargetCoordinates(target);
         }
-    }, [selectedCorpus])
-
+    }, [selectedCorpus]);
 
     // Cancel animation on user interaction
     useEffect(() => {
@@ -52,19 +70,21 @@ const Camera = ({ selectedCorpus }) => {
         return () => {
             events.forEach(event => window.removeEventListener(event, reset));
         };
-    }, [])
-
+    }, []);
 
     useFrame((state) => {
-        if (targetCoordinates !== null) {
+        if (targetCoordinates !== null && controlsRef.current && lookAtPosition) {
             const step = 0.05; // Define the step size
             const camera = state.camera;
-            camera.position.lerp(targetCoordinates, step);
+            camera.position.lerp(new THREE.Vector3(
+                targetCoordinates.x,
+                targetCoordinates.y,
+                targetCoordinates.z
+            ), step);
             controlsRef.current.target.lerp(lookAtPosition, step);
         }
     });
 
-    
     return (
         <>
             <perspectiveCamera />

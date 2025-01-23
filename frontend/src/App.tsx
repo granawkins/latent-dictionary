@@ -9,42 +9,48 @@ import FAQButton from './navigation/FAQ';
 import LoadingHandler from './LoadingHandler';
 import ErrorModal from './ErrorModal';
 import Navigation from './navigation/Navigation';
-import { fetchWithAuth } from './utils.js';
+import { fetchWithAuth } from './utils';
 
+interface CorpusItem {
+    word: string;
+    x: number;
+    y: number;
+    z: number;
+    language: string | null;
+}
 
 const DotMemo = React.memo(Dot);
 
-
-const App = () => {
-    
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null);
-    const [corpus, setCorpus] = useState([]);
-    const [inputText, setInputText] = useState("when u don't wanna get out of bed")
-    const [activeText, setActiveText] = useState("")
+const App: React.FC = () => {
+    const [loading, setLoading] = useState<boolean>(false)
+    const [error, setError] = useState<string | null>(null);
+    const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
+    const [inputText, setInputText] = useState<string>("when u don't wanna get out of bed")
+    const [activeText, setActiveText] = useState<string>("")
     const wordsPerL = 20
 
-    const timer = useRef(null)
-    const [selected, setSelected] = useState([])
-    const select = (word) => {
+    const timer = useRef<NodeJS.Timeout | null>(null)
+    const [selected, setSelected] = useState<string[]>([])
+    
+    const select = (word: string) => {
         setSelected(oldSelected => {
             if (oldSelected.includes(word)) return oldSelected.filter(w => w !== word)
             return [...oldSelected, word]
         })
     }
     
-    const fetchSearch = useCallback(async (inputText, l1, l2, wordsPerL) => {
+    const fetchSearch = useCallback(async (inputText: string, l1: string, l2: string | null, wordsPerL: number) => {
         setLoading(true)
         try {
-            const response = await fetchWithAuth(
+            const response: Record<string, CorpusItem> = await fetchWithAuth(
                 "/api/search",
                 "POST",
                 {
-                word: inputText,
-                l1: "english",
-                l2: null,
-                words_per_l: wordsPerL,
-            }
+                    word: inputText,
+                    l1: "english",
+                    l2: null,
+                    words_per_l: wordsPerL,
+                }
             )
             if (response) {
                 setActiveText(inputText)
@@ -112,4 +118,4 @@ const App = () => {
     );
 };
 
-export default App
+export default App;

@@ -1,4 +1,6 @@
-const LogoButton = () => (
+import React from 'react';
+
+const LogoButton: React.FC = () => (
     <button 
         onClick={() => window.location.reload()} 
         style={{ 
