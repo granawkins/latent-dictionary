@@ -10,10 +10,11 @@
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   display: flex;
   gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .language-menu {
@@ -21,13 +22,14 @@
   bottom: 100%;
   right: 0;
   margin-bottom: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(40, 40, 40, 0.95);
   backdrop-filter: blur(10px);
   border-radius: 8px;
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .language-option {
@@ -35,14 +37,18 @@
   padding: 8px;
   border-radius: 4px;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .language-option:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .language-flag {
   font-size: 1.5em;
+  line-height: 1;
 }
 
 .selected {
@@ -51,5 +57,5 @@
 }
 
 .language-option.selected {
-  background: rgba(74, 144, 226, 0.1);
+  background: rgba(74, 144, 226, 0.2);
 }
