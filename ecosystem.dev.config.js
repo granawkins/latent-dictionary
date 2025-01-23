@@ -13,7 +13,7 @@ module.exports = {
         name: 'latentdictionary-frontend',
         cwd: './frontend',
         script: 'npm run dev',
-        watch: true,
+        watch: false, // Disabled because Vite handles hot reloading
         env: {
           NODE_ENV: 'development',
         },
