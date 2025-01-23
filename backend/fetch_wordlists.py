@@ -34,59 +34,63 @@ logging.basicConfig(
 def fetch_wiktionary_words(
     language: str,
     page_path: str,
-    section: str,
+    sections: List[str],
     num_words: int,
 ) -> Optional[List[str]]:
     """Fetch word frequency list from Wiktionary.
     
     Args:
         language: Language name (e.g., "english")
-        page_path: Wiktionary page path (e.g., "Wiktionary:Frequency_lists/English/Wikipedia_(2016)")
-        section: Section number containing the word list
+        page_path: Path to Wiktionary frequency list page
+        sections: List of section numbers to fetch
         num_words: Maximum number of words to fetch
     
     Returns:
         List of words in frequency order, or None if fetch fails
     """
     try:
-        params = {
-            "action": "parse",
-            "page": page_path,
-            "section": section,
-            "format": "json",
-            "prop": "text"
-        }
+        all_words = []
         
-        response = requests.get(
-            "https://en.wiktionary.org/w/api.php",
-            params=params
-        )
-        response.raise_for_status()
-        data = response.json()
-        
-        if "parse" not in data:
-            logging.error(f"No content found in {language} frequency list")
-            return None
+        for section in sections:
+            params = {
+                "action": "parse",
+                "page": page_path,
+                "section": section,
+                "format": "json",
+                "prop": "text"
+            }
             
-        # Extract words from the HTML content
-        html_content = data["parse"]["text"]["*"]
-        
-        # Extract words from links (format: <a title="word">word</a>)
-        words = []
-        word_pattern = (
-            r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
-        )
-        for match in re.finditer(word_pattern, html_content):
-            title, word = match.groups()
-            if word == title:  # Only use when title matches word (avoid disambiguation)
-                if word and len(word) > 1 and not any(c.isdigit() for c in word):
-                    words.append(word)
+            response = requests.get(
+                "https://en.wiktionary.org/w/api.php",
+                params=params
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            if "parse" not in data:
+                logging.error(
+                    f"No content found in {language} frequency list section {section}"
+                )
+                continue
                 
-        if not words:
+            # Extract words from the HTML content
+            html_content = data["parse"]["text"]["*"]
+            
+            # Extract words from links (format: <a title="word">word</a>)
+            word_pattern = (
+                r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+            )
+            for match in re.finditer(word_pattern, html_content):
+                title, word = match.groups()
+                if word == title:  # Only use when title matches word (avoid disambiguation)
+                    if word and len(word) > 1 and not any(c.isdigit() for c in word):
+                        all_words.append(word)
+                
+        if not all_words:
             logging.error(f"No words found in {language} frequency list")
             return None
             
-        return words[:num_words]
+        return all_words[:num_words]
                 
     except Exception as e:
         logging.error(f"Error fetching {language} frequency list: {str(e)}")
@@ -133,10 +137,11 @@ def main():
     # English Wikipedia frequency list
     language = "english"
     page_path = "Wiktionary:Frequency_lists/English/Wikipedia_(2016)"
-    section = "1"  # Section containing 1-1000
+    # Sections 1-1000 through 9001-10000
+    sections = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     
     logging.info(f"Fetching {language} frequency list...")
-    words = fetch_wiktionary_words(language, page_path, section, args.num_words)
+    words = fetch_wiktionary_words(language, page_path, sections, args.num_words)
     
     if words:
         if save_wordlist(words, language):
