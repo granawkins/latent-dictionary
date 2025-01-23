@@ -4,15 +4,12 @@ Primary source: Wiktionary frequency lists
 Backup: NLTK corpus
 """
 
-import os
 import sys
 import logging
 import requests
-import json
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set
-from urllib.parse import quote
 
 # Configure logging
 logging.basicConfig(
@@ -74,7 +71,9 @@ def fetch_wiktionary_words(lang_code: str, lang_info: Dict) -> Optional[List[str
                 break
                 
         except Exception as e:
-            logging.error(f"Error fetching {lang_info['name']} words from Wiktionary: {str(e)}")
+            logging.error(
+                f"Error fetching {lang_info['name']} words from Wiktionary: {str(e)}"
+            )
             return None
             
     return list(words)[:TARGET_WORDS_PER_LANGUAGE]
@@ -115,7 +114,9 @@ def main():
             logging.error(f"Failed to fetch {lang_info['name']} words from Wiktionary")
             # TODO: Implement NLTK fallback if needed
     
-    logging.info(f"Completed processing {success_count} out of {len(LANGUAGES)} languages")
+    logging.info(
+        f"Completed processing {success_count} out of {len(LANGUAGES)} languages"
+    )
     return 0 if success_count == len(LANGUAGES) else 1
 
 if __name__ == "__main__":
