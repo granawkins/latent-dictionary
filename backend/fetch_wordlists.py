@@ -76,7 +76,8 @@ def fetch_wiktionary_words(
                 
                 if "parse" not in data:
                     logging.error(
-                        f"No content found in {language} frequency list page {page} section {section}"
+                        f"No content found in {language} frequency list "
+                        f"page {page} section {section}"
                     )
                     continue
                     
@@ -91,7 +92,9 @@ def fetch_wiktionary_words(
                     title, word = match.groups()
                     # Skip disambiguation pages by only using exact matches
                     if word == title:
-                        if word and len(word) > 1 and not any(c.isdigit() for c in word):
+                        # Check word validity: non-empty, >1 char, no digits
+                        has_digits = any(c.isdigit() for c in word)
+                        if word and len(word) > 1 and not has_digits:
                             if word not in seen_words:
                                 seen_words.add(word)
                                 all_words.append(word)
