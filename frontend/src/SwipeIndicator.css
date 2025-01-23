@@ -1,0 +1,40 @@
+.swipe-indicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 20px;
+  border-radius: 50%;
+  animation: swipeAndFlash 3s ease-in-out forwards;
+  pointer-events: none;
+}
+
+@keyframes swipeAndFlash {
+  0% {
+    opacity: 0;
+    transform: translate(-60%, -50%) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-40%, -50%) scale(1.2);
+  }
+  30% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(-40%, -50%) scale(1.2);
+  }
+  60% {
+    opacity: 0.3;
+    transform: translate(-60%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+}
