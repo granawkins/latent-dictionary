@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import './LanguageSelector.css';
+import React, { useState } from "react";
+import "./LanguageSelector.css";
 
 interface Language {
   code: string;
@@ -8,8 +8,8 @@ interface Language {
 }
 
 const LANGUAGES: Language[] = [
-  { code: 'en', flag: '🇺🇸', name: 'English' },
-  { code: 'es', flag: '🇪🇸', name: 'Spanish' },
+  { code: "en", flag: "🇺🇸", name: "English" },
+  { code: "es", flag: "🇪🇸", name: "Spanish" },
 ];
 
 interface LanguageSelectorProps {
@@ -28,24 +28,26 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className={`language-selector ${isOpen ? 'open' : ''}`}>
+    <div className={`language-selector ${isOpen ? "open" : ""}`}>
       <div className="selected-languages" onClick={toggleMenu}>
-        {LANGUAGES.filter(lang => selectedLanguages.includes(lang.code)).map(lang => (
-          <span
-            key={lang.code}
-            className="language-flag selected"
-            title={lang.name}
-          >
-            {lang.flag}
-          </span>
-        ))}
+        {LANGUAGES.filter((lang) => selectedLanguages.includes(lang.code)).map(
+          (lang) => (
+            <span
+              key={lang.code}
+              className="language-flag selected"
+              title={lang.name}
+            >
+              {lang.flag}
+            </span>
+          ),
+        )}
       </div>
       {isOpen && (
         <div className="language-menu">
-          {LANGUAGES.map(lang => (
+          {LANGUAGES.map((lang) => (
             <div
               key={lang.code}
-              className={`language-option ${selectedLanguages.includes(lang.code) ? 'selected' : ''}`}
+              className={`language-option ${selectedLanguages.includes(lang.code) ? "selected" : ""}`}
               onClick={() => {
                 onToggleLanguage(lang.code);
               }}

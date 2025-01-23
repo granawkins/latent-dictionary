@@ -36,14 +36,14 @@ const App: React.FC = () => {
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['en']);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["en"]);
 
   const handleToggleLanguage = (code: string) => {
-    setSelectedLanguages(prev => {
+    setSelectedLanguages((prev) => {
       if (prev.includes(code)) {
         // Don't allow deselecting if it's the last language
         if (prev.length === 1) return prev;
-        return prev.filter(lang => lang !== code);
+        return prev.filter((lang) => lang !== code);
       }
       return [...prev, code];
     });
