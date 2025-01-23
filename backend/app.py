@@ -1,5 +1,5 @@
 import os
-from typing import Union, List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
