@@ -100,7 +100,6 @@ const App: React.FC = () => {
         inputText={inputText}
         setInputText={setInputText}
         handleSearch={handleSearch}
-        disabled={loading}
       />
       <Canvas>
         {/* @ts-expect-error @react-three/fiber ambient light type */}
