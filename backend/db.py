@@ -5,8 +5,9 @@ from typing import List, Tuple, Set, cast
 
 import chromadb
 from chromadb.api.types import Include
-from chromadb.utils import embedding_functions
-from chromadb.utils.embedding_functions.openai_embedding_function import OpenAIEmbeddingFunction
+from chromadb.utils.embedding_functions.openai_embedding_function import (
+    OpenAIEmbeddingFunction,
+)
 from dotenv import load_dotenv
 
 # Define valid include parameters
@@ -20,26 +21,22 @@ try:
     openai_api_key = os.getenv("OPENAI_API_KEY")
 except KeyError:
     openai_api_key = input("Enter your OpenAI API key: ")
-client = chromadb.PersistentClient(
-    path=DB_PATH.as_posix()
-)
+client = chromadb.PersistentClient(path=DB_PATH.as_posix())
 embedding_function = OpenAIEmbeddingFunction(
-    api_key=openai_api_key,
-    model_name="text-embedding-3-small"
+    api_key=openai_api_key, model_name="text-embedding-3-small"
 )
 collection = client.get_or_create_collection(
-    name='latent-dictionary', 
-    embedding_function=embedding_function
+    name="latent-dictionary", embedding_function=embedding_function
 )
 
 
 def main() -> None:
     include: Include = DOCUMENTS_AND_METADATAS
     all_records = collection.get(include=include)
-    
+
     documents = all_records.get("documents", [])
     metadatas = all_records.get("metadatas", [])
-    
+
     if not documents or not metadatas:
         all_words: Set[Tuple[str, str]] = set()
     else:
@@ -77,7 +74,7 @@ def main() -> None:
             collection.add(
                 ids=ids[i:_end],
                 documents=documents[i:_end],
-                metadatas=metadatas[i:_end]
+                metadatas=metadatas[i:_end],
             )
         except Exception as e:
             print(f"Error adding {documents[i:_end]}: {e}")

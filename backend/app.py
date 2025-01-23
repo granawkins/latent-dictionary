@@ -1,5 +1,5 @@
 import os
-from typing import Union, List, Dict, Any, Optional
+from typing import Union, List, Dict, Any, Optional, Tuple
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,22 +23,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 def pca(data: Embeddings) -> Embeddings:
     "Basic 3-dimensional Principal Component Analysis"
     # Convert input to numpy array
     data_array = np.array(data, dtype=np.float64)
-    
+
     # Reshape if we have a 3D array
     if len(data_array.shape) == 3:
         # Flatten to 2D: (batch*n_embeddings, embedding_dim)
         data_array = data_array.reshape(-1, data_array.shape[-1])
-    
+
     X = data_array - np.mean(data_array, axis=0)
     _, _, Vt = np.linalg.svd(X, full_matrices=False)
     coordinates = np.dot(X, Vt.T[:, :3])
     return coordinates.tolist()
 
-cache = dict[tuple[str, str, str, int], list[dict]]()
+
+cache: Dict[Tuple[str, str, Optional[str], int], List[dict]] = {}
+
 
 @app.post("/api/search")
 async def search(request: Request) -> List[Dict[str, Any]]:
@@ -60,14 +63,14 @@ async def search(request: Request) -> List[Dict[str, Any]]:
     )
     l1_docs = l1_records.get("documents", [[]])
     l1_embeddings = l1_records.get("embeddings", [[]])
-    
+
     if not l1_docs or not l1_embeddings:
         return []
-        
+
     words = l1_docs[0]
     embeddings = l1_embeddings[0]
     languages = [l1] * len(words)
-    
+
     if l2:
         include_l2: Include = EMBEDDINGS_AND_DOCUMENTS
         l2_records = collection.query(
@@ -78,19 +81,28 @@ async def search(request: Request) -> List[Dict[str, Any]]:
         )
         l2_docs = l2_records.get("documents", [[]])
         l2_embeddings = l2_records.get("embeddings", [[]])
-        
+
         if l2_docs and l2_embeddings:
             words.extend(l2_docs[0])
             embeddings.extend(l2_embeddings[0])
             languages.extend([l2] * len(l2_docs[0]))
-    
+
     # Transform to coordinates
     coordinates = pca(embeddings)
     dots = []
     for word, language, c in zip(words, languages, list(coordinates)):
-        dots.append({"word": word, "language": language, "x": float(c[0]), "y": float(c[1]), "z": float(c[2])})
+        dots.append(
+            {
+                "word": word,
+                "language": language,
+                "x": float(c[0]),
+                "y": float(c[1]),
+                "z": float(c[2]),
+            }
+        )
     cache[cache_key] = dots
     return dots
+
 
 # Frontend
 @app.get("/favicon.png")
