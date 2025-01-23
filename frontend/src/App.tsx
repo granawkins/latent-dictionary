@@ -8,6 +8,7 @@ import Camera from "./Camera";
 import FAQButton from "./navigation/FAQ";
 import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
+import SwipeIndicator from "./SwipeIndicator";
 import { fetchWithAuth } from "./utils";
 
 interface CorpusItem {
@@ -24,6 +25,8 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
+  const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
+  const hasLoadedData = useRef<boolean>(false);
   const [inputText, setInputText] = useState<string>(
     "when u don't wanna get out of bed",
   );
@@ -63,6 +66,10 @@ const App: React.FC = () => {
         if (response) {
           setActiveText(inputText);
           setCorpus(response);
+          if (!hasLoadedData.current) {
+            hasLoadedData.current = true;
+            setShowSwipeIndicator(true);
+          }
         }
       } finally {
         setLoading(false);
@@ -93,12 +100,11 @@ const App: React.FC = () => {
         inputText={inputText}
         setInputText={setInputText}
         handleSearch={handleSearch}
-        disabled={loading}
       />
       <Canvas>
-        {/* @ts-expect-error - Three.js components not properly typed */}
+        {/* @ts-expect-error @react-three/fiber ambient light type */}
         <ambientLight />
-        {/* @ts-expect-error - Three.js components not properly typed */}
+        {/* @ts-expect-error @react-three/fiber point light type */}
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
@@ -130,6 +136,7 @@ const App: React.FC = () => {
       </Canvas>
       <FAQButton />
       {error && <ErrorModal message={error} onClose={() => setError(null)} />}
+      <SwipeIndicator show={showSwipeIndicator} />
     </>
   );
 };
