@@ -53,9 +53,13 @@ def fetch_frequency_list(
         # Extract words from the HTML content
         html_content = data["parse"]["text"]["*"]
         
-        # Extract words from links, format: <a href="/wiki/word#English" title="word">word</a>
+        # Extract words from links in format:
+        # <a href="/wiki/word#English" title="word">word</a>
         words = []
-        for match in re.finditer(r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>', html_content):
+        word_pattern = (
+            r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+        )
+        for match in re.finditer(word_pattern, html_content):
             title, word = match.groups()
             if word == title:  # Only use when title matches word (avoid disambiguation)
                 if word and len(word) > 1 and not any(c.isdigit() for c in word):
