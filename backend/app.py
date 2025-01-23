@@ -30,6 +30,8 @@ def pca(data: list[list[float]]) -> list[list[float]]:
     coordinates = np.dot(X, Vt.T[:, :3])
     return coordinates
 
+cache = dict[tuple[str, str, str, int], list[dict]]()
+
 @app.post("/api/search")
 async def search(request: Request):
     data = await request.json()
@@ -37,6 +39,9 @@ async def search(request: Request):
     l1 = data["l1"]
     l2 = data["l2"]
     words_per_l = data["words_per_l"]
+    cache_key = (word, l1, l2, words_per_l)
+    if cache_key in cache:
+        return cache[cache_key]
     # Get embeddings
     l1_records = collection.query(
         query_texts=[word],
@@ -63,6 +68,7 @@ async def search(request: Request):
     dots = []
     for word, language, c in zip(words, languages, list(coordinates)):
         dots.append({"word": word, "language": language, "x": float(c[0]), "y": float(c[1]), "z": float(c[2])})
+    cache[cache_key] = dots
     return dots
 
 # Frontend

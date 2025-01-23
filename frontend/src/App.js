@@ -22,7 +22,6 @@ const App = () => {
     const [corpus, setCorpus] = useState([]);
     const [inputText, setInputText] = useState("when u don't wanna get out of bed")
     const [activeText, setActiveText] = useState("")
-    const [searchPending, setSearchPending] = useState(false)
     const wordsPerL = 20
 
     const timer = useRef(null)
@@ -34,40 +33,37 @@ const App = () => {
         })
     }
     
+    const fetchSearch = useCallback(async (inputText, l1, l2, wordsPerL) => {
+        setLoading(true)
+        try {
+            const response = await fetchWithAuth(
+                "/api/search",
+                "POST",
+                {
+                word: inputText,
+                l1: "english",
+                l2: null,
+                words_per_l: wordsPerL,
+            }
+            )
+            if (response) {
+                setActiveText(inputText)
+                setCorpus(response)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }, [inputText, wordsPerL])
+    
     const handleSearch = useCallback(() => {
         if (!inputText || inputText === activeText) return
         if (timer.current) clearTimeout(timer.current)
-        setSearchPending(true)
-        timer.current = setTimeout(() => {
-            setLoading(true)
-            try {
-                fetchWithAuth(
-                    "/api/search",
-                    "POST",
-                    {
-                        word: inputText,
-                        l1: "english",
-                        l2: null,
-                        words_per_l: wordsPerL,
-                    }
-                )
-                    .then(data => {
-                        console.log(data)
-                        setActiveText(inputText)
-                        setCorpus(data)
-                        setSearchPending(false)
-                    })
-            } catch (error) {
-                setError(error)
-                setSearchPending(false)
-            } finally {
-                    setLoading(false)
-            }
-        }, 1000)
+        setLoading(true)
+        timer.current = setTimeout(() => fetchSearch(inputText, "english", null, wordsPerL), 1000)
     }, [inputText, activeText]);
     
     useEffect(() => {
-        handleSearch()
+        fetchSearch(inputText, "english", null, wordsPerL)
     }, [handleSearch])
 
     return (
@@ -94,7 +90,7 @@ const App = () => {
                             language={data.language}
                             selected={selected.includes(data.word)}
                             select={() => select(data.word)}
-                            searchPending={searchPending}
+                            searchPending={loading}
                         />
                     ))}
                 {/* A red dot at the origin to represent the search term */}
@@ -107,7 +103,7 @@ const App = () => {
                     selected={selected.includes(inputText)}
                     select={() => select(inputText)}
                     color="red"
-                    searchPending={searchPending}
+                    searchPending={loading}
                 />
             </Canvas>
             <FAQButton />

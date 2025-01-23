@@ -39,10 +39,6 @@ const Camera = ({ selectedCorpus }) => {
             if (target.z === 0 && target.y === 0 && target.x === 0) {
                 return
             }
-            if (target !== targetCoordinates) {
-                console.log("target", target)
-                console.log("targetCoordinates", targetCoordinates)
-            }
             setTargetCoordinates(target);
         }
     }, [selectedCorpus])
