@@ -100,7 +100,7 @@ const App: React.FC = () => {
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
-          Object.entries(corpus).map(([_key, data]) => (
+          Object.entries(corpus).map(([, data]) => (
             <DotMemo
               key={data.word}
               word={data.word}
