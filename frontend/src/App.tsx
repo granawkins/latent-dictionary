@@ -9,6 +9,7 @@ import FAQButton from "./navigation/FAQ";
 import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
 import SwipeIndicator from "./SwipeIndicator";
+import LanguageSelector from "./navigation/LanguageSelector";
 import { fetchWithAuth } from "./utils";
 
 interface CorpusItem {
@@ -35,6 +36,18 @@ const App: React.FC = () => {
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['en']);
+
+  const handleToggleLanguage = (code: string) => {
+    setSelectedLanguages(prev => {
+      if (prev.includes(code)) {
+        // Don't allow deselecting if it's the last language
+        if (prev.length === 1) return prev;
+        return prev.filter(lang => lang !== code);
+      }
+      return [...prev, code];
+    });
+  };
 
   const select = (word: string) => {
     setSelected((oldSelected) => {
@@ -137,6 +150,10 @@ const App: React.FC = () => {
       <FAQButton />
       {error && <ErrorModal message={error} onClose={() => setError(null)} />}
       <SwipeIndicator show={showSwipeIndicator} />
+      <LanguageSelector
+        selectedLanguages={selectedLanguages}
+        onToggleLanguage={handleToggleLanguage}
+      />
     </>
   );
 };
