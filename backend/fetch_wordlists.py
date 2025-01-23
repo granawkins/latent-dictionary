@@ -33,16 +33,14 @@ logging.basicConfig(
 
 def fetch_wiktionary_words(
     language: str,
-    page_path: str,
-    sections: List[str],
+    config: dict,
     num_words: int,
 ) -> Optional[List[str]]:
     """Fetch word frequency list from Wiktionary.
     
     Args:
         language: Language name (e.g., "english")
-        page_path: Path to Wiktionary frequency list page
-        sections: List of section numbers to fetch
+        config: Language configuration containing pages and sections
         num_words: Maximum number of words to fetch
     
     Returns:
@@ -50,46 +48,59 @@ def fetch_wiktionary_words(
     """
     try:
         all_words = []
+        seen_words = set()  # Track unique words across all pages
         
-        for section in sections:
-            params = {
-                "action": "parse",
-                "page": page_path,
-                "section": section,
-                "format": "json",
-                "prop": "text"
-            }
-            
-            response = requests.get(
-                "https://en.wiktionary.org/w/api.php",
-                params=params
-            )
-            response.raise_for_status()
-            data = response.json()
-            
-            if "parse" not in data:
-                logging.error(
-                    f"No content found in {language} frequency list section {section}"
+        # Handle both single page_path and multiple pages configurations
+        pages = config.get("pages", [config.get("page_path")])
+        sections = config.get("sections", [])
+        
+        for page in pages:
+            if len(all_words) >= num_words:
+                break
+                
+            for section in sections:
+                params = {
+                    "action": "parse",
+                    "page": page,
+                    "section": section,
+                    "format": "json",
+                    "prop": "text"
+                }
+                
+                response = requests.get(
+                    "https://en.wiktionary.org/w/api.php",
+                    params=params
                 )
-                continue
+                response.raise_for_status()
+                data = response.json()
                 
-            # Extract words from the HTML content
-            html_content = data["parse"]["text"]["*"]
-            
-            # Extract words from links (format: <a title="word">word</a>)
-            word_pattern = (
-                r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
-            )
-            seen_words = set()  # Track unique words
-            for match in re.finditer(word_pattern, html_content):
-                title, word = match.groups()
-                # Skip disambiguation pages by only using exact matches
-                if word == title:
-                    if word and len(word) > 1 and not any(c.isdigit() for c in word):
-                        if word not in seen_words:
-                            seen_words.add(word)
-                            all_words.append(word)
+                if "parse" not in data:
+                    logging.error(
+                        f"No content found in {language} frequency list page {page} section {section}"
+                    )
+                    continue
+                    
+                # Extract words from the HTML content
+                html_content = data["parse"]["text"]["*"]
                 
+                # Extract words from links (format: <a title="word">word</a>)
+                word_pattern = (
+                    r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                )
+                for match in re.finditer(word_pattern, html_content):
+                    title, word = match.groups()
+                    # Skip disambiguation pages by only using exact matches
+                    if word == title:
+                        if word and len(word) > 1 and not any(c.isdigit() for c in word):
+                            if word not in seen_words:
+                                seen_words.add(word)
+                                all_words.append(word)
+                                if len(all_words) >= num_words:
+                                    break
+                
+                if len(all_words) >= num_words:
+                    break
+                    
         if not all_words:
             logging.error(f"No words found in {language} frequency list")
             return None
@@ -146,6 +157,7 @@ def main():
     args = parser.parse_args()
     
     # Language configurations
+    # Comment out languages you don't want to use locally
     configs = {
         "english": {
             "page_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
@@ -153,8 +165,19 @@ def main():
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
         },
         "spanish": {
-            "page_path": "Wiktionary:Frequency_lists/Spanish1000",
-            # Spanish frequency list (top 1000 words)
+            # Spanish frequency lists in 1000-word segments
+            "pages": [
+                "Wiktionary:Frequency_lists/Spanish1000",  # 1-1000
+                "Wiktionary:Frequency_lists/Spanish1001-2000",  # 1001-2000
+                "Wiktionary:Frequency_lists/Spanish2001-3000",  # 2001-3000
+                "Wiktionary:Frequency_lists/Spanish3001-4000",  # 3001-4000
+                "Wiktionary:Frequency_lists/Spanish4001-5000",  # 4001-5000
+                "Wiktionary:Frequency_lists/Spanish5001-6000",  # 5001-6000
+                "Wiktionary:Frequency_lists/Spanish6001-7000",  # 6001-7000
+                "Wiktionary:Frequency_lists/Spanish7001-8000",  # 7001-8000
+                "Wiktionary:Frequency_lists/Spanish8001-9000",  # 8001-9000
+                "Wiktionary:Frequency_lists/Spanish9001-10000",  # 9001-10000
+            ],
             "sections": ["0"]  # Main section containing the word list
         }
     }
@@ -165,8 +188,7 @@ def main():
     logging.info(f"Fetching {language} frequency list...")
     words = fetch_wiktionary_words(
         language,
-        config["page_path"],
-        config["sections"],
+        config,
         args.num_words
     )
     
