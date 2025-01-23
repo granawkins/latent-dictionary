@@ -1,4 +1,4 @@
-type Environment = 'DEV' | 'PROD';
+type Environment = "DEV" | "PROD";
 
 const origin = (): string => {
   return window.location.origin.split(":").slice(0, 2).join(":");
@@ -16,7 +16,8 @@ const env = (): Environment => {
   return "PROD";
 };
 
-export const backendUrl = (): string => `${origin()}${env() === "DEV" ? ":5001" : ""}`;
+export const backendUrl = (): string =>
+  `${origin()}${env() === "DEV" ? ":5001" : ""}`;
 
 interface FetchOptions {
   method?: string;
@@ -25,16 +26,16 @@ interface FetchOptions {
 }
 
 export const fetchWithAuth = async <T>(
-  route: string, 
-  method: string = "GET", 
-  body?: unknown
+  route: string,
+  method: string = "GET",
+  body?: unknown,
 ): Promise<T> => {
   const jwt = localStorage.getItem("jwt") || "";
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${jwt}`,
   };
-  
+
   const options: FetchOptions = {
     method,
     headers,
@@ -45,22 +46,22 @@ export const fetchWithAuth = async <T>(
   }
 
   console.log(`${backendUrl()}${route}`, options);
-  
+
   const res = await fetch(`${backendUrl()}${route}`, options);
-  
+
   if (!res.ok) {
     throw new Error(`HTTP error! status: ${res.status}`);
   }
-  
+
   return res.json() as Promise<T>;
 };
 
-export function debounce<T extends (...args: any[]) => void>(
+export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
-  delay: number
+  delay: number,
 ): (...args: Parameters<T>) => void {
   let timerId: NodeJS.Timeout | undefined;
-  
+
   return (...args: Parameters<T>) => {
     if (timerId) clearTimeout(timerId);
     timerId = setTimeout(() => {
