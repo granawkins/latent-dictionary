@@ -35,4 +35,4 @@ jobs:
     - name: Run Pytest
       working-directory: ./backend
       run: |
-        python -m pytest tests/ -v
+        PYTHONPATH=$PYTHONPATH:$(pwd) python -m pytest tests/ -v
