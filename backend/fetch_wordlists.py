@@ -19,6 +19,7 @@ logging.basicConfig(
 
 # Language configurations with Wiktionary language codes
 LANGUAGES = {
+    "en": {"name": "English", "wiktionary": "English"},
     "es": {"name": "Spanish", "wiktionary": "Spanish"},
     "fr": {"name": "French", "wiktionary": "French"},
     "de": {"name": "German", "wiktionary": "German"},
@@ -29,6 +30,7 @@ LANGUAGES = {
     "ja": {"name": "Japanese", "wiktionary": "Japanese"},
     "ko": {"name": "Korean", "wiktionary": "Korean"},
     "ar": {"name": "Arabic", "wiktionary": "Arabic"},
+    "vi": {"name": "Vietnamese", "wiktionary": "Vietnamese"},
 }
 
 WIKTIONARY_API_URL = "https://en.wiktionary.org/w/api.php"
