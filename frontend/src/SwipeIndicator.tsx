@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import './SwipeIndicator.css';
+import React, { useEffect, useState } from "react";
+import "./SwipeIndicator.css";
 
 interface SwipeIndicatorProps {
   show: boolean;
@@ -22,14 +22,14 @@ const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({ show }) => {
 
   return (
     <div className="swipe-indicator">
-      <svg 
-        width="64" 
-        height="64" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
+      <svg
+        width="64"
+        height="64"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
         strokeWidth="2"
-        strokeLinecap="round" 
+        strokeLinecap="round"
         strokeLinejoin="round"
       >
         <path d="M14 8L10 12L14 16" />
