@@ -33,7 +33,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <div className="selected-languages" onClick={toggleMenu}>
         {LANGUAGES.filter((lang) => selectedLanguages.includes(lang.code)).map(
           (lang) => (
-            <div key={lang.code} className="language-flag selected" title={lang.name}>
+            <div
+              key={lang.code}
+              className="language-flag selected"
+              title={lang.name}
+            >
               <lang.Flag title={lang.name} />
             </div>
           ),
