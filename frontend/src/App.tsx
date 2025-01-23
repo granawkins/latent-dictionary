@@ -103,9 +103,9 @@ const App: React.FC = () => {
         disabled={loading}
       />
       <Canvas>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error @react-three/fiber ambient light type */}
         <ambientLight />
-        {/* @ts-ignore */}
+        {/* @ts-expect-error @react-three/fiber point light type */}
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
