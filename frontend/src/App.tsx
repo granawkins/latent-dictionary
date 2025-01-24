@@ -1,7 +1,13 @@
 import React from "react";
-import { useCallback } from "react";
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
+import Dot from "./Dot";
+import Camera from "./Camera";
+import ErrorModal from "./ErrorModal";
+import Navigation from "./navigation/Navigation";
+import SwipeIndicator from "./SwipeIndicator";
+import LanguageSelector from "./navigation/LanguageSelector";
+import { fetchWithAuth, Languages } from "./utils";
 import "./FullscreenButton.css";
 
 // Add type definition for screen orientation API
@@ -20,17 +26,6 @@ declare global {
   }
 }
 
-// Add type for the ref
-type DivRef = React.RefObject<HTMLDivElement>;
-
-import Dot from "./Dot";
-import Camera from "./Camera";
-import ErrorModal from "./ErrorModal";
-import Navigation from "./navigation/Navigation";
-import SwipeIndicator from "./SwipeIndicator";
-import LanguageSelector from "./navigation/LanguageSelector";
-import { fetchWithAuth, Languages } from "./utils";
-
 interface CorpusItem {
   word: string;
   x: number;
@@ -48,7 +43,7 @@ const App: React.FC = () => {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const hasLoadedData = useRef<boolean>(false);
-  const appRef: DivRef = useRef(null);
+  const appRef = useRef<HTMLDivElement>(null);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
