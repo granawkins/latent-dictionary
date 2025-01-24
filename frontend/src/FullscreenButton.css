@@ -10,32 +10,41 @@
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  border-radius: 50%;
-  width: 48px;
-  height: 48px;
-  padding: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  width: 72px;
+  height: 72px;
+  padding: 18px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   color: white;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(10px);
+  transform: scale(0.8);
+  transform-origin: right center;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.95;
+}
+
+.fullscreen-button svg {
+  width: 36px;
+  height: 36px;
 }
 
 .fullscreen-button:hover {
-  background: rgba(0, 0, 0, 0.7);
+  opacity: 1;
+  transform: scale(0.85);
 }
 
 .fullscreen-button:active {
-  background: rgba(0, 0, 0, 0.8);
+  transform: scale(0.75);
 }
 
 /* Only show fullscreen button on mobile devices */
 @media (max-width: 768px) {
   .fullscreen-button {
     display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
