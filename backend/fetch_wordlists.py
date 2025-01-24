@@ -186,7 +186,9 @@ def main():
             "sections": ["0"],  # Main section containing the word list
         },
         "french": {
-            "page_path": "Wiktionary:Frequency_lists/French_wordlist_opensubtitles_5000",
+            "page_path": (
+                "Wiktionary:Frequency_lists/French_wordlist_opensubtitles_5000"
+            ),
             "sections": ["0"],  # Main section containing the word list
         },
     }
