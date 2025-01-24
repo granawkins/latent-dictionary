@@ -1,5 +1,5 @@
 import React, { useState, CSSProperties } from "react";
-import { US, ES } from "country-flag-icons/react/3x2";
+import { US, ES, FR } from "country-flag-icons/react/3x2";
 
 interface Language {
   code: string;
@@ -11,6 +11,7 @@ interface Language {
 const LANGUAGES: Language[] = [
   { code: "en", Flag: US, name: "English", color: "#4a90e2" },
   { code: "es", Flag: ES, name: "Spanish", color: "#e24a4a" },
+  { code: "fr", Flag: FR, name: "French", color: "#4ae24a" },  // Green color to complement blue and red
 ];
 
 interface LanguageSelectorProps {
