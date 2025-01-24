@@ -197,7 +197,9 @@ def main():
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
         "italian": {
-            "page_path": "Wiktionary:Frequency_lists/Italian_wordlist_opensubtitles_5000",
+            "page_path": (
+                "Wiktionary:Frequency_lists/Italian_wordlist_opensubtitles_5000"
+            ),
             "sections": ["0"],  # Main section containing the word list
         },
     }
