@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const hasLoadedData = useRef<boolean>(false);
-  const appRef = useRef<ElementRef<'div'>>(null);
+  const appRef = useRef<ElementRef<"div">>(null);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
