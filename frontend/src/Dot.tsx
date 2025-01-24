@@ -15,6 +15,7 @@ interface DotProps {
   select: () => void;
   searchPending?: boolean;
   language?: string | null;
+  color?: string;
 }
 
 const Dot: React.FC<DotProps> = ({
@@ -26,11 +27,14 @@ const Dot: React.FC<DotProps> = ({
   select,
   searchPending = false,
   language,
+  color,
 }) => {
   const meshRef = useRef<Mesh>(null);
-  const dotColor = language
-    ? Languages.find((l: Language) => l.name === language)?.color
-    : "white";
+  const dotColor = color
+    ? color
+    : language
+      ? Languages.find((l: Language) => l.name === language)?.color
+      : "white";
 
   return (
     <mesh
@@ -39,11 +43,10 @@ const Dot: React.FC<DotProps> = ({
       onClick={select}
     >
       <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
-      <meshStandardMaterial
+      <meshBasicMaterial
         color={dotColor}
-        emissive={dotColor}
         transparent
-        opacity={searchPending ? 0.25 : selected ? 1 : 0.5}
+        opacity={searchPending ? 0.25 : selected ? 0.85 : 0.6}
       />
       <Text
         position={[0, 0.5, 0]}
