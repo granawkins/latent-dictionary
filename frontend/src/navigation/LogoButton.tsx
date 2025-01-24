@@ -12,35 +12,39 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      backgroundColor: "rgba(0, 0, 0, 0.4)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      zIndex: 2000,
+      zIndex: 1000,
     }}
     onClick={onClose}
   >
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        backgroundColor: "white",
         padding: "20px",
+        borderRadius: "4px",
+        margin: "10%",
+        minWidth: "300px",
+        maxHeight: "80vh",
+        overflowY: "auto",
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <img
-        src="/latent-dictionary.png"
-        alt="Latent Dictionary"
-        style={{
-          width: "300px",
-          height: "300px",
-          objectFit: "contain",
-        }}
-      />
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <img
+          src="/latent-dictionary.png"
+          alt="Latent Dictionary"
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+          }}
+        />
+      </div>
       <p
         style={{
-          color: "white",
+          color: "black",
           marginTop: "20px",
           textAlign: "center",
           fontSize: "16px",
@@ -52,7 +56,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
           href="https://x.com/granawkins"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "#1DA1F2", textDecoration: "none" }}
+          style={{ color: "#0066cc", textDecoration: "none" }}
         >
           @granawkins
         </a>{" "}
@@ -61,7 +65,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
           href="https://www.wiktionary.org/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "#1DA1F2", textDecoration: "none" }}
+          style={{ color: "#0066cc", textDecoration: "none" }}
         >
           Wiktionary
         </a>{" "}
@@ -70,7 +74,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
           href="https://openai.com/"
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: "#1DA1F2", textDecoration: "none" }}
+          style={{ color: "#0066cc", textDecoration: "none" }}
         >
           OpenAI
         </a>{" "}
