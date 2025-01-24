@@ -70,7 +70,7 @@ export function debounce<T extends (...args: unknown[]) => void>(
   };
 }
 
-import { US, ES, FR } from "country-flag-icons/react/3x2";
+import { US, ES, FR, DE } from "country-flag-icons/react/3x2";
 
 export interface Language {
   code: string;
@@ -97,5 +97,11 @@ export const Languages: Language[] = [
     name: "french",
     color: "#6BFF8D",
     Flag: FR,
+  },
+  {
+    code: "de",
+    name: "german",
+    color: "#9B6BFF",
+    Flag: DE,
   },
 ];
