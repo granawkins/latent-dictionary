@@ -15,6 +15,7 @@ interface DotProps {
   select: () => void;
   searchPending?: boolean;
   language?: string | null;
+  color?: string;
 }
 
 const Dot: React.FC<DotProps> = ({
@@ -26,9 +27,12 @@ const Dot: React.FC<DotProps> = ({
   select,
   searchPending = false,
   language,
+  color,
 }) => {
   const meshRef = useRef<Mesh>(null);
-  const dotColor = language
+  const dotColor = color
+    ? color
+    : language
     ? Languages.find((l: Language) => l.name === language)?.color
     : "white";
 
