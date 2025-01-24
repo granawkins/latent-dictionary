@@ -78,10 +78,9 @@ const styles = {
       : "1px solid rgba(255, 255, 255, 0.3)",
     transition: "all 0.3s ease",
     position: "relative",
-    maxWidth: expanded ? "400px" : "none",
     transform: expanded
-      ? "scale(1) translateX(0)"
-      : "scale(0.8) translateX(30px)",
+      ? "scale(1)"
+      : "scale(0.8)",
     transformOrigin: "right center",
     opacity: expanded ? 1 : 0.95,
   }),
