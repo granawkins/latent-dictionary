@@ -1,5 +1,5 @@
 import React from "react";
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef, ElementRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import Dot from "./Dot";
 import Camera from "./Camera";
@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const hasLoadedData = useRef<boolean>(false);
-  const appRef = useRef<HTMLDivElement>(null);
+  const appRef = useRef<ElementRef<'div'>>(null);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
