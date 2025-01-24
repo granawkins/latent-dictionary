@@ -64,6 +64,7 @@ const styles = {
   legend: (expanded: boolean): CSSProperties => ({
     cursor: expanded ? "default" : "pointer",
     padding: "24px",
+    marginRight: expanded ? "24px" : "0px",
     borderRadius: "12px",
     background: expanded
       ? "rgba(40, 40, 40, 0.95)"
