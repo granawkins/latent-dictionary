@@ -58,12 +58,7 @@ const App: React.FC = () => {
   };
 
   const fetchSearch = useCallback(
-    async (
-      inputText: string,
-      l1: string,
-      l2: string | null,
-      wordsPerL: number,
-    ) => {
+    async (inputText: string, languages: string[], wordsPerL: number) => {
       setLoading(true);
       try {
         const response: Record<string, CorpusItem> = await fetchWithAuth(
@@ -71,8 +66,7 @@ const App: React.FC = () => {
           "POST",
           {
             word: inputText,
-            l1: l1,
-            l2: l2,
+            languages: languages,
             words_per_l: wordsPerL,
           },
         );
@@ -96,9 +90,15 @@ const App: React.FC = () => {
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
     timer.current = setTimeout(() => {
-      fetchSearch(inputText, "english", null, wordsPerL);
+      // Map language codes to full names
+      const languageMap: Record<string, string> = {
+        en: "english",
+        es: "spanish",
+      };
+      const languages = selectedLanguages.map((code) => languageMap[code]);
+      fetchSearch(inputText, languages, wordsPerL);
     }, 1000);
-  }, [inputText, activeText, fetchSearch, wordsPerL]);
+  }, [inputText, activeText, fetchSearch, wordsPerL, selectedLanguages]);
 
   useEffect(() => {
     handleSearch();
