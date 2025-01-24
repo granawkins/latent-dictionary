@@ -119,7 +119,7 @@ const App: React.FC = () => {
         <Camera selectedCorpus={corpus} />
         {corpus &&
           Object.entries(corpus)
-            .filter(([_, data]) => {
+            .filter(([, data]) => {
               // Only show dots for selected languages
               if (!data.language) return true; // Always show words without language
               const langCode = Languages.find(
