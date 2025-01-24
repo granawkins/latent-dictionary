@@ -11,7 +11,7 @@ const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     style={{
       position: "absolute",
       top: 0,
-      right: "-40px",
+      right: 0,
       width: "32px",
       height: "32px",
       cursor: "pointer",
