@@ -1,17 +1,5 @@
 import React, { useState, CSSProperties } from "react";
-import { US, ES } from "country-flag-icons/react/3x2";
-
-interface Language {
-  code: string;
-  Flag: React.ComponentType<{ title: string; style?: React.CSSProperties }>;
-  name: string;
-  color: string;
-}
-
-const LANGUAGES: Language[] = [
-  { code: "en", Flag: US, name: "English", color: "#4a90e2" },
-  { code: "es", Flag: ES, name: "Spanish", color: "#e24a4a" },
-];
+import { Languages } from "../utils";
 
 interface LanguageSelectorProps {
   selectedLanguages: string[];
@@ -120,7 +108,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   return (
     <div style={styles.container}>
       <div style={styles.legend(isExpanded)} onClick={toggleExpanded}>
-        {LANGUAGES.map((lang) => (
+        {Languages.map((lang) => (
           <div
             key={lang.code}
             style={styles.flag(

@@ -155,7 +155,7 @@ def main():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish"],
+        choices=["english", "spanish", "french"],
         default="english",
         help="Language to fetch (default: english)",
     )
@@ -183,6 +183,12 @@ def main():
                 "Wiktionary:Frequency_lists/Spanish8001-9000",  # 8001-9000
                 "Wiktionary:Frequency_lists/Spanish9001-10000",  # 9001-10000
             ],
+            "sections": ["0"],  # Main section containing the word list
+        },
+        "french": {
+            "page_path": (
+                "Wiktionary:Frequency_lists/French_wordlist_opensubtitles_5000"
+            ),
             "sections": ["0"],  # Main section containing the word list
         },
     }

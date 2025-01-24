@@ -86,9 +86,9 @@ async def search(request: Request) -> List[Dict[str, Any]]:
                 "language": language,
                 "x": float(c[0]),
                 "y": float(c[1]),
-            "z": float(c[2]),
-        }
-    )
+                "z": float(c[2]),
+            }
+        )
     cache[cache_key] = dots
     return dots
 
