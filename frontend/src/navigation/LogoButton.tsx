@@ -38,13 +38,15 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
           objectFit: "contain",
         }}
       />
-      <p style={{ 
-        color: "white", 
-        marginTop: "20px",
-        textAlign: "center",
-        fontSize: "16px",
-        lineHeight: "1.5"
-      }}>
+      <p
+        style={{
+          color: "white",
+          marginTop: "20px",
+          textAlign: "center",
+          fontSize: "16px",
+          lineHeight: "1.5",
+        }}
+      >
         made by{" "}
         <a
           href="https://x.com/granawkins"
