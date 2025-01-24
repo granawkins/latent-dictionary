@@ -67,3 +67,22 @@ export function debounce<T extends (...args: unknown[]) => void>(
     }, delay);
   };
 }
+
+export interface Language {
+  code: string;
+  name: string;
+  color: string;
+}
+
+export const Languages: Language[] = [
+  {
+    code: "en",
+    name: "english",
+    color: "blue",
+  },
+  {
+    code: "es",
+    name: "spanish",
+    color: "red",
+  },
+];
