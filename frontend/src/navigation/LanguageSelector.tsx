@@ -46,8 +46,11 @@ const styles = {
     position: "fixed",
     bottom: "20px",
     right: "20px",
+    left: "20px",
     zIndex: 1000,
     userSelect: "none",
+    display: "flex",
+    justifyContent: "flex-end",
   } as CSSProperties,
   legend: (expanded: boolean): CSSProperties => ({
     cursor: expanded ? "default" : "pointer",
@@ -70,6 +73,8 @@ const styles = {
     transform: expanded ? "scale(1)" : "scale(0.8)",
     transformOrigin: "right center",
     opacity: expanded ? 1 : 0.95,
+    width: expanded ? "264px" : "auto", // Width calculated for 2 items per row
+    maxWidth: "100%",
   }),
   flag: (
     selected: boolean,
