@@ -32,11 +32,6 @@ const Dot: React.FC<DotProps> = ({
     ? Languages.find((l: Language) => l.name === language)?.color
     : "white";
 
-  // Debug log to track dot rendering
-  console.log(
-    `Rendering dot: ${word}, language: ${language}, color: ${dotColor}, position: [${x}, ${y}, ${z}]`,
-  );
-
   return (
     <mesh
       ref={meshRef}
