@@ -34,7 +34,7 @@ const Navigation: React.FC<NavigationProps> = ({
           setInputText(e.target.value)
         }
         onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+          if (e.key === "Enter") {
             e.preventDefault();
           }
         }}
