@@ -57,19 +57,7 @@ const styles = {
   container: {
     position: "fixed",
     bottom: "20px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: 1000,
-    userSelect: "none",
-    maxWidth: "calc(100% - 40px)",
-    margin: "0 auto",
-  } as CSSProperties,
-  containerDesktop: {
-    position: "fixed",
-    bottom: "20px",
     right: "20px",
-    left: "auto",
-    transform: "none",
     zIndex: 1000,
     userSelect: "none",
   } as CSSProperties,
@@ -124,16 +112,6 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onToggleLanguage,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 768);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const toggleExpanded = () => {
     if (!isExpanded) {
@@ -142,7 +120,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div style={isDesktop ? styles.containerDesktop : styles.container}>
+    <div style={styles.container}>
       <div style={styles.legend(isExpanded)} onClick={toggleExpanded}>
         {LANGUAGES.map((lang) => (
           <div
