@@ -2,12 +2,9 @@ import { Text } from "@react-three/drei";
 import React, { useRef } from "react";
 import { Mesh } from "three";
 
-export const SCALE = 10;
+import { Languages, Language } from "./utils";
 
-const LANGUAGE_COLORS: Record<string, string> = {
-  english: "#4a90e2", // Blue for English
-  spanish: "#e24a4a", // Red for Spanish
-};
+export const SCALE = 10;
 
 interface DotProps {
   word: string;
@@ -16,7 +13,6 @@ interface DotProps {
   z: number;
   selected: boolean;
   select: () => void;
-  color?: string;
   searchPending?: boolean;
   language?: string | null;
 }
@@ -28,12 +24,13 @@ const Dot: React.FC<DotProps> = ({
   z,
   selected,
   select,
-  color = "white",
   searchPending = false,
   language,
 }) => {
   const meshRef = useRef<Mesh>(null);
-  const dotColor = language ? LANGUAGE_COLORS[language] : color;
+  const dotColor = language
+    ? Languages.find((l: Language) => l.name === language)?.color
+    : "white";
 
   return (
     <mesh

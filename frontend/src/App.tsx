@@ -10,7 +10,7 @@ import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
 import SwipeIndicator from "./SwipeIndicator";
 import LanguageSelector from "./navigation/LanguageSelector";
-import { fetchWithAuth } from "./utils";
+import { fetchWithAuth, Languages } from "./utils";
 
 interface CorpusItem {
   word: string;
@@ -19,17 +19,6 @@ interface CorpusItem {
   z: number;
   language: string | null;
 }
-
-const languageMap: Record<string, string> = {
-  en: "english",
-  es: "spanish",
-};
-
-// Ensure consistent language values for color mapping
-const getLanguageForColor = (language: string | null): string | null => {
-  if (!language) return null;
-  return language.toLowerCase();
-};
 
 const DotMemo = React.memo(Dot);
 
@@ -98,7 +87,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
-    const languages = selectedLanguages.map((code) => languageMap[code]);
+    const languages = Languages.filter((l) =>
+      selectedLanguages.includes(l.code),
+    ).map((l) => l.name);
     fetchSearch(inputText, languages, wordsPerL);
   }, [selectedLanguages]);
 
@@ -107,8 +98,9 @@ const App: React.FC = () => {
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
     timer.current = setTimeout(() => {
-      // Map language codes to full names
-      const languages = selectedLanguages.map((code) => languageMap[code]);
+      const languages = Languages.filter((l) =>
+        selectedLanguages.includes(l.code),
+      ).map((l) => l.name);
       fetchSearch(inputText, languages, wordsPerL);
     }, 1000);
   }, [inputText, activeText, fetchSearch, wordsPerL, selectedLanguages]);
@@ -122,11 +114,7 @@ const App: React.FC = () => {
 
   return (
     <>
-      <Navigation
-        inputText={inputText}
-        setInputText={setInputText}
-        handleSearch={handleSearch}
-      />
+      <Navigation inputText={inputText} setInputText={setInputText} />
       <Canvas>
         {/* @ts-expect-error @react-three/fiber ambient light type */}
         <ambientLight />
@@ -141,7 +129,7 @@ const App: React.FC = () => {
               x={data.x}
               y={data.y}
               z={data.z}
-              language={getLanguageForColor(data.language)}
+              language={data.language}
               selected={selected.includes(data.word)}
               select={() => select(data.word)}
               searchPending={loading}
