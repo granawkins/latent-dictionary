@@ -193,7 +193,8 @@ def main():
         },
         "german": {
             "page_path": "Wiktionary:Frequency_lists/German/Mixed_web_3M",
-            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],  # Sections for 1-1000 through 9001-10000
+            # Sections 1-10 correspond to ranges 1-1000 through 9001-10000
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
     }
 
