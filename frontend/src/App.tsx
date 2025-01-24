@@ -4,6 +4,21 @@ import { useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import "./FullscreenButton.css";
 
+// Add type definition for screen orientation API
+interface ScreenOrientation {
+  lock(orientation: "landscape"): Promise<void>;
+}
+
+interface Screen extends EventTarget {
+  orientation?: ScreenOrientation;
+}
+
+declare global {
+  interface Window {
+    screen: Screen;
+  }
+}
+
 import Dot from "./Dot";
 import Camera from "./Camera";
 import ErrorModal from "./ErrorModal";
@@ -38,8 +53,8 @@ const App: React.FC = () => {
         .then(() => {
           setIsFullscreen(true);
           // Force screen orientation to landscape if supported
-          if (screen.orientation) {
-            screen.orientation.lock("landscape").catch(() => {
+          if (window.screen.orientation) {
+            window.screen.orientation.lock("landscape").catch(() => {
               // Silently fail if orientation lock is not supported
             });
           }
