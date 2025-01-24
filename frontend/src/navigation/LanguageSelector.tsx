@@ -11,7 +11,7 @@ interface Language {
 const LANGUAGES: Language[] = [
   { code: "en", Flag: US, name: "English", color: "#4a90e2" },
   { code: "es", Flag: ES, name: "Spanish", color: "#e24a4a" },
-  { code: "fr", Flag: FR, name: "French", color: "#4ae24a" },  // Green color to complement blue and red
+  { code: "fr", Flag: FR, name: "French", color: "#4ae24a" }, // Green color to complement blue and red
 ];
 
 interface LanguageSelectorProps {
