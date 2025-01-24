@@ -33,8 +33,12 @@ const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
       transition: "background 0.2s ease",
     }}
     onClick={onClick}
-    onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")}
-    onMouseOut={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")}
+    onMouseOver={(e) =>
+      (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")
+    }
+    onMouseOut={(e) =>
+      (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")
+    }
   >
     <svg
       width="30"
