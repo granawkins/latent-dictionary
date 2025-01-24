@@ -1,3 +1,5 @@
+import React from "react";
+
 type Environment = "DEV" | "PROD";
 
 const origin = (): string => {
@@ -68,10 +70,13 @@ export function debounce<T extends (...args: unknown[]) => void>(
   };
 }
 
+import { US, ES, FR } from "country-flag-icons/react/3x2";
+
 export interface Language {
   code: string;
   name: string;
   color: string;
+  Flag: React.ComponentType<{ title: string; style?: React.CSSProperties }>;
 }
 
 export const Languages: Language[] = [
@@ -79,10 +84,18 @@ export const Languages: Language[] = [
     code: "en",
     name: "english",
     color: "#4A90E2",
+    Flag: US,
   },
   {
     code: "es",
     name: "spanish",
     color: "#FF6B6B",
+    Flag: ES,
+  },
+  {
+    code: "fr",
+    name: "french",
+    color: "#FF6B6B",
+    Flag: FR,
   },
 ];
