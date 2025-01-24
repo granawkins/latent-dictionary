@@ -30,15 +30,15 @@ const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     strokeLinejoin="round"
     onClick={onClick}
     style={{
-      cursor: 'pointer',
-      position: 'absolute',
-      bottom: '12px',
-      right: '12px',
-      color: 'rgba(255, 255, 255, 0.8)',
-      transition: 'color 0.2s ease',
+      cursor: "pointer",
+      position: "absolute",
+      bottom: "12px",
+      right: "12px",
+      color: "rgba(255, 255, 255, 0.8)",
+      transition: "color 0.2s ease",
     }}
-    onMouseOver={(e) => e.currentTarget.style.color = 'white'}
-    onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'}
+    onMouseOver={(e) => (e.currentTarget.style.color = "white")}
+    onMouseOut={(e) => (e.currentTarget.style.color = "rgba(255, 255, 255, 0.8)")}
   >
     <line x1="18" y1="6" x2="6" y2="18" />
     <line x1="6" y1="6" x2="18" y2="18" />
@@ -62,7 +62,7 @@ const styles = {
     display: "flex",
     flexWrap: "wrap",
     gap: "24px",
-    border: expanded 
+    border: expanded
       ? "1px solid rgba(255, 255, 255, 0.2)"
       : "1px solid rgba(255, 255, 255, 0.3)",
     transition: "all 0.3s ease",
@@ -78,7 +78,7 @@ const styles = {
     transition: "all 0.2s ease",
     outline: selected && color ? `3px solid ${color}` : "none",
     background: selected ? `${color}20` : "transparent",
-    display: (!expanded && !selected) ? "none" : "block",
+    display: !expanded && !selected ? "none" : "block",
   }),
   flagImage: {
     width: "100%",
