@@ -10,24 +10,79 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
       position: "absolute",
       top: 0,
       left: 0,
+      right: 0,
+      bottom: 0,
       width: "100vw",
       height: "100vh",
-      backgroundColor: "rgba(0, 0, 0, 1)",
-      zIndex: 2000,
+      backgroundColor: "rgba(0, 0, 0, 0.4)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
     }}
     onClick={onClose}
   >
-    <img
-      src="/latent-dictionary.png"
-      alt="Latent Dictionary"
+    <div
       style={{
-        width: "300px",
-        height: "300px",
-        marginLeft: "calc(50% - 150px)",
-        marginTop: "calc(50% - 150px)",
-        objectFit: "contain",
+        backgroundColor: "rgba(246, 246, 246, 100)",
+        padding: "20px",
+        borderRadius: "4px",
+        margin: "10%",
+        minWidth: "300px",
+        maxHeight: "80vh",
+        overflowY: "auto",
       }}
-    />
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <img
+          src="/latent-dictionary.png"
+          alt="Latent Dictionary"
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+          }}
+        />
+      </div>
+      <p
+        style={{
+          color: "black",
+          marginTop: "20px",
+          textAlign: "center",
+          fontSize: "16px",
+          lineHeight: "1.5",
+        }}
+      >
+        made by{" "}
+        <a
+          href="https://x.com/granawkins"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#0066cc", textDecoration: "none" }}
+        >
+          @granawkins
+        </a>{" "}
+        using{" "}
+        <a
+          href="https://www.wiktionary.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#0066cc", textDecoration: "none" }}
+        >
+          Wiktionary
+        </a>{" "}
+        data and{" "}
+        <a
+          href="https://openai.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#0066cc", textDecoration: "none" }}
+        >
+          OpenAI
+        </a>{" "}
+        embeddings
+      </p>
+    </div>
   </div>
 );
 
