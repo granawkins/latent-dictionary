@@ -21,31 +21,28 @@ interface LanguageSelectorProps {
 const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   <div
     style={{
-      width: "72px",
-      height: "54px",
-      padding: "12px",
-      borderRadius: "8px",
+      position: "absolute",
+      top: 0,
+      right: "-40px",
+      width: "32px",
+      height: "32px",
       cursor: "pointer",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(255, 255, 255, 0.1)",
-      transition: "background 0.2s ease",
+      transition: "opacity 0.2s ease",
+      opacity: 0.8,
     }}
     onClick={onClick}
-    onMouseOver={(e) =>
-      (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")
-    }
-    onMouseOut={(e) =>
-      (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")
-    }
+    onMouseOver={(e) => (e.currentTarget.style.opacity = "1")}
+    onMouseOut={(e) => (e.currentTarget.style.opacity = "0.8")}
   >
     <svg
-      width="30"
-      height="30"
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="rgba(255, 255, 255, 0.8)"
+      stroke="rgba(255, 255, 255, 0.9)"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -60,7 +57,19 @@ const styles = {
   container: {
     position: "fixed",
     bottom: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 1000,
+    userSelect: "none",
+    maxWidth: "calc(100% - 40px)",
+    margin: "0 auto",
+  } as CSSProperties,
+  containerDesktop: {
+    position: "fixed",
+    bottom: "20px",
     right: "20px",
+    left: "auto",
+    transform: "none",
     zIndex: 1000,
     userSelect: "none",
   } as CSSProperties,
@@ -81,6 +90,9 @@ const styles = {
     transition: "all 0.3s ease",
     position: "relative",
     maxWidth: expanded ? "400px" : "none",
+    transform: expanded ? "scale(1) translateX(0)" : "scale(0.8) translateX(30px)",
+    transformOrigin: "right center",
+    opacity: expanded ? 1 : 0.95,
   }),
   flag: (
     selected: boolean,
@@ -109,6 +121,16 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onToggleLanguage,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const toggleExpanded = () => {
     if (!isExpanded) {
@@ -117,7 +139,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div style={styles.container}>
+    <div style={isDesktop ? styles.containerDesktop : styles.container}>
       <div style={styles.legend(isExpanded)} onClick={toggleExpanded}>
         {LANGUAGES.map((lang) => (
           <div
