@@ -107,7 +107,7 @@ export const Languages: Language[] = [
   {
     code: "it",
     name: "italian",
-    color: "#FF9B6B",  // Orange to differentiate from other colors
+    color: "#FF9B6B", // Orange to differentiate from other colors
     Flag: IT,
   },
 ];
