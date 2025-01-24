@@ -25,6 +25,12 @@ const languageMap: Record<string, string> = {
   es: "spanish",
 };
 
+// Ensure consistent language values for color mapping
+const getLanguageForColor = (language: string | null): string | null => {
+  if (!language) return null;
+  return language.toLowerCase();
+};
+
 const DotMemo = React.memo(Dot);
 
 const App: React.FC = () => {
@@ -135,7 +141,7 @@ const App: React.FC = () => {
               x={data.x}
               y={data.y}
               z={data.z}
-              language={data.language}
+              language={getLanguageForColor(data.language)}
               selected={selected.includes(data.word)}
               select={() => select(data.word)}
               searchPending={loading}

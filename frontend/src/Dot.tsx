@@ -5,8 +5,8 @@ import { Mesh } from "three";
 export const SCALE = 10;
 
 const LANGUAGE_COLORS: Record<string, string> = {
-  english: "#4a90e2",
-  spanish: "#e24a4a",
+  english: "#4a90e2",  // Blue for English
+  spanish: "#e24a4a",  // Red for Spanish
 };
 
 interface DotProps {
