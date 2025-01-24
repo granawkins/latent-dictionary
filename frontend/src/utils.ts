@@ -78,11 +78,11 @@ export const Languages: Language[] = [
   {
     code: "en",
     name: "english",
-    color: "blue",
+    color: "#4A90E2",
   },
   {
     code: "es",
     name: "spanish",
-    color: "red",
+    color: "#FF6B6B",
   },
 ];
