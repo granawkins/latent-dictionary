@@ -97,7 +97,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           {LANGUAGES.map((lang) => (
             <div
               key={lang.code}
-              style={styles.flag(selectedLanguages.includes(lang.code), lang.color)}
+              style={styles.flag(
+                selectedLanguages.includes(lang.code),
+                lang.color,
+              )}
               onClick={() => {
                 onToggleLanguage(lang.code);
               }}

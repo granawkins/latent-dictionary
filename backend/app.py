@@ -40,7 +40,7 @@ def pca(data: Embeddings) -> Embeddings:
     return coordinates.tolist()
 
 
-cache: Dict[Tuple[str, str, Optional[str], int], List[dict]] = {}
+cache: Dict[Tuple[str, Tuple[str, ...], int], List[dict]] = {}
 
 
 @app.post("/api/search")
