@@ -118,19 +118,26 @@ const App: React.FC = () => {
       <Canvas>
         <Camera selectedCorpus={corpus} />
         {corpus &&
-          Object.entries(corpus).map(([i, data]) => (
-            <DotMemo
-              key={i}
-              word={data.word}
-              x={data.x}
-              y={data.y}
-              z={data.z}
-              language={data.language}
-              selected={selected.includes(data.word)}
-              select={() => select(data.word)}
-              searchPending={loading}
-            />
-          ))}
+          Object.entries(corpus)
+            .filter(([_, data]) => {
+              // Only show dots for selected languages
+              if (!data.language) return true; // Always show words without language
+              const langCode = Languages.find(l => l.name === data.language)?.code;
+              return langCode && selectedLanguages.includes(langCode);
+            })
+            .map(([i, data]) => (
+              <DotMemo
+                key={i}
+                word={data.word}
+                x={data.x}
+                y={data.y}
+                z={data.z}
+                language={data.language}
+                selected={selected.includes(data.word)}
+                select={() => select(data.word)}
+                searchPending={loading}
+              />
+            ))}
         {/* A red dot at the origin to represent the search term */}
         <DotMemo
           word={inputText}
