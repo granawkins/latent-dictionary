@@ -5,7 +5,6 @@ import { Canvas } from "@react-three/fiber";
 
 import Dot from "./Dot";
 import Camera from "./Camera";
-import FAQButton from "./navigation/FAQ";
 import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
 import SwipeIndicator from "./SwipeIndicator";
@@ -153,7 +152,6 @@ const App: React.FC = () => {
           searchPending={loading}
         />
       </Canvas>
-      <FAQButton />
       {error && <ErrorModal message={error} onClose={() => setError(null)} />}
       <SwipeIndicator show={showSwipeIndicator} />
       <LanguageSelector
