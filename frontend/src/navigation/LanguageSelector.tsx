@@ -84,6 +84,7 @@ const styles = {
     display: "flex",
     flexWrap: "wrap",
     gap: "24px",
+    justifyContent: "flex-end",
     border: expanded
       ? "1px solid rgba(255, 255, 255, 0.2)"
       : "1px solid rgba(255, 255, 255, 0.3)",
