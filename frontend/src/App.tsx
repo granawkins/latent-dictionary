@@ -9,7 +9,8 @@ interface ScreenOrientation {
   lock(orientation: "landscape"): Promise<void>;
 }
 
-interface Screen extends EventTarget {
+// Use type references instead of extending EventTarget
+interface Screen {
   orientation?: ScreenOrientation;
 }
 
@@ -18,6 +19,9 @@ declare global {
     screen: Screen;
   }
 }
+
+// Add type for the ref
+type DivRef = React.RefObject<HTMLDivElement>;
 
 import Dot from "./Dot";
 import Camera from "./Camera";
@@ -44,7 +48,7 @@ const App: React.FC = () => {
   const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const hasLoadedData = useRef<boolean>(false);
-  const appRef = useRef<HTMLDivElement>(null);
+  const appRef: DivRef = useRef(null);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
