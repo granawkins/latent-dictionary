@@ -4,14 +4,12 @@ import LogoButton from "./LogoButton";
 interface NavigationProps {
   inputText: string;
   setInputText: (text: string) => void;
-  handleSearch: (e: React.FormEvent) => void;
   disabled?: boolean;
 }
 
 const Navigation: React.FC<NavigationProps> = ({
   inputText,
   setInputText,
-  handleSearch,
   disabled = false,
 }) => (
   <div
@@ -28,13 +26,18 @@ const Navigation: React.FC<NavigationProps> = ({
     }}
   >
     <LogoButton />
-    <form onSubmit={handleSearch} style={{ flexGrow: 1 }}>
+    <div style={{ flexGrow: 1 }}>
       <input
         type="text"
         value={inputText}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           setInputText(e.target.value)
         }
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+          }
+        }}
         style={{
           width: "100%",
           padding: "15px 15px",
@@ -47,7 +50,7 @@ const Navigation: React.FC<NavigationProps> = ({
         placeholder="Search..."
         disabled={disabled}
       />
-    </form>
+    </div>
   </div>
 );
 
