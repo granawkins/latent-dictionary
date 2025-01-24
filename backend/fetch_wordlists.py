@@ -192,8 +192,8 @@ def main():
             "sections": ["0"],  # Main section containing the word list
         },
         "german": {
-            "page_path": "Wiktionary:Frequency_lists/DeReWo_10000",
-            "sections": ["1"],  # Main section containing the word list
+            "page_path": "Wiktionary:Frequency_lists/German/Mixed_web_3M",
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],  # Sections for 1-1000 through 9001-10000
         },
     }
 
