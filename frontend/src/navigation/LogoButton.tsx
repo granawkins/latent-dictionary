@@ -7,27 +7,74 @@ interface ImageModalProps {
 const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
   <div
     style={{
-      position: "absolute",
+      position: "fixed",
       top: 0,
       left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundColor: "rgba(0, 0, 0, 1)",
+      right: 0,
+      bottom: 0,
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
       zIndex: 2000,
     }}
     onClick={onClose}
   >
-    <img
-      src="/latent-dictionary.png"
-      alt="Latent Dictionary"
+    <div
       style={{
-        width: "300px",
-        height: "300px",
-        marginLeft: "calc(50% - 150px)",
-        marginTop: "calc(50% - 150px)",
-        objectFit: "contain",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px",
       }}
-    />
+      onClick={(e) => e.stopPropagation()}
+    >
+      <img
+        src="/latent-dictionary.png"
+        alt="Latent Dictionary"
+        style={{
+          width: "300px",
+          height: "300px",
+          objectFit: "contain",
+        }}
+      />
+      <p style={{ 
+        color: "white", 
+        marginTop: "20px",
+        textAlign: "center",
+        fontSize: "16px",
+        lineHeight: "1.5"
+      }}>
+        made by{" "}
+        <a
+          href="https://x.com/granawkins"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1DA1F2", textDecoration: "none" }}
+        >
+          @granawkins
+        </a>{" "}
+        using{" "}
+        <a
+          href="https://www.wiktionary.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1DA1F2", textDecoration: "none" }}
+        >
+          Wiktionary
+        </a>{" "}
+        data and{" "}
+        <a
+          href="https://openai.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1DA1F2", textDecoration: "none" }}
+        >
+          OpenAI
+        </a>{" "}
+        embeddings
+      </p>
+    </div>
   </div>
 );
 
