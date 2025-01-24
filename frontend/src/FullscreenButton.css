@@ -1,0 +1,58 @@
+.app-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.fullscreen-button {
+  display: none; /* Hidden by default */
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+  backdrop-filter: blur(10px);
+  transform: scale(0.8);
+  transform-origin: right center;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.95;
+}
+
+.fullscreen-button svg {
+  width: 36px;
+  height: 36px;
+}
+
+.fullscreen-button:hover {
+  opacity: 1;
+  transform: scale(0.85);
+}
+
+.fullscreen-button:active {
+  transform: scale(0.75);
+}
+
+/* Only show fullscreen button on mobile devices */
+@media (max-width: 768px) {
+  .fullscreen-button {
+    display: flex;
+  }
+}
+
+/* When in fullscreen mode */
+:fullscreen .fullscreen-button {
+  opacity: 0.6;
+}
+
+:fullscreen .fullscreen-button:hover {
+  opacity: 1;
+}
