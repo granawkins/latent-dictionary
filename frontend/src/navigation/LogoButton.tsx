@@ -7,15 +7,12 @@ interface ImageModalProps {
 const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
   <div
     style={{
-      position: "fixed",
+      position: "absolute",
       top: 0,
       left: 0,
-      width: "100%",
-      height: "100%",
-      backgroundColor: "rgba(0, 0, 0, 0.8)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
+      width: "100vw",
+      height: "100vh",
+      backgroundColor: "rgba(0, 0, 0, 1)",
       zIndex: 2000,
     }}
     onClick={onClose}
@@ -24,11 +21,12 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
       src="/latent-dictionary.png"
       alt="Latent Dictionary"
       style={{
-        maxWidth: "90%",
-        maxHeight: "90%",
+        width: "300px",
+        height: "300px",
+        marginLeft: "calc(50% - 150px)",
+        marginTop: "calc(50% - 150px)",
         objectFit: "contain",
       }}
-      onClick={(e) => e.stopPropagation()}
     />
   </div>
 );
