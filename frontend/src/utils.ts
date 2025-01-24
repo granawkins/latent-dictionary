@@ -45,8 +45,6 @@ export const fetchWithAuth = async <T>(
     options.body = JSON.stringify(body);
   }
 
-  console.log(`${backendUrl()}${route}`, options);
-
   const res = await fetch(`${backendUrl()}${route}`, options);
 
   if (!res.ok) {

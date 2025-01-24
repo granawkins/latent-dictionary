@@ -20,6 +20,11 @@ interface CorpusItem {
   language: string | null;
 }
 
+const languageMap: Record<string, string> = {
+  en: "english",
+  es: "spanish",
+};
+
 const DotMemo = React.memo(Dot);
 
 const App: React.FC = () => {
@@ -85,16 +90,18 @@ const App: React.FC = () => {
     [],
   );
 
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current);
+    const languages = selectedLanguages.map((code) => languageMap[code]);
+    fetchSearch(inputText, languages, wordsPerL);
+  }, [selectedLanguages]);
+
   const handleSearch = useCallback(() => {
     if (!inputText || inputText === activeText) return;
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
     timer.current = setTimeout(() => {
       // Map language codes to full names
-      const languageMap: Record<string, string> = {
-        en: "english",
-        es: "spanish",
-      };
       const languages = selectedLanguages.map((code) => languageMap[code]);
       fetchSearch(inputText, languages, wordsPerL);
     }, 1000);
@@ -121,9 +128,9 @@ const App: React.FC = () => {
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
-          Object.entries(corpus).map(([, data]) => (
+          Object.entries(corpus).map(([i, data]) => (
             <DotMemo
-              key={data.word}
+              key={i}
               word={data.word}
               x={data.x}
               y={data.y}

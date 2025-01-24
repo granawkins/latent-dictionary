@@ -69,7 +69,7 @@ async def search(request: Request) -> List[Dict[str, Any]]:
         docs = records.get("documents", [[]])
         lang_embeddings = records.get("embeddings", [[]])
 
-        if docs and lang_embeddings and docs[0] and lang_embeddings[0]:
+        if docs and lang_embeddings and docs[0] and len(lang_embeddings) > 0:
             words.extend(docs[0])
             embeddings.extend(list(lang_embeddings[0]))
             word_languages.extend([language] * len(docs[0]))
@@ -79,16 +79,17 @@ async def search(request: Request) -> List[Dict[str, Any]]:
     # Transform to coordinates
     coordinates = pca(embeddings)
     dots = []
-    for word, language, c in zip(words, languages, list(coordinates)):
-        dots.append(
-            {
-                "word": word,
-                "language": language,
-                "x": float(c[0]),
-                "y": float(c[1]),
-                "z": float(c[2]),
-            }
-        )
+    for language in languages:
+        for word, c in zip(words, coordinates):
+            dots.append(
+                {
+                    "word": word,
+                    "language": language,
+                    "x": float(c[0]),
+                    "y": float(c[1]),
+                    "z": float(c[2]),
+                }
+            )
     cache[cache_key] = dots
     return dots
 
