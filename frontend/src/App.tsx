@@ -122,7 +122,9 @@ const App: React.FC = () => {
             .filter(([_, data]) => {
               // Only show dots for selected languages
               if (!data.language) return true; // Always show words without language
-              const langCode = Languages.find((l) => l.name === data.language)?.code;
+              const langCode = Languages.find(
+                (l) => l.name === data.language,
+              )?.code;
               return langCode && selectedLanguages.includes(langCode);
             })
             .map(([i, data]) => (
