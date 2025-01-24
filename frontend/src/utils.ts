@@ -95,7 +95,7 @@ export const Languages: Language[] = [
   {
     code: "fr",
     name: "french",
-    color: "#FF6B6B",
+    color: "#6BFF8D",
     Flag: FR,
   },
 ];
