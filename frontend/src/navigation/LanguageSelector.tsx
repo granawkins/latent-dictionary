@@ -18,6 +18,33 @@ interface LanguageSelectorProps {
   onToggleLanguage: (code: string) => void;
 }
 
+const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <svg
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    onClick={onClick}
+    style={{
+      cursor: 'pointer',
+      position: 'absolute',
+      bottom: '12px',
+      right: '12px',
+      color: 'rgba(255, 255, 255, 0.8)',
+      transition: 'color 0.2s ease',
+    }}
+    onMouseOver={(e) => e.currentTarget.style.color = 'white'}
+    onMouseOut={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)'}
+  >
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
 const styles = {
   container: {
     position: "fixed",
@@ -26,39 +53,32 @@ const styles = {
     zIndex: 1000,
     userSelect: "none",
   } as CSSProperties,
-  selectedLanguages: {
-    cursor: "pointer",
+  legend: (expanded: boolean): CSSProperties => ({
+    cursor: expanded ? "default" : "pointer",
     padding: "24px",
     borderRadius: "12px",
-    background: "rgba(255, 255, 255, 0.2)",
+    background: expanded ? "rgba(40, 40, 40, 0.95)" : "rgba(255, 255, 255, 0.2)",
     backdropFilter: "blur(10px)",
     display: "flex",
+    flexWrap: "wrap",
     gap: "24px",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-  } as CSSProperties,
-  menu: {
-    position: "absolute",
-    bottom: "100%",
-    right: 0,
-    marginBottom: "12px",
-    background: "rgba(40, 40, 40, 0.95)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "12px",
-    padding: "12px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    border: "1px solid rgba(255, 255, 255, 0.2)",
-  } as CSSProperties,
-  flag: (selected: boolean, color?: string): CSSProperties => ({
+    border: expanded 
+      ? "1px solid rgba(255, 255, 255, 0.2)"
+      : "1px solid rgba(255, 255, 255, 0.3)",
+    transition: "all 0.3s ease",
+    position: "relative",
+    maxWidth: expanded ? "400px" : "none",
+  }),
+  flag: (selected: boolean, color?: string, expanded: boolean): CSSProperties => ({
     width: "72px",
     height: "54px",
-    cursor: "pointer",
+    cursor: expanded ? "pointer" : "default",
     padding: "12px",
     borderRadius: "8px",
     transition: "all 0.2s ease",
     outline: selected && color ? `3px solid ${color}` : "none",
     background: selected ? `${color}20` : "transparent",
+    display: (!expanded && !selected) ? "none" : "block",
   }),
   flagImage: {
     width: "100%",
@@ -71,46 +91,38 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   selectedLanguages,
   onToggleLanguage,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+  const toggleExpanded = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
   };
 
   return (
     <div style={styles.container}>
-      <div style={styles.selectedLanguages} onClick={toggleMenu}>
-        {LANGUAGES.filter((lang) => selectedLanguages.includes(lang.code)).map(
-          (lang) => (
-            <div
-              key={lang.code}
-              style={styles.flag(true, lang.color)}
-              title={lang.name}
-            >
-              <lang.Flag title={lang.name} style={styles.flagImage} />
-            </div>
-          ),
-        )}
-      </div>
-      {isOpen && (
-        <div style={styles.menu}>
-          {LANGUAGES.map((lang) => (
-            <div
-              key={lang.code}
-              style={styles.flag(
-                selectedLanguages.includes(lang.code),
-                lang.color,
-              )}
-              onClick={() => {
+      <div style={styles.legend(isExpanded)} onClick={toggleExpanded}>
+        {LANGUAGES.map((lang) => (
+          <div
+            key={lang.code}
+            style={styles.flag(
+              selectedLanguages.includes(lang.code),
+              lang.color,
+              isExpanded
+            )}
+            onClick={(e) => {
+              if (isExpanded) {
+                e.stopPropagation();
                 onToggleLanguage(lang.code);
-              }}
-              title={lang.name}
-            >
-              <lang.Flag title={lang.name} style={styles.flagImage} />
-            </div>
-          ))}
-        </div>
-      )}
+              }
+            }}
+            title={lang.name}
+          >
+            <lang.Flag title={lang.name} style={styles.flagImage} />
+          </div>
+        ))}
+        {isExpanded && <CloseIcon onClick={() => setIsExpanded(false)} />}
+      </div>
     </div>
   );
 };
