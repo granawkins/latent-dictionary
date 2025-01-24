@@ -19,30 +19,37 @@ interface LanguageSelectorProps {
 }
 
 const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    onClick={onClick}
+  <div
     style={{
+      width: "72px",
+      height: "54px",
+      padding: "12px",
+      borderRadius: "8px",
       cursor: "pointer",
-      position: "absolute",
-      bottom: "12px",
-      right: "12px",
-      color: "rgba(255, 255, 255, 0.8)",
-      transition: "color 0.2s ease",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "rgba(255, 255, 255, 0.1)",
+      transition: "background 0.2s ease",
     }}
-    onMouseOver={(e) => (e.currentTarget.style.color = "white")}
-    onMouseOut={(e) => (e.currentTarget.style.color = "rgba(255, 255, 255, 0.8)")}
+    onClick={onClick}
+    onMouseOver={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)")}
+    onMouseOut={(e) => (e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)")}
   >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
+    <svg
+      width="30"
+      height="30"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="rgba(255, 255, 255, 0.8)"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  </div>
 );
 
 const styles = {
@@ -57,7 +64,9 @@ const styles = {
     cursor: expanded ? "default" : "pointer",
     padding: "24px",
     borderRadius: "12px",
-    background: expanded ? "rgba(40, 40, 40, 0.95)" : "rgba(255, 255, 255, 0.2)",
+    background: expanded
+      ? "rgba(40, 40, 40, 0.95)"
+      : "rgba(255, 255, 255, 0.2)",
     backdropFilter: "blur(10px)",
     display: "flex",
     flexWrap: "wrap",
@@ -69,11 +78,15 @@ const styles = {
     position: "relative",
     maxWidth: expanded ? "400px" : "none",
   }),
-  flag: (selected: boolean, color?: string, expanded: boolean): CSSProperties => ({
-    width: "72px",
-    height: "54px",
+  flag: (
+    selected: boolean,
+    color?: string,
+    expanded: boolean,
+  ): CSSProperties => ({
+    width: expanded ? "72px" : "36px",
+    height: expanded ? "54px" : "27px",
     cursor: expanded ? "pointer" : "default",
-    padding: "12px",
+    padding: expanded ? "12px" : "6px",
     borderRadius: "8px",
     transition: "all 0.2s ease",
     outline: selected && color ? `3px solid ${color}` : "none",
@@ -108,7 +121,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             style={styles.flag(
               selectedLanguages.includes(lang.code),
               lang.color,
-              isExpanded
+              isExpanded,
             )}
             onClick={(e) => {
               if (isExpanded) {
@@ -121,7 +134,14 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <lang.Flag title={lang.name} style={styles.flagImage} />
           </div>
         ))}
-        {isExpanded && <CloseIcon onClick={() => setIsExpanded(false)} />}
+        {isExpanded && (
+          <CloseIcon
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );
