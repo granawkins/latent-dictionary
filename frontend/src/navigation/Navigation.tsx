@@ -27,29 +27,55 @@ const Navigation: React.FC<NavigationProps> = ({
   >
     <LogoButton />
     <div style={{ flexGrow: 1 }}>
-      <input
-        type="text"
-        value={inputText}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setInputText(e.target.value)
-        }
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
+      <div style={{ position: "relative", width: "100%" }}>
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setInputText(e.target.value)
           }
-        }}
-        style={{
-          width: "100%",
-          padding: "15px 15px",
-          fontSize: "16px",
-          border: "1px solid #ccc",
-          backgroundColor: "black",
-          color: "white",
-          boxSizing: "border-box",
-        }}
-        placeholder="Search..."
-        disabled={disabled}
-      />
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+            }
+          }}
+          style={{
+            width: "100%",
+            padding: "15px 15px",
+            paddingRight: "40px", // Make room for the clear button
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            backgroundColor: "black",
+            color: "white",
+            boxSizing: "border-box",
+          }}
+          placeholder="Search..."
+          disabled={disabled}
+        />
+        {inputText && (
+          <button
+            onClick={() => setInputText("")}
+            style={{
+              position: "absolute",
+              right: "15px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              color: "#999",
+              cursor: "pointer",
+              fontSize: "16px",
+              padding: "0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
+      </div>
     </div>
   </div>
 );
