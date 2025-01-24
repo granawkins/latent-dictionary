@@ -7,11 +7,13 @@ interface ImageModalProps {
 const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
   <div
     style={{
-      position: "fixed",
+      position: "absolute",
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
+      width: "100vw",
+      height: "100vh",
       backgroundColor: "rgba(0, 0, 0, 0.4)",
       display: "flex",
       alignItems: "center",
@@ -22,7 +24,7 @@ const ImageModal: React.FC<ImageModalProps> = ({ onClose }) => (
   >
     <div
       style={{
-        backgroundColor: "white",
+        backgroundColor: "rgba(246, 246, 246, 100)",
         padding: "20px",
         borderRadius: "4px",
         margin: "10%",
