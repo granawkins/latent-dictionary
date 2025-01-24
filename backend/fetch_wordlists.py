@@ -155,7 +155,7 @@ def main():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish", "french"],
+        choices=["english", "spanish", "french", "german"],
         default="english",
         help="Language to fetch (default: english)",
     )
@@ -190,6 +190,11 @@ def main():
                 "Wiktionary:Frequency_lists/French_wordlist_opensubtitles_5000"
             ),
             "sections": ["0"],  # Main section containing the word list
+        },
+        "german": {
+            "page_path": "Wiktionary:Frequency_lists/German/Mixed_web_3M",
+            # Sections 1-10 correspond to ranges 1-1000 through 9001-10000
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
     }
 
