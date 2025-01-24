@@ -116,10 +116,6 @@ const App: React.FC = () => {
     <>
       <Navigation inputText={inputText} setInputText={setInputText} />
       <Canvas>
-        {/* @ts-expect-error @react-three/fiber ambient light type */}
-        <ambientLight />
-        {/* @ts-expect-error @react-three/fiber point light type */}
-        <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
           Object.entries(corpus).map(([i, data]) => (
