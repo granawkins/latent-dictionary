@@ -9,6 +9,7 @@ import FAQButton from "./navigation/FAQ";
 import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
 import SwipeIndicator from "./SwipeIndicator";
+import LanguageSelector from "./navigation/LanguageSelector";
 import { fetchWithAuth } from "./utils";
 
 interface CorpusItem {
@@ -18,6 +19,11 @@ interface CorpusItem {
   z: number;
   language: string | null;
 }
+
+const languageMap: Record<string, string> = {
+  en: "english",
+  es: "spanish",
+};
 
 const DotMemo = React.memo(Dot);
 
@@ -35,6 +41,18 @@ const App: React.FC = () => {
 
   const timer = useRef<NodeJS.Timeout | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(["en"]);
+
+  const handleToggleLanguage = (code: string) => {
+    setSelectedLanguages((prev) => {
+      if (prev.includes(code)) {
+        // Don't allow deselecting if it's the last language
+        if (prev.length === 1) return prev;
+        return prev.filter((lang) => lang !== code);
+      }
+      return [...prev, code];
+    });
+  };
 
   const select = (word: string) => {
     setSelected((oldSelected) => {
@@ -45,12 +63,7 @@ const App: React.FC = () => {
   };
 
   const fetchSearch = useCallback(
-    async (
-      inputText: string,
-      l1: string,
-      l2: string | null,
-      wordsPerL: number,
-    ) => {
+    async (inputText: string, languages: string[], wordsPerL: number) => {
       setLoading(true);
       try {
         const response: Record<string, CorpusItem> = await fetchWithAuth(
@@ -58,8 +71,7 @@ const App: React.FC = () => {
           "POST",
           {
             word: inputText,
-            l1: l1,
-            l2: l2,
+            languages: languages,
             words_per_l: wordsPerL,
           },
         );
@@ -78,14 +90,22 @@ const App: React.FC = () => {
     [],
   );
 
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current);
+    const languages = selectedLanguages.map((code) => languageMap[code]);
+    fetchSearch(inputText, languages, wordsPerL);
+  }, [selectedLanguages]);
+
   const handleSearch = useCallback(() => {
     if (!inputText || inputText === activeText) return;
     if (timer.current) clearTimeout(timer.current);
     setLoading(true);
     timer.current = setTimeout(() => {
-      fetchSearch(inputText, "english", null, wordsPerL);
+      // Map language codes to full names
+      const languages = selectedLanguages.map((code) => languageMap[code]);
+      fetchSearch(inputText, languages, wordsPerL);
     }, 1000);
-  }, [inputText, activeText, fetchSearch, wordsPerL]);
+  }, [inputText, activeText, fetchSearch, wordsPerL, selectedLanguages]);
 
   useEffect(() => {
     handleSearch();
@@ -108,9 +128,9 @@ const App: React.FC = () => {
         <pointLight position={[10, 10, 10]} />
         <Camera selectedCorpus={corpus} />
         {corpus &&
-          Object.entries(corpus).map(([, data]) => (
+          Object.entries(corpus).map(([i, data]) => (
             <DotMemo
-              key={data.word}
+              key={i}
               word={data.word}
               x={data.x}
               y={data.y}
@@ -137,6 +157,10 @@ const App: React.FC = () => {
       <FAQButton />
       {error && <ErrorModal message={error} onClose={() => setError(null)} />}
       <SwipeIndicator show={showSwipeIndicator} />
+      <LanguageSelector
+        selectedLanguages={selectedLanguages}
+        onToggleLanguage={handleToggleLanguage}
+      />
     </>
   );
 };

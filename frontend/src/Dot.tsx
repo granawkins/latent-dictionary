@@ -4,6 +4,11 @@ import { Mesh } from "three";
 
 export const SCALE = 10;
 
+const LANGUAGE_COLORS: Record<string, string> = {
+  english: "#4a90e2",
+  spanish: "#e24a4a",
+};
+
 interface DotProps {
   word: string;
   x: number;
@@ -25,8 +30,10 @@ const Dot: React.FC<DotProps> = ({
   select,
   color = "white",
   searchPending = false,
+  language,
 }) => {
   const meshRef = useRef<Mesh>(null);
+  const dotColor = language ? LANGUAGE_COLORS[language] : color;
 
   return (
     <mesh
@@ -36,15 +43,15 @@ const Dot: React.FC<DotProps> = ({
     >
       <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
       <meshStandardMaterial
-        color={color}
-        emissive={color}
+        color={dotColor}
+        emissive={dotColor}
         transparent
         opacity={searchPending ? 0.25 : selected ? 1 : 0.5}
       />
       <Text
         position={[0, 0.5, 0]}
         fontSize={0.3}
-        color="white"
+        color={dotColor}
         transparent={!selected}
       >
         {word}
