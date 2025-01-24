@@ -140,7 +140,7 @@ const App: React.FC = () => {
                 searchPending={loading}
               />
             ))}
-        {/* A red dot at the origin to represent the search term */}
+        {/* A white dot at the origin to represent the search term */}
         <DotMemo
           word={inputText}
           x={0}
@@ -149,7 +149,7 @@ const App: React.FC = () => {
           language={null}
           selected={selected.includes(inputText)}
           select={() => select(inputText)}
-          color="red"
+          color="white"
           searchPending={loading}
         />
       </Canvas>
