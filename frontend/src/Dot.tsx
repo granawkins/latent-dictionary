@@ -33,7 +33,9 @@ const Dot: React.FC<DotProps> = ({
     : "white";
 
   // Debug log to track dot rendering
-  console.log(`Rendering dot: ${word}, language: ${language}, color: ${dotColor}, position: [${x}, ${y}, ${z}]`);
+  console.log(
+    `Rendering dot: ${word}, language: ${language}, color: ${dotColor}, position: [${x}, ${y}, ${z}]`,
+  );
 
   return (
     <mesh
