@@ -13,7 +13,6 @@ interface DotProps {
   z: number;
   selected: boolean;
   select: () => void;
-  searchPending?: boolean;
   language?: string | null;
   color?: string;
 }
@@ -25,11 +24,9 @@ const Dot: React.FC<DotProps> = ({
   z,
   selected,
   select,
-  searchPending = false,
   language,
   color,
 }) => {
-  const meshRef = useRef<Mesh>(null);
   const dotColor = color
     ? color
     : language
