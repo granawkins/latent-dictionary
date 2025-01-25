@@ -39,8 +39,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   return (
     <div className="language-selector-container">
-      <div 
-        className={`language-selector-legend ${isExpanded ? 'expanded' : ''}`} 
+      <div
+        className={`language-selector-legend ${isExpanded ? "expanded" : ""}`}
         onClick={toggleExpanded}
       >
         <div className="language-selector-flags">
@@ -48,8 +48,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <div
               key={lang.code}
               className={`language-selector-flag ${
-                selectedLanguages.includes(lang.code) ? 'selected' : ''
-              } ${!isExpanded && !selectedLanguages.includes(lang.code) ? 'hidden' : ''}`}
+                selectedLanguages.includes(lang.code) ? "selected" : ""
+              } ${!isExpanded && !selectedLanguages.includes(lang.code) ? "hidden" : ""}`}
               onClick={(e) => {
                 if (isExpanded) {
                   e.stopPropagation();
@@ -57,9 +57,11 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 }
               }}
               title={lang.name}
-              style={{
-                '--flag-color': lang.color
-              } as React.CSSProperties}
+              style={
+                {
+                  "--flag-color": lang.color,
+                } as React.CSSProperties
+              }
             >
               <lang.Flag title={lang.name} className="flag-image" />
             </div>
