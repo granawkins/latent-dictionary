@@ -1,6 +1,5 @@
 import { Html } from "@react-three/drei";
-import React, { useRef } from "react";
-import { Mesh } from "three";
+import React from "react";
 
 import { Languages, Language } from "./utils";
 
