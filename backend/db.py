@@ -21,10 +21,10 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 client = chromadb.PersistentClient(path=DB_PATH.as_posix())
 # Configure HNSW index parameters for better performance and capacity
 hnsw_params = {
-    "hnsw:space": "cosine",
-    "hnsw:construction_ef": 100,
-    "hnsw:M": 16,
-    "hnsw:maxElements": 100000,
+    "space": "cosine",
+    "construction_ef": 100,
+    "M": 16,
+    "max_elements": 100000,
 }
 
 if openai_api_key:
@@ -86,7 +86,7 @@ def main() -> None:
         collection_info = collection.get()
         current_count = len(collection_info.get("ids", []))
         total_records = current_count + len(documents)
-        max_capacity = hnsw_params["hnsw:maxElements"]
+        max_capacity = hnsw_params["max_elements"]
         if total_records > max_capacity:
             print(
                 f"Error: Total records ({total_records}) would exceed "
