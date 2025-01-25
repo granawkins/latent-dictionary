@@ -138,7 +138,7 @@ def save_wordlist(words: List[str], language: str) -> bool:
 
 
 def main():
-    """Fetch and save English frequency list."""
+    """Fetch and save word frequency lists."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -149,20 +149,24 @@ def main():
         "--num-words",
         type=int,
         default=10000,
-        help="Number of words to fetch (default: 10000)",
+        help="Number of words to fetch per language (default: 10000)",
     )
     parser.add_argument(
         "-l",
         "--language",
         type=str,
         choices=["english", "spanish", "french", "german", "italian", "chinese"],
-        default="english",
-        help="Language to fetch (default: english)",
+        help="Specific language to fetch (if not specified, fetches all languages)",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        default=True,
+        help="Process all configured languages (default: True)",
     )
     args = parser.parse_args()
 
     # Language configurations
-    # Comment out languages you don't want to use locally
     configs = {
         "english": {
             "page_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
@@ -217,22 +221,34 @@ def main():
         },
     }
 
-    language = args.language
-    config = configs[language]
+    # Determine which languages to process
+    languages_to_process = []
+    if args.language:
+        languages_to_process = [args.language]
+    elif args.all:
+        languages_to_process = list(configs.keys())
 
-    logging.info(f"Fetching {language} frequency list...")
-    words = fetch_wiktionary_words(language, config, args.num_words)
+    if not languages_to_process:
+        logging.error("No languages specified to process")
+        return 1
 
-    if words:
-        if save_wordlist(words, language):
-            logging.info(f"Successfully saved {len(words)} words")
-            return 0
+    success = True
+    for language in languages_to_process:
+        config = configs[language]
+        logging.info(f"Fetching {language} frequency list...")
+        words = fetch_wiktionary_words(language, config, args.num_words)
+
+        if words:
+            if save_wordlist(words, language):
+                logging.info(f"Successfully saved {len(words)} {language} words")
+            else:
+                logging.error(f"Failed to save {language} word list")
+                success = False
         else:
-            logging.error(f"Failed to save {language} word list")
-    else:
-        logging.error(f"Failed to fetch {language} frequency list")
+            logging.error(f"Failed to fetch {language} frequency list")
+            success = False
 
-    return 1
+    return 0 if success else 1
 
 
 if __name__ == "__main__":
