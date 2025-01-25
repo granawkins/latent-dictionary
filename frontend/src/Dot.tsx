@@ -1,7 +1,8 @@
 import { Text } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import React, { useRef } from "react";
-import { Mesh } from "three";
-
+import { Mesh, Vector3 } from "three";
+import { animated, useSpring } from "@react-spring/three";
 import { Languages, Language } from "./utils";
 
 export const SCALE = 10;
@@ -15,6 +16,7 @@ interface DotProps {
   select: () => void;
   language?: string | null;
   color?: string;
+  searchPending?: boolean;
 }
 
 const Dot: React.FC<DotProps> = ({
@@ -26,8 +28,12 @@ const Dot: React.FC<DotProps> = ({
   select,
   language,
   color,
+  searchPending,
 }) => {
   const meshRef = useRef<Mesh>(null);
+  const initialPosition = useRef(new Vector3(x * SCALE, y * SCALE, z * SCALE));
+  const time = useRef(Math.random() * Math.PI * 2);
+
   const dotColor = color
     ? color
     : language
@@ -39,36 +45,57 @@ const Dot: React.FC<DotProps> = ({
     ? Languages.find((l: Language) => l.name === language)?.code
     : null;
 
+  // Spring animation for position
+  const { position } = useSpring({
+    position: [x * SCALE, y * SCALE, z * SCALE],
+    config: { mass: 1, tension: 120, friction: 14 },
+  });
+
+  // Orbital motion for empty dots
+  useFrame((_, delta) => {
+    if (!word && meshRef.current && !searchPending) {
+      time.current += delta * 0.2;
+      const radius = 5;
+      const orbitX = Math.cos(time.current) * radius;
+      const orbitZ = Math.sin(time.current) * radius;
+      meshRef.current.position.x = orbitX;
+      meshRef.current.position.z = orbitZ;
+      meshRef.current.position.y = Math.sin(time.current * 0.5) * 2;
+    }
+  });
+
   return (
-    <mesh
+    <animated.mesh
       ref={meshRef}
-      position={[x * SCALE, y * SCALE, z * SCALE]}
+      position={word ? position : undefined}
       onClick={select}
     >
       <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
       <meshBasicMaterial
         color={dotColor}
         transparent
-        opacity={selected ? 0.85 : 0.6}
+        opacity={selected ? 0.85 : word ? 0.6 : 0.3}
       />
-      <Text
-        position={[0, 0.5, 0]}
-        fontSize={0.3}
-        color={dotColor}
-        anchorX="center"
-        anchorY="middle"
-        font={
-          langCode === "zh"
-            ? "https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.ttf"
-            : "https://fonts.gstatic.com/s/notosans/v35/o-0IIpQlx3QUlC5A4PNr5TRG.ttf"
-        }
-        onError={(e) => {
-          console.error(`Text rendering error for word "${word}":`, e);
-        }}
-      >
-        {word}
-      </Text>
-    </mesh>
+      {word && (
+        <Text
+          position={[0, 0.5, 0]}
+          fontSize={0.3}
+          color={dotColor}
+          anchorX="center"
+          anchorY="middle"
+          font={
+            langCode === "zh"
+              ? "https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.ttf"
+              : "https://fonts.gstatic.com/s/notosans/v35/o-0IIpQlx3QUlC5A4PNr5TRG.ttf"
+          }
+          onError={(e) => {
+            console.error(`Text rendering error for word "${word}":`, e);
+          }}
+        >
+          {word}
+        </Text>
+      )}
+    </animated.mesh>
   );
 };
 

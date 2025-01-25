@@ -39,11 +39,58 @@ const DotMemo = React.memo(Dot);
 const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
+  // Maintain a fixed set of dots per language
+  const [dots, setDots] = useState<Record<string, CorpusItem[]>>({});
   const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const hasLoadedData = useRef<boolean>(false);
   const appRef = useRef<ElementRef<"div">>(null);
+
+  // Initialize or update dots for a language
+  const initializeDotsForLanguage = useCallback((langCode: string) => {
+    const langName = Languages.find(l => l.code === langCode)?.name;
+    if (!langName) return;
+
+    setDots(prevDots => {
+      const existingDots = prevDots[langCode] || [];
+      if (existingDots.length === wordsPerL) return prevDots;
+      
+      const newDots = [...existingDots];
+      while (newDots.length < wordsPerL) {
+        newDots.push({
+          word: "",
+          x: (Math.random() - 0.5) * 0.1,
+          y: (Math.random() - 0.5) * 0.1,
+          z: (Math.random() - 0.5) * 0.1,
+          language: langName
+        });
+      }
+      
+      return {
+        ...prevDots,
+        [langCode]: newDots
+      };
+    });
+  }, [wordsPerL]);
+
+  // Update dots when languages change
+  useEffect(() => {
+    selectedLanguages.forEach(lang => {
+      initializeDotsForLanguage(lang);
+    });
+    
+    // Remove dots for unselected languages
+    setDots(prevDots => {
+      const newDots = { ...prevDots };
+      Object.keys(newDots).forEach(lang => {
+        if (!selectedLanguages.includes(lang)) {
+          delete newDots[lang];
+        }
+      });
+      return newDots;
+    });
+  }, [selectedLanguages, initializeDotsForLanguage]);
+
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -129,7 +176,58 @@ const App: React.FC = () => {
         );
         if (response) {
           setActiveText(inputText);
-          setCorpus(response);
+          // Update dots with new corpus data
+          setDots(prevDots => {
+            const newDots = { ...prevDots };
+            
+            // Group corpus items by language code
+            const corpusByLang: Record<string, CorpusItem[]> = {};
+            Object.values(response).forEach(item => {
+              const langCode = Languages.find(l => l.name === item.language)?.code;
+              if (langCode && selectedLanguages.includes(langCode)) {
+                corpusByLang[langCode] = corpusByLang[langCode] || [];
+                corpusByLang[langCode].push(item);
+              }
+            });
+            
+            // Update dots for each language
+            Object.entries(corpusByLang).forEach(([lang, items]) => {
+              const langName = Languages.find(l => l.code === lang)?.name;
+              if (!newDots[lang] && langName) {
+                newDots[lang] = Array(wordsPerL).fill(null).map(() => ({
+                  word: "",
+                  x: (Math.random() - 0.5) * 0.1,
+                  y: (Math.random() - 0.5) * 0.1,
+                  z: (Math.random() - 0.5) * 0.1,
+                  language: langName
+                }));
+              }
+              
+              const updatedDots = [...newDots[lang]];
+              items.forEach((item, index) => {
+                if (index < updatedDots.length) {
+                  updatedDots[index] = item;
+                }
+              });
+              
+              // Clear remaining dots
+              for (let i = items.length; i < updatedDots.length; i++) {
+                const langName = Languages.find(l => l.code === lang)?.name;
+                updatedDots[i] = {
+                  word: "",
+                  x: (Math.random() - 0.5) * 0.1,
+                  y: (Math.random() - 0.5) * 0.1,
+                  z: (Math.random() - 0.5) * 0.1,
+                  language: langName || null
+                };
+              }
+              
+              newDots[lang] = updatedDots;
+            });
+            
+            return newDots;
+          });
+
           if (!hasLoadedData.current) {
             hasLoadedData.current = true;
             setShowSwipeIndicator(true);
@@ -194,30 +292,27 @@ const App: React.FC = () => {
         )}
       </button>
       <Canvas>
-        <Camera selectedCorpus={corpus} />
-        {corpus &&
-          Object.entries(corpus)
-            .filter(([, data]) => {
-              // Only show dots for selected languages
-              if (!data.language) return true; // Always show words without language
-              const langCode = Languages.find(
-                (l) => l.name === data.language,
-              )?.code;
-              return langCode && selectedLanguages.includes(langCode);
-            })
-            .map(([i, data]) => (
-              <DotMemo
-                key={i}
-                word={data.word}
-                x={data.x}
-                y={data.y}
-                z={data.z}
-                language={data.language}
-                selected={selected.includes(data.word)}
-                select={() => select(data.word)}
-                searchPending={loading}
-              />
-            ))}
+        <Camera selectedCorpus={Object.values(dots).flat().reduce((acc, dot) => {
+          if (dot.word) {
+            acc[dot.word] = dot;
+          }
+          return acc;
+        }, {} as Record<string, CorpusItem>)} />
+        {Object.entries(dots).map(([lang, langDots]) =>
+          langDots.map((dot, index) => (
+            <DotMemo
+              key={`${lang}-${index}`}
+              word={dot.word}
+              x={dot.x}
+              y={dot.y}
+              z={dot.z}
+              language={dot.language}
+              selected={selected.includes(dot.word)}
+              select={() => select(dot.word)}
+              searchPending={loading}
+            />
+          ))
+        )}
         {/* A white dot at the origin to represent the search term */}
         <DotMemo
           word={inputText}
