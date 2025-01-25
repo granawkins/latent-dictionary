@@ -5,7 +5,8 @@ import shutil
 from typing import List, Tuple, Set, cast, Optional
 
 import chromadb
-from chromadb.api.types import Include, Collection
+from chromadb.api.types import Include
+from chromadb.api import Collection
 from chromadb.utils.embedding_functions.openai_embedding_function import (
     OpenAIEmbeddingFunction,
 )
@@ -63,7 +64,7 @@ def handle_incompatible_database() -> None:
     if DB_PATH.exists():
         if backup_path.exists():
             backup_path.unlink()
-        shutil.move(DB_PATH, backup_path)
+        shutil.move(str(DB_PATH), str(backup_path))
     
     print("\nPlease run this script again to rebuild the database.")
     print("Your existing data is safe in the backup file.")
