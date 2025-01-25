@@ -1,0 +1,92 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Backend checks
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+        cache-dependency-path: backend/requirements.txt
+    
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run Ruff
+      working-directory: ./backend
+      run: ruff check .
+
+    - name: Run Pyright
+      working-directory: ./backend
+      run: pyright .
+
+    - name: Run Pytest
+      working-directory: ./backend
+      run: |
+        PYTHONPATH=$PYTHONPATH:$(pwd) python -m pytest tests/ -v
+    
+    # Frontend build
+    - name: Use Node.js 18.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18.x
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    - name: Check formatting
+      working-directory: ./frontend
+      run: npm run format:check
+    
+    - name: Run linting
+      working-directory: ./frontend
+      run: npm run lint
+    
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    # Deploy
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.DEPLOY_KEY }}
+        known_hosts: unnecessary
+        if_key_exists: fail
+
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to DigitalOcean
+      run: |
+        # Sync the repository
+        rsync -avz --delete \
+          --exclude '.git*' \
+          --exclude 'node_modules' \
+          --exclude '.venv' \
+          --exclude '__pycache__' \
+          ./ ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+        # Execute deployment commands
+        ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd ${{ secrets.DEPLOY_PATH }} && \
+          # Stop the current PM2 process
+          pm2 stop latentdictionary || true && \
+          pm2 delete latentdictionary || true && \
+          # Run setup script
+          ./setup.sh"
