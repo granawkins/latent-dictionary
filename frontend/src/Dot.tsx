@@ -5,6 +5,10 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 import { Languages, Language } from "./utils";
 
+// Import fonts using Vite's asset handling
+import notoSansRegular from "/NotoSans-Regular.ttf?url";
+import notoSansChinese from "/NotoSansSC-VariableFont_wght.ttf?url";
+
 export const SCALE = 10;
 
 interface DotProps {
@@ -44,10 +48,7 @@ const Dot: React.FC<DotProps> = ({
     : null;
 
   // Determine font path based on language
-  const fontPath =
-    langCode === "zh"
-      ? `${window.location.origin}/NotoSansSC-VariableFont_wght.ttf`
-      : `${window.location.origin}/NotoSans-Regular.ttf`;
+  const fontPath = langCode === "zh" ? notoSansChinese : notoSansRegular;
 
   // Preload font to catch errors
   useEffect(() => {
@@ -56,9 +57,12 @@ const Dot: React.FC<DotProps> = ({
       fontPath,
       () => setFontError(false),
       undefined,
-      () => setFontError(true),
+      (error) => {
+        console.error(`Font loading error for ${language}:`, error);
+        setFontError(true);
+      },
     );
-  }, [fontPath]);
+  }, [fontPath, language]);
 
   if (fontError) {
     console.warn(`Failed to load font for language: ${language}`);

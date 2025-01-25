@@ -9,5 +9,16 @@ export default defineConfig({
   },
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx']
-  }
+  },
+  build: {
+    assetsInlineLimit: 0, // Don't inline any assets as base64
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          fonts: ['./public/NotoSans-Regular.ttf', './public/NotoSansSC-VariableFont_wght.ttf']
+        }
+      }
+    }
+  },
+  publicDir: 'public'
 })
