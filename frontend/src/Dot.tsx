@@ -1,6 +1,7 @@
 import { Text } from "@react-three/drei";
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Mesh } from "three";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 import { Languages, Language } from "./utils";
 
@@ -30,11 +31,38 @@ const Dot: React.FC<DotProps> = ({
   color,
 }) => {
   const meshRef = useRef<Mesh>(null);
+  const [fontError, setFontError] = useState<boolean>(false);
   const dotColor = color
     ? color
     : language
       ? Languages.find((l: Language) => l.name === language)?.color
       : "white";
+
+  // Get the language code (zh for Chinese)
+  const langCode = language
+    ? Languages.find((l: Language) => l.name === language)?.code
+    : null;
+
+  // Determine font path based on language
+  const fontPath =
+    langCode === "zh"
+      ? `${window.location.origin}/NotoSansSC-VariableFont_wght.ttf`
+      : `${window.location.origin}/NotoSans-Regular.ttf`;
+
+  // Preload font to catch errors
+  useEffect(() => {
+    const loader = new FontLoader();
+    loader.load(
+      fontPath,
+      () => setFontError(false),
+      undefined,
+      () => setFontError(true)
+    );
+  }, [fontPath]);
+
+  if (fontError) {
+    console.warn(`Failed to load font for language: ${language}`);
+  }
 
   return (
     <mesh
@@ -53,11 +81,11 @@ const Dot: React.FC<DotProps> = ({
         fontSize={0.3}
         color={dotColor}
         transparent={!selected}
-        font={
-          language === "chinese"
-            ? "/NotoSansSC-VariableFont_wght.ttf"
-            : "/NotoSans-Regular.ttf"
-        }
+        font={fontPath}
+        onError={(e) => {
+          console.warn(`Text rendering error for word "${word}":`, e);
+          setFontError(true);
+        }}
       >
         {word}
       </Text>
