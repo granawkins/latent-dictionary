@@ -34,7 +34,7 @@ logging.basicConfig(
 # Rate limiting parameters
 REQUEST_DELAY = 0.1  # 100ms between requests to be nice to the API
 
-def fetch_definition(word: str, language: str) -> Optional[str]:
+def fetch_definition(word: str, language: str) -> Optional[List[str]]:
     """Fetch definition for a word from Wiktionary.
     
     Args:
@@ -42,7 +42,7 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
         language: Language code (e.g., "english", "spanish")
     
     Returns:
-        Definition string or None if not found
+        List of definition strings or None if not found
     """
     try:
         # Add delay for rate limiting
@@ -525,9 +525,10 @@ def save_wordlist(words: List[Tuple[str, Optional[str]]], language: str) -> bool
         output_file = wordlists_dir / f"{language}.txt"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# {language.title()} word list\n")
-            for word, definition in words:
-                if definition:
-                    f.write(f"{word}\t{definition}\n")
+            for word, definitions in words:
+                if definitions:
+                    definition_str = ' | '.join(definitions)
+                    f.write(f"{word}\t{definition_str}\n")
                 else:
                     f.write(f"{word}\n")
         return True
