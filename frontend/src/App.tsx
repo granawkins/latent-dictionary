@@ -191,11 +191,11 @@ const App: React.FC = () => {
                 corpusByLang[lang.code] = corpusByLang[lang.code] || [];
                 corpusByLang[lang.code].push({
                   ...item,
-                  language: item.language // Preserve the language name from the API
+                  language: item.language, // Preserve the language name from the API
                 });
               }
             });
-            console.log('Grouped corpus by language:', corpusByLang); // Debug log
+            console.log("Grouped corpus by language:", corpusByLang); // Debug log
 
             // Update dots for each language
             Object.entries(corpusByLang).forEach(([lang, items]) => {
@@ -254,7 +254,7 @@ const App: React.FC = () => {
     const languages = Languages.filter((l) =>
       selectedLanguages.includes(l.code),
     ).map((l) => l.name);
-    console.log('Fetching with languages:', languages); // Debug log
+    console.log("Fetching with languages:", languages); // Debug log
     fetchSearch(inputText, languages, wordsPerL);
   }, [selectedLanguages]);
 
