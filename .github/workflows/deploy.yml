@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ "main", "mentat-64-1" ]
+    branches: [ "main" ]
 
 jobs:
   deploy:
@@ -75,18 +75,8 @@ jobs:
 
     - name: Deploy to DigitalOcean
       run: |
-        # Sync the repository
-        rsync -avz --delete \
-          --exclude '.git*' \
-          --exclude 'node_modules' \
-          --exclude '.venv' \
-          --exclude '__pycache__' \
-          ./ ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/
-
-        # Execute deployment commands
+        # Pull latest changes and deploy
         ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd ${{ secrets.DEPLOY_PATH }} && \
-          # Stop the current PM2 process
-          pm2 stop latentdictionary || true && \
-          pm2 delete latentdictionary || true && \
-          # Run setup script
-          ./setup.sh"
+          git pull && \
+          # Gracefully restart PM2 process if it exists, otherwise run setup
+          pm2 reload latentdictionary || ./setup.sh"
