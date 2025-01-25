@@ -75,8 +75,24 @@ jobs:
 
     - name: Deploy to DigitalOcean
       run: |
-        # Pull latest changes and deploy
+        # Pull latest changes and check for updates
         ssh ${{ secrets.DEPLOY_USERNAME }}@${{ secrets.DEPLOY_HOST }} "cd ${{ secrets.DEPLOY_PATH }} && \
+          git fetch && \
+          CHANGES=\$(git diff --name-only HEAD..origin/main) && \
           git pull && \
-          # Gracefully restart PM2 process if it exists, otherwise run setup
+          # Update backend if requirements changed
+          if echo \"\$CHANGES\" | grep -q \"backend/requirements.txt\"; then
+            cd backend && \
+            source .venv/bin/activate && \
+            pip install -r requirements.txt && \
+            cd ..
+          fi && \
+          # Rebuild frontend if frontend files changed
+          if echo \"\$CHANGES\" | grep -q \"^frontend/\"; then
+            cd frontend && \
+            npm install && \
+            npm run build && \
+            cd ..
+          fi && \
+          # Reload PM2 process or run full setup if needed
           pm2 reload latentdictionary || ./setup.sh"
