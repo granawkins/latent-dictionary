@@ -1,13 +1,8 @@
-import { Text } from "@react-three/drei";
-import React, { useRef, useState, useEffect } from "react";
+import { Html } from "@react-three/drei";
+import React, { useRef } from "react";
 import { Mesh } from "three";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 
 import { Languages, Language } from "./utils";
-
-// Import fonts using Vite's asset handling
-import notoSansRegular from "/NotoSans-Regular.ttf?url";
-import notoSansChinese from "/NotoSansSC-VariableFont_wght.ttf?url";
 
 export const SCALE = 10;
 
@@ -35,7 +30,6 @@ const Dot: React.FC<DotProps> = ({
   color,
 }) => {
   const meshRef = useRef<Mesh>(null);
-  const [fontError, setFontError] = useState<boolean>(false);
   const dotColor = color
     ? color
     : language
@@ -46,27 +40,6 @@ const Dot: React.FC<DotProps> = ({
   const langCode = language
     ? Languages.find((l: Language) => l.name === language)?.code
     : null;
-
-  // Determine font path based on language
-  const fontPath = langCode === "zh" ? notoSansChinese : notoSansRegular;
-
-  // Preload font to catch errors
-  useEffect(() => {
-    const loader = new FontLoader();
-    loader.load(
-      fontPath,
-      () => setFontError(false),
-      undefined,
-      (error) => {
-        console.error(`Font loading error for ${language}:`, error);
-        setFontError(true);
-      },
-    );
-  }, [fontPath, language]);
-
-  if (fontError) {
-    console.warn(`Failed to load font for language: ${language}`);
-  }
 
   return (
     <mesh
@@ -80,19 +53,21 @@ const Dot: React.FC<DotProps> = ({
         transparent
         opacity={searchPending ? 0.25 : selected ? 0.85 : 0.6}
       />
-      <Text
+      <Html
         position={[0, 0.5, 0]}
-        fontSize={0.3}
-        color={dotColor}
-        transparent={!selected}
-        font={fontPath}
-        onError={(e) => {
-          console.warn(`Text rendering error for word "${word}":`, e);
-          setFontError(true);
+        style={{
+          transform: 'translate(-50%, -100%)',
         }}
       >
-        {word}
-      </Text>
+        <div
+          className={`dot-label ${selected ? 'selected' : ''} ${
+            langCode === 'zh' ? 'chinese-text' : ''
+          }`}
+          style={{ color: dotColor }}
+        >
+          {word}
+        </div>
+      </Html>
     </mesh>
   );
 };
