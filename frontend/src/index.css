@@ -1,18 +1,3 @@
-@font-face {
-  font-family: "Noto Sans";
-  src: url("/NotoSans-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Noto Sans SC";
-  src: url("/NotoSansSC-VariableFont_wght.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 
 body {
   margin: 0;
