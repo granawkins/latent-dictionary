@@ -201,7 +201,18 @@ def main():
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
         "chinese": {
-            "page_path": "Appendix:Mandarin_Frequency_lists/1-1000",
+            "pages": [
+                "Appendix:Mandarin_Frequency_lists/1-1000",
+                "Appendix:Mandarin_Frequency_lists/1001-2000",
+                "Appendix:Mandarin_Frequency_lists/2001-3000",
+                "Appendix:Mandarin_Frequency_lists/3001-4000",
+                "Appendix:Mandarin_Frequency_lists/4001-5000",
+                "Appendix:Mandarin_Frequency_lists/5001-6000",
+                "Appendix:Mandarin_Frequency_lists/6001-7000",
+                "Appendix:Mandarin_Frequency_lists/7001-8000",
+                "Appendix:Mandarin_Frequency_lists/8001-9000",
+                "Appendix:Mandarin_Frequency_lists/9001-10000",
+            ],
             "sections": ["0"],  # Main section containing the word list
         },
     }
