@@ -11,7 +11,7 @@ const CloseIcon: React.FC<{ onClick: () => void }> = ({ onClick }) => (
     style={{
       position: "absolute",
       top: 0,
-      right: "-40px",
+      right: 0,
       width: "32px",
       height: "32px",
       cursor: "pointer",
@@ -45,7 +45,7 @@ const styles = {
   container: {
     position: "fixed",
     bottom: "20px",
-    right: "20px",
+    left: "20px",
     zIndex: 1000,
     userSelect: "none",
   } as CSSProperties,
