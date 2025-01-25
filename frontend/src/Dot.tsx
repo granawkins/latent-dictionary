@@ -31,7 +31,6 @@ const Dot: React.FC<DotProps> = ({
   searchPending,
 }) => {
   const meshRef = useRef<Mesh>(null);
-  const initialPosition = useRef(new Vector3(x * SCALE, y * SCALE, z * SCALE));
   const time = useRef(Math.random() * Math.PI * 2);
 
   const dotColor = color
