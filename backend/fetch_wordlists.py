@@ -418,8 +418,8 @@ def fetch_definition(word: str, language: str) -> Optional[List[str]]:
             logging.debug(f"No definitions found for word: {word}")
             return None
             
-        # Return first 3 definitions combined
-        return ' | '.join(definitions[:3])
+        # Return first 3 definitions
+        return definitions[:3]
 
     except Exception as e:
         logging.debug(f"Error fetching definition for {word}: {str(e)}")
