@@ -34,25 +34,31 @@ logging.basicConfig(
 # Rate limiting parameters
 REQUEST_DELAY = 0.1  # 100ms between requests to be nice to the API
 
-def fetch_definition(word: str, language: str) -> Optional[List[str]]:
-    """Fetch definition for a word from Wiktionary.
+def fetch_definitions_batch(words: List[str], language: str) -> dict[str, Optional[List[str]]]:
+    """Fetch definitions for multiple words from Wiktionary using batch queries.
     
     Args:
-        word: Word to fetch definition for
+        words: List of words to fetch definitions for
         language: Language code (e.g., "english", "spanish")
     
     Returns:
-        List of definition strings or None if not found
+        Dictionary mapping words to their definitions (None if not found)
     """
     try:
         # Add delay for rate limiting
         time.sleep(REQUEST_DELAY)
         
+        # Join words with | for batch query
+        titles = '|'.join(words)
+        
         params = {
-            "action": "parse",
-            "page": word,
+            "action": "query",
+            "titles": titles,
+            "prop": "revisions",
+            "rvprop": "content",
             "format": "json",
-            "prop": "text",
+            "formatversion": "2",  # Use newer format
+            "rvslots": "main"  # Required for newer format
         }
 
         response = requests.get(
@@ -61,369 +67,123 @@ def fetch_definition(word: str, language: str) -> Optional[List[str]]:
         response.raise_for_status()
         data = response.json()
 
-        if "parse" not in data:
-            logging.debug(f"No content found for word: {word}")
-            return None
-
-        html_content = data["parse"]["text"]["*"]
-        
-        # Find the language section using a more flexible pattern
-        lang_title = language.title()
-        lang_patterns = [
-            f'<h2><span class="mw-headline" id="{lang_title}">',
-            f'<h2 id="{lang_title}">',
-            f'class="mw-headline" id="{lang_title}"'
-        ]
-        
-        lang_content = None
-        for pattern in lang_patterns:
-            sections = html_content.split(pattern)
-            if len(sections) > 1:
-                lang_content = sections[1]
-                break
-        
-        if not lang_content:
-            logging.debug(f"No {language} section found for word: {word}")
-            return None
-        
-        # Find the end of the language section (next h2 heading)
-        next_lang = re.search(r'<h2[^>]*>', lang_content)
-        if next_lang:
-            lang_content = lang_content[:next_lang.start()]
-        
-        # Special handling for Spanish common words
-        if language.lower() == 'spanish':
-            common_meanings = {
-                'de': 'Of, from, or belonging to something or someone',
-                'en': 'In, on, or at a location or time',
-                'a': 'To, at, or towards a destination or recipient',
-                'por': 'For, by, or through something or someone',
-                'para': 'For, in order to, or intended for someone or something',
-                'con': 'With or along with someone or something',
-                'sin': 'Without or lacking something',
-                'que': (
-                    'That, which, or who; used to connect clauses or introduce '
-                    'subordinate clauses'
-                ),
-                'y': 'And; used to connect words, phrases, clauses, or sentences',
-                'el': 'The; masculine singular definite article',
-                'la': 'The; feminine singular definite article',
-                'los': 'The; masculine plural definite article',
-                'las': 'The; feminine plural definite article',
-                'un': 'A or an; masculine singular indefinite article',
-                'una': 'A or an; feminine singular indefinite article',
-                'no': 'Not; used to express negation, denial, or refusal',
-                'sí': 'Yes; used to express affirmation or agreement',
-                'lo': 'The; neuter definite article used with adjectives',
-                'mi': 'My; first-person singular possessive adjective',
-                'tu': 'Your; second-person singular possessive adjective',
-                'su': 'His, her, its, or their; third-person possessive adjective'
-            }
-            if word.lower() in common_meanings:
-                meaning = common_meanings[word.lower()]
-                return [meaning] if isinstance(meaning, str) else meaning
-
-        # Special handling for English common words
-        if language.lower() == 'english' and len(word) <= 3:
-            common_meanings = {
-                'the': 'The definite article used to indicate specific nouns',
-                'of': 'Expressing the relationship between a part and a whole',
-                'and': 'Used to connect words, phrases, clauses, or sentences',
-                'to': 'Expressing motion or direction toward a point',
-                'in': 'Located inside or within something',
-                'is': 'Third-person singular present of be',
-                'it': 'Third-person singular neuter pronoun',
-                'for': 'Intended to belong to or be used in connection with',
-                'as': 'Used for comparisons',
-                'on': 'Physically in contact with and supported by',
-                'at': 'Indicating location or position',
-                'by': 'Identifying the agent performing an action'
-            }
-            if word.lower() in common_meanings:
-                meaning = common_meanings[word.lower()]
-                return [meaning] if isinstance(meaning, str) else meaning
-
-        # Look for definitions section
-        def_section = None
-        
-        # Try to find the section with definitions
-        section_titles = [
-            'Article', 'Noun', 'Verb', 'Adjective', 'Adverb',
-            'Preposition', 'Conjunction', 'Particle'
-        ]
-        
-        # Pattern to find section headers
-        section_pattern = (
-            r'<h[34][^>]*>'  # h3 or h4 tag with any attributes
-            r'(?:<span[^>]*>)?'  # optional span with attributes
-            r'([^<]+)'  # capture the heading text
-        )
-        section_matches = re.finditer(section_pattern, lang_content)
-        
-        for match in section_matches:
-            section_title = match.group(1)
-            if any(title in section_title for title in section_titles):
-                section_start = match.end()
-                # Find next heading of any level (h2-h4)
-                next_pattern = r'<h[234][^>]*>'
-                next_section = re.search(next_pattern, lang_content[section_start:])
-                
-                if next_section:
-                    end = section_start + next_section.start()
-                    def_section = lang_content[section_start:end]
-                else:
-                    def_section = lang_content[section_start:]
-                break
-        
-        # If no definition section found in headers, try looking for definition lists
-        if not def_section:
-            dl_match = re.search(r'<dl>(.+?)</dl>', lang_content, re.DOTALL)
-            if dl_match:
-                def_section = dl_match.group(1)
-        
-        if not def_section:
-            logging.debug(f"No definition section found for word: {word}")
-            return None
-        
-        # Look for numbered definitions
-        definitions = []
-        
-        # First try to find definitions in ordered lists
-        ol_sections = re.finditer(r'<ol[^>]*>(.+?)</ol>', def_section, re.DOTALL)
-        for ol in ol_sections:
-            ol_content = ol.group(1)
-            def_items = re.findall(r'<li[^>]*>(.+?)</li>', ol_content, re.DOTALL)
-            
-            for item in def_items:
-                # Remove citations, examples, and nested content
-                clean_def = re.sub(r'<ul>.+?</ul>', '', item, flags=re.DOTALL)
-                clean_def = re.sub(r'<dl>.+?</dl>', '', clean_def, flags=re.DOTALL)
-                clean_def = re.sub(r'\[\[.+?\]\]', '', clean_def)
-                clean_def = re.sub(r'\[.+?\]', '', clean_def)
-                
-                # Remove HTML tags but keep their text content
-                clean_def = re.sub(r'<[^>]+>', '', clean_def)
-                
-                # Remove dates, citations, and parenthetical notes
-                clean_def = re.sub(r'\[from \d+(?:th|st|nd|rd) c\.\]', '', clean_def)
-                clean_def = re.sub(r'\d{4}.*?:', '', clean_def)
-                # Remove obsolete/informal markers
-                obsolete_pattern = (
-                    r'\([^)]*'  # Opening paren and content
-                    r'(?:obsolete|dialectal|archaic|dated|rare|informal)'  # Keywords
-                    r'[^)]*\)'  # Rest of content and closing paren
-                )
-                clean_def = re.sub(obsolete_pattern, '', clean_def)
-                
-                # Clean up HTML entities
-                html_entities = {
-                    '&nbsp;': ' ',
-                    '&#32;': ' ',
-                    '&#59;': ';',
-                    '&#58;': ':'
-                }
-                for entity, replacement in html_entities.items():
-                    clean_def = clean_def.replace(entity, replacement)
-                
-                # Clean up whitespace and dots
-                clean_def = re.sub(r'\s+', ' ', clean_def)  # Normalize spaces
-                clean_def = re.sub(r'\.{2,}', '.', clean_def)  # Multiple dots to one
-                clean_def = clean_def.strip(' .,')  # Remove edge punctuation
-                
-                # Skip if empty or starts with unwanted prefixes
-                unwanted_prefixes = [
-                    '(', 'alternative', 'misspelling', 'present', 'past',
-                    'obsolete', 'archaic', 'dated', 'rare', 'informal',
-                    'plural', 'singular', 'countable', 'uncountable',
-                    'transitive', 'intransitive', 'see also', 'compare',
-                    'often', 'usually', 'especially'
-                ]
-                
-                if (not clean_def or
-                        clean_def.startswith('...') or
-                        any(clean_def.lower().startswith(x)
-                            for x in unwanted_prefixes)):
+        # Process batch response
+        results = {}
+        if "query" in data and "pages" in data["query"]:
+            for page in data["query"]["pages"]:
+                word = page["title"]
+                if "missing" in page:
+                    logging.debug(f"No content found for word: {word}")
+                    results[word] = None
                     continue
-                
-                # Skip if it's too short or looks like an example
-                is_short = len(clean_def) < 10
-                has_colon = ': ' in clean_def
-                starts_with_quote = (
-                    clean_def.startswith('"') or
-                    clean_def.startswith("'")
-                )
-                
-                if is_short or has_colon or starts_with_quote:
+
+                if "revisions" not in page:
+                    logging.debug(f"No revisions found for word: {word}")
+                    results[word] = None
                     continue
+
+                content = page["revisions"][0]["slots"]["main"]["content"]
                 
-                # Extract meaningful sentences
-                sentences = []
-                for sentence in re.split(r'[.!?](?:\s|$)', clean_def):
-                    sentence = sentence.strip()
-                    if not (sentence and len(sentence) >= 10):
-                        continue
-                    if sentence.startswith('...'):
-                        continue
-
-                    # Remove grammatical notes at start of sentence
-                    grammar_prefixes = (
-                        'of|in|on|with|by|for|to|at|from|about|like|used|being|having'
-                    )
-                    sentence = re.sub(
-                        f'^(?:{grammar_prefixes})\\s+',
-                        '',
-                        sentence,
-                        flags=re.IGNORECASE
-                    )
-
-                    # Remove articles at start
-                    sentence = re.sub(
-                        r'^(?:a|an|the)\s+',
-                        '',
-                        sentence,
-                        flags=re.IGNORECASE
-                    )
+                # First check common words
+                definitions = None
+                if language.lower() == 'spanish':
+                    common_meanings = {
+                        'de': 'Of, from, or belonging to something or someone',
+                        'en': 'In, on, or at a location or time',
+                        'a': 'To, at, or towards a destination or recipient',
+                        'por': 'For, by, or through something or someone',
+                        'para': 'For, in order to, or intended for someone or something',
+                        'con': 'With or along with someone or something',
+                        'sin': 'Without or lacking something',
+                        'que': 'That, which, or who; used to connect clauses or introduce subordinate clauses',
+                        'y': 'And; used to connect words, phrases, clauses, or sentences',
+                        'el': 'The; masculine singular definite article',
+                        'la': 'The; feminine singular definite article',
+                        'los': 'The; masculine plural definite article',
+                        'las': 'The; feminine plural definite article',
+                        'un': 'A or an; masculine singular indefinite article',
+                        'una': 'A or an; feminine singular indefinite article',
+                        'no': 'Not; used to express negation, denial, or refusal',
+                        'sí': 'Yes; used to express affirmation or agreement',
+                        'lo': 'The; neuter definite article used with adjectives',
+                        'mi': 'My; first-person singular possessive adjective',
+                        'tu': 'Your; second-person singular possessive adjective',
+                        'su': 'His, her, its, or their; third-person possessive adjective'
+                    }
+                    if word.lower() in common_meanings:
+                        definitions = [common_meanings[word.lower()]]
+                elif language.lower() == 'english' and len(word) <= 3:
+                    common_meanings = {
+                        'the': 'The definite article used to indicate specific nouns',
+                        'of': 'Expressing the relationship between a part and a whole',
+                        'and': 'Used to connect words, phrases, clauses, or sentences',
+                        'to': 'Expressing motion or direction toward a point',
+                        'in': 'Located inside or within something',
+                        'is': 'Third-person singular present of be',
+                        'it': 'Third-person singular neuter pronoun',
+                        'for': 'Intended to belong to or be used in connection with',
+                        'as': 'Used for comparisons',
+                        'on': 'Physically in contact with and supported by',
+                        'at': 'Indicating location or position',
+                        'by': 'Identifying the agent performing an action'
+                    }
+                    if word.lower() in common_meanings:
+                        definitions = [common_meanings[word.lower()]]
+                
+                if not definitions:
+                    # Find the language section
+                    lang_title = language.title()
+                    lang_pattern = rf"={{{2,3}}}\s*{lang_title}\s*={{{2,3}}}"
+                    lang_sections = re.split(lang_pattern, content)
                     
-                    if not (sentence and len(sentence) >= 10):
+                    if len(lang_sections) < 2:
+                        logging.debug(f"No {language} section found for word: {word}")
+                        results[word] = None
                         continue
-
-                    # Remove examples and parenthetical notes
-                    sentence = sentence.split(';')[0]  # Before first semicolon
-                    sentence = re.sub(r'\s*\([^)]*\)', '', sentence)  # No parentheses
-                    sentence = sentence.strip()
                     
-                    # Skip if it looks like a usage note, example, or letter name
-                    skip_phrases = [
-                        'example', 'see also', 'compare', 'often used',
-                        'usually', 'especially', 'note:', 'e.g.', 'i.e.',
-                        'name of', 'letter', 'alphabet', 'pronunciation',
-                        'spelling', 'variant of', 'alternative form',
-                        'abbreviation', 'initialism', 'acronym'
+                    # Get content up to next language section
+                    lang_content = lang_sections[1]
+                    next_lang = re.search(r"={2,3}\s*[A-Z]", lang_content)
+                    if next_lang:
+                        lang_content = lang_content[:next_lang.start()]
+                    
+                    # Extract definitions
+                    definitions = []
+                    
+                    # Look for definitions in various formats
+                    def_patterns = [
+                        r"# ([^\n]+)",  # Numbered definitions
+                        r"\* ([^\n]+)",  # Bullet points
+                        r"\{\{lb\|[^}]+\}\}\s*([^\n]+)",  # Label templates
+                        r"\{\{def\|([^}]+)\}\}",  # Definition templates
+                        r"\{\{gloss\|([^}]+)\}\}",  # Gloss templates
+                        r"\{\{sense\|([^}]+)\}\}",  # Sense templates
                     ]
                     
-                    if any(x in sentence.lower() for x in skip_phrases):
-                        continue
-
-                    # Clean up the sentence
-                    sentence = re.sub(r'\s*\[[^\]]*\]', '', sentence)  # No brackets
-                    sentence = re.sub(r'\s+', ' ', sentence)  # Clean whitespace
-                    sentence = sentence.strip()
-                    
-                    # For Spanish words, look for translations and glosses
-                    if language.lower() == 'spanish':
-                        translation = None
-                        # Look for quoted translations
-                        if '"' in sentence:
-                            translations = re.findall(r'"([^"]+)"', sentence)
-                            if translations:
-                                translation = translations[0].strip()
-                        # Look for translations after ":" or "="
-                        if not translation:
-                            delimiters = [':', '=']
-                            if any(x in sentence for x in delimiters):
-                                parts = re.split(r'[:=]', sentence)
-                                if len(parts) > 1:
-                                    translation = parts[1].strip(' "\'')
-                        # Look for glosses in parentheses
-                        if not translation:
-                            glosses = re.findall(r'\(([^)]+)\)', sentence)
-                            if glosses:
-                                translation = glosses[0].strip()
-                        
-                        if translation:
-                            sentence = translation
-                    
-                    # Special handling for prepositions
-                    prepositions = ['de', 'en', 'a', 'por', 'para', 'con', 'sin']
-                    if word.lower() in prepositions:
-                        preposition_meanings = {
-                            'de': 'Of, from, belonging to',
-                            'en': 'In, on, at',
-                            'a': 'To, at, towards',
-                            'por': 'For, by, through',
-                            'para': 'For, in order to, towards',
-                            'con': 'With, along with',
-                            'sin': 'Without, lacking'
-                        }
-                        sentence = preposition_meanings.get(word.lower(), sentence)
-                    
-                    # Skip if it's too generic or too specific
-                    is_normal_case = (
-                        len(sentence) >= 15 and
-                        len(sentence.split()) >= 3
-                    )
-                    is_preposition = word.lower() in prepositions
-                    unwanted_starts = ('name of', 'form of', 'alternative', 'short for')
-
-                    if (sentence and
-                            (is_normal_case or is_preposition) and
-                            not sentence.lower().startswith(unwanted_starts)):
-                        sentences.append(sentence)
+                    for pattern in def_patterns:
+                        matches = re.finditer(pattern, lang_content)
+                        for match in matches:
+                            definition = match.group(1).strip()
+                            # Clean up wiki markup
+                            definition = re.sub(r"\{\{[^}]+\}\}", "", definition)
+                            definition = re.sub(r"\[\[([^]|]+\|)?([^]]+)\]\]", r"\2", definition)
+                            definition = re.sub(r"''([^']+)''", r"\1", definition)
+                            definition = re.sub(r"#\s*", "", definition)  # Remove list markers
+                            
+                            if definition and len(definition) >= 10:
+                                definitions.append(definition)
+                                if len(definitions) >= 3:
+                                    break
+                        if definitions:
+                            break
                 
-                if sentences:
-                    clean_def = sentences[0]  # Take first good sentence
-                    # Capitalize first letter
-                    clean_def = clean_def[0].upper() + clean_def[1:]
-                    # Remove trailing punctuation
-                    clean_def = clean_def.rstrip('.,;')
-                    
-                    # Final length and quality check
-                    bad_words = ['letter', 'alphabet', 'pronunciation']
-                    is_good_length = (
-                        len(clean_def) >= 15 and
-                        len(clean_def.split()) > 3
-                    )
-                    has_bad_words = any(x in clean_def.lower() for x in bad_words)
+                results[word] = definitions if definitions else None
 
-                    if clean_def and is_good_length and not has_bad_words:
-                        logging.debug(f"Found definition for {word}: {clean_def}")
-                        definitions.append(clean_def)
-                        if len(definitions) >= 3:  # Limit to first 3 definitions
-                            break
-            
-            if definitions:
-                break
-        
-        if not definitions:
-            logging.debug(f"No definitions found in ordered lists for word: {word}")
-            # Try alternative patterns if no definitions found in ordered lists
-            def_patterns = [
-                r'<dd[^>]*>([^<]+)</dd>',
-                r'<li[^>]*>([^<]+)</li>'
-            ]
-            
-            # Words to skip at start of definition
-            skip_words = [
-                '(', 'Alternative', 'Misspelling', 'present', 'past',
-                'Obsolete', 'archaic', 'dated', 'rare', 'informal',
-                'plural', 'singular', 'countable', 'uncountable',
-                'transitive', 'intransitive'
-            ]
-
-            for pattern in def_patterns:
-                def_items = re.findall(pattern, def_section)
-                for item in def_items:
-                    clean_def = re.sub(r'\s+', ' ', item).strip()
-                    if (len(clean_def) >= 10 and
-                            not any(clean_def.startswith(x) for x in skip_words)):
-                        msg = f"Found alternative definition for {word}: {clean_def}"
-                        logging.debug(msg)
-                        definitions.append(clean_def)
-                        if len(definitions) >= 3:
-                            break
-                if definitions:
-                    break
-        
-        if not definitions:
-            logging.debug(f"No definitions found for word: {word}")
-            return None
-            
-        # Return first 3 definitions
-        return definitions[:3]
+        return results
 
     except Exception as e:
-        logging.debug(f"Error fetching definition for {word}: {str(e)}")
-        return None
+        logging.error(f"Error fetching definitions batch: {str(e)}")
+        return {}
 
 def fetch_wiktionary_words(
     language: str,
@@ -488,14 +248,32 @@ def fetch_wiktionary_words(
                         if word and len(word) > 1 and not has_digits:
                             if word not in seen_words:
                                 seen_words.add(word)
-                                # Fetch definition for the word
-                                definition = fetch_definition(word, language)
-                                all_words.append((word, definition))
+                                # Collect words for batch processing
+                                all_words.append((word, None))
                                 if len(all_words) >= num_words:
                                     break
 
                 if len(all_words) >= num_words:
                     break
+
+        if all_words:
+            # Process words in batches
+            batch_size = 50  # Maximum titles per request
+            processed_words = []
+            
+            for i in range(0, len(all_words), batch_size):
+                batch = all_words[i:i + batch_size]
+                batch_words = [word for word, _ in batch]
+                
+                # Fetch definitions for the batch
+                definitions = fetch_definitions_batch(batch_words, language)
+                
+                # Update words with their definitions
+                for word, _ in batch:
+                    definition = definitions.get(word)
+                    processed_words.append((word, definition))
+            
+            all_words = processed_words[:num_words]
 
         if not all_words:
             logging.error(f"No words found in {language} frequency list")
