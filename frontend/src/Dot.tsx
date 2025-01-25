@@ -1,7 +1,7 @@
 import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import React, { useRef } from "react";
-import { Mesh, Vector3 } from "three";
+import { Mesh } from "three";
 import { animated, useSpring } from "@react-spring/three";
 import { Languages, Language } from "./utils";
 
