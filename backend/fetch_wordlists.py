@@ -155,7 +155,7 @@ def main():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish", "french", "german", "chinese"],
+        choices=["english", "spanish", "french", "german", "italian", "chinese"],
         default="english",
         help="Language to fetch (default: english)",
     )
@@ -194,6 +194,10 @@ def main():
         "german": {
             "page_path": "Wiktionary:Frequency_lists/German/Mixed_web_3M",
             # Sections 1-10 correspond to ranges 1-1000 through 9001-10000
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        "italian": {
+            "page_path": "Wiktionary:Frequency_lists/Italian50k",
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
         "chinese": {
