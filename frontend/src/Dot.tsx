@@ -59,8 +59,8 @@ const Dot: React.FC<DotProps> = ({
         anchorY="middle"
         font={
           langCode === "zh"
-            ? "https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.ttf"
-            : "https://fonts.gstatic.com/s/notosans/v35/o-0IIpQlx3QUlC5A4PNr5TRG.ttf"
+            ? "/NotoSansSC-VariableFont_wght.ttf"
+            : "/NotoSans-Regular.ttf"
         }
         onError={(e) => {
           console.error(`Text rendering error for word "${word}":`, e);
