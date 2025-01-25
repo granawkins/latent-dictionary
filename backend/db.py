@@ -51,9 +51,12 @@ def check_collection_compatibility(collection: Collection) -> bool:
 def handle_incompatible_database() -> None:
     """Handle incompatible database by backing up and recreating."""
     backup_path = DB_PATH.with_suffix('.backup')
-    print(f"Warning: Incompatible embedding dimensions detected!")
-    print(f"The database was created with a different embedding model.")
-    print(f"Current model ({CURRENT_EMBEDDING_MODEL}) produces {EXPECTED_DIMENSIONS}-dimensional embeddings.")
+    print("Warning: Incompatible embedding dimensions detected!")
+    print("The database was created with a different embedding model.")
+    print(
+        f"Current model ({CURRENT_EMBEDDING_MODEL}) produces "
+        f"{EXPECTED_DIMENSIONS}-dimensional embeddings."
+    )
     print(f"\nBacking up existing database to: {backup_path}")
     print("Creating new database with current embedding model.")
     
