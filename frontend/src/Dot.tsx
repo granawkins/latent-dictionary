@@ -53,7 +53,11 @@ const Dot: React.FC<DotProps> = ({
         fontSize={0.3}
         color={dotColor}
         transparent={!selected}
-        font="https://fonts.gstatic.com/s/notosanssc/v36/k3kCo84MPvpLmixcA63oeALhL2O9.woff2"
+        font={
+          language === "chinese"
+            ? "/NotoSansSC-VariableFont_wght.ttf"
+            : "/NotoSans"
+        }
       >
         {word}
       </Text>
