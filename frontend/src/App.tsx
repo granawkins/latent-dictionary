@@ -47,42 +47,45 @@ const App: React.FC = () => {
   const appRef = useRef<ElementRef<"div">>(null);
 
   // Initialize or update dots for a language
-  const initializeDotsForLanguage = useCallback((langCode: string) => {
-    const langName = Languages.find(l => l.code === langCode)?.name;
-    if (!langName) return;
+  const initializeDotsForLanguage = useCallback(
+    (langCode: string) => {
+      const langName = Languages.find((l) => l.code === langCode)?.name;
+      if (!langName) return;
 
-    setDots(prevDots => {
-      const existingDots = prevDots[langCode] || [];
-      if (existingDots.length === wordsPerL) return prevDots;
-      
-      const newDots = [...existingDots];
-      while (newDots.length < wordsPerL) {
-        newDots.push({
-          word: "",
-          x: (Math.random() - 0.5) * 0.1,
-          y: (Math.random() - 0.5) * 0.1,
-          z: (Math.random() - 0.5) * 0.1,
-          language: langName
-        });
-      }
-      
-      return {
-        ...prevDots,
-        [langCode]: newDots
-      };
-    });
-  }, [wordsPerL]);
+      setDots((prevDots) => {
+        const existingDots = prevDots[langCode] || [];
+        if (existingDots.length === wordsPerL) return prevDots;
+
+        const newDots = [...existingDots];
+        while (newDots.length < wordsPerL) {
+          newDots.push({
+            word: "",
+            x: (Math.random() - 0.5) * 0.1,
+            y: (Math.random() - 0.5) * 0.1,
+            z: (Math.random() - 0.5) * 0.1,
+            language: langName,
+          });
+        }
+
+        return {
+          ...prevDots,
+          [langCode]: newDots,
+        };
+      });
+    },
+    [wordsPerL],
+  );
 
   // Update dots when languages change
   useEffect(() => {
-    selectedLanguages.forEach(lang => {
+    selectedLanguages.forEach((lang) => {
       initializeDotsForLanguage(lang);
     });
-    
+
     // Remove dots for unselected languages
-    setDots(prevDots => {
+    setDots((prevDots) => {
       const newDots = { ...prevDots };
-      Object.keys(newDots).forEach(lang => {
+      Object.keys(newDots).forEach((lang) => {
         if (!selectedLanguages.includes(lang)) {
           delete newDots[lang];
         }
@@ -90,7 +93,6 @@ const App: React.FC = () => {
       return newDots;
     });
   }, [selectedLanguages, initializeDotsForLanguage]);
-
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -177,54 +179,58 @@ const App: React.FC = () => {
         if (response) {
           setActiveText(inputText);
           // Update dots with new corpus data
-          setDots(prevDots => {
+          setDots((prevDots) => {
             const newDots = { ...prevDots };
-            
+
             // Group corpus items by language code
             const corpusByLang: Record<string, CorpusItem[]> = {};
-            Object.values(response).forEach(item => {
-              const langCode = Languages.find(l => l.name === item.language)?.code;
+            Object.values(response).forEach((item) => {
+              const langCode = Languages.find(
+                (l) => l.name === item.language,
+              )?.code;
               if (langCode && selectedLanguages.includes(langCode)) {
                 corpusByLang[langCode] = corpusByLang[langCode] || [];
                 corpusByLang[langCode].push(item);
               }
             });
-            
+
             // Update dots for each language
             Object.entries(corpusByLang).forEach(([lang, items]) => {
-              const langName = Languages.find(l => l.code === lang)?.name;
+              const langName = Languages.find((l) => l.code === lang)?.name;
               if (!newDots[lang] && langName) {
-                newDots[lang] = Array(wordsPerL).fill(null).map(() => ({
-                  word: "",
-                  x: (Math.random() - 0.5) * 0.1,
-                  y: (Math.random() - 0.5) * 0.1,
-                  z: (Math.random() - 0.5) * 0.1,
-                  language: langName
-                }));
+                newDots[lang] = Array(wordsPerL)
+                  .fill(null)
+                  .map(() => ({
+                    word: "",
+                    x: (Math.random() - 0.5) * 0.1,
+                    y: (Math.random() - 0.5) * 0.1,
+                    z: (Math.random() - 0.5) * 0.1,
+                    language: langName,
+                  }));
               }
-              
+
               const updatedDots = [...newDots[lang]];
               items.forEach((item, index) => {
                 if (index < updatedDots.length) {
                   updatedDots[index] = item;
                 }
               });
-              
+
               // Clear remaining dots
               for (let i = items.length; i < updatedDots.length; i++) {
-                const langName = Languages.find(l => l.code === lang)?.name;
+                const langName = Languages.find((l) => l.code === lang)?.name;
                 updatedDots[i] = {
                   word: "",
                   x: (Math.random() - 0.5) * 0.1,
                   y: (Math.random() - 0.5) * 0.1,
                   z: (Math.random() - 0.5) * 0.1,
-                  language: langName || null
+                  language: langName || null,
                 };
               }
-              
+
               newDots[lang] = updatedDots;
             });
-            
+
             return newDots;
           });
 
@@ -292,12 +298,19 @@ const App: React.FC = () => {
         )}
       </button>
       <Canvas>
-        <Camera selectedCorpus={Object.values(dots).flat().reduce((acc, dot) => {
-          if (dot.word) {
-            acc[dot.word] = dot;
-          }
-          return acc;
-        }, {} as Record<string, CorpusItem>)} />
+        <Camera
+          selectedCorpus={Object.values(dots)
+            .flat()
+            .reduce(
+              (acc, dot) => {
+                if (dot.word) {
+                  acc[dot.word] = dot;
+                }
+                return acc;
+              },
+              {} as Record<string, CorpusItem>,
+            )}
+        />
         {Object.entries(dots).map(([lang, langDots]) =>
           langDots.map((dot, index) => (
             <DotMemo
@@ -311,7 +324,7 @@ const App: React.FC = () => {
               select={() => select(dot.word)}
               searchPending={loading}
             />
-          ))
+          )),
         )}
         {/* A white dot at the origin to represent the search term */}
         <DotMemo
