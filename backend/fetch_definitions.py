@@ -238,7 +238,7 @@ def save_definitions(words_with_defs: WordDefs, language: str) -> bool:
         wordlists_dir = Path(__file__).parent / "wordlists"
         wordlists_dir.mkdir(exist_ok=True)
         
-        output_file = wordlists_dir / f"{language}.txt"
+        output_file = wordlists_dir / f"{language}_defs.txt"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# {language.title()} word list\n")
             for word, definitions in words_with_defs.items():
