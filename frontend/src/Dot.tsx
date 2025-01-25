@@ -44,10 +44,10 @@ const Dot: React.FC<DotProps> = ({
     ? Languages.find((l: Language) => l.name === language)?.code
     : null;
 
-  // Spring animation for position
+  // Spring animation for position - slower and more subtle
   const { position } = useSpring({
     position: [x * SCALE, y * SCALE, z * SCALE],
-    config: { mass: 1, tension: 120, friction: 14 },
+    config: { mass: 2, tension: 80, friction: 20 },
   });
 
   // Orbital motion for empty dots
