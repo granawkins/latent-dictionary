@@ -23,15 +23,22 @@ if openai_api_key:
     embedding_function = OpenAIEmbeddingFunction(
         api_key=openai_api_key, model_name="text-embedding-3-small"
     )
+    # Configure HNSW index parameters for better performance and capacity
+    hnsw_params = {
+        "hnsw:space": "cosine",
+        "hnsw:construction_ef": 100,
+        "hnsw:M": 16,
+        "hnsw:num_elements": 100000,
+    }
     collection = client.get_or_create_collection(
         name="latent-dictionary",
         embedding_function=embedding_function,
-        metadata={"hnsw:space": "cosine", "hnsw:construction_ef": 100, "hnsw:M": 16, "hnsw:num_elements": 100000}
+        metadata=hnsw_params,
     )
 else:
     collection = client.get_or_create_collection(
         name="latent-dictionary",
-        metadata={"hnsw:space": "cosine", "hnsw:construction_ef": 100, "hnsw:M": 16, "hnsw:num_elements": 100000}
+        metadata=hnsw_params,
     )
 
 
@@ -77,8 +84,13 @@ def main() -> None:
     try:
         collection_info = collection.get()
         current_count = len(collection_info.get("ids", []))
-        if current_count + len(documents) > 100000:  # Match the hnsw:num_elements setting
-            print(f"Error: Total records ({current_count + len(documents)}) would exceed collection capacity (100000)")
+        total_records = current_count + len(documents)
+        max_capacity = hnsw_params["hnsw:num_elements"]
+        if total_records > max_capacity:
+            print(
+                f"Error: Total records ({total_records}) would exceed "
+                f"collection capacity ({max_capacity})"
+            )
             return
     except Exception as e:
         print(f"Error checking collection capacity: {e}")
@@ -93,7 +105,9 @@ def main() -> None:
                 documents=documents[i:_end],
                 metadatas=metadatas[i:_end],
             )
-            print(f"Successfully added batch {i//batch_size + 1} of {(len(documents) + batch_size - 1)//batch_size}")
+            total_batches = (len(documents) + batch_size - 1) // batch_size
+            current_batch = i // batch_size + 1
+            print(f"Successfully added batch {current_batch} of {total_batches}")
         except Exception as e:
             print(f"Error adding batch {i//batch_size + 1}: {e}")
             print(f"Failed at records {i} to {_end}")
