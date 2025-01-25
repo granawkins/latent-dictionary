@@ -24,7 +24,7 @@ hnsw_params = {
     "hnsw:space": "cosine",
     "hnsw:construction_ef": 100,
     "hnsw:M": 16,
-    "hnsw:num_elements": 100000,
+    "hnsw:maxElements": 100000,
 }
 
 if openai_api_key:
@@ -86,7 +86,7 @@ def main() -> None:
         collection_info = collection.get()
         current_count = len(collection_info.get("ids", []))
         total_records = current_count + len(documents)
-        max_capacity = hnsw_params["hnsw:num_elements"]
+        max_capacity = hnsw_params["hnsw:maxElements"]
         if total_records > max_capacity:
             print(
                 f"Error: Total records ({total_records}) would exceed "
