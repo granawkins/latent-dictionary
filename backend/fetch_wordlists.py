@@ -22,21 +22,335 @@ import sys
 import logging
 import requests
 import re
+import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Tuple
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# Rate limiting parameters
+REQUEST_DELAY = 0.1  # 100ms between requests to be nice to the API
+
+def fetch_definition(word: str, language: str) -> Optional[str]:
+    """Fetch definition for a word from Wiktionary.
+    
+    Args:
+        word: Word to fetch definition for
+        language: Language code (e.g., "english", "spanish")
+    
+    Returns:
+        Definition string or None if not found
+    """
+    try:
+        # Add delay for rate limiting
+        time.sleep(REQUEST_DELAY)
+        
+        params = {
+            "action": "parse",
+            "page": word,
+            "format": "json",
+            "prop": "text",
+        }
+
+        response = requests.get(
+            "https://en.wiktionary.org/w/api.php", params=params
+        )
+        response.raise_for_status()
+        data = response.json()
+
+        if "parse" not in data:
+            logging.debug(f"No content found for word: {word}")
+            return None
+
+        html_content = data["parse"]["text"]["*"]
+        
+        # Find the language section using a more flexible pattern
+        lang_title = language.title()
+        lang_patterns = [
+            f'<h2><span class="mw-headline" id="{lang_title}">',
+            f'<h2 id="{lang_title}">',
+            f'class="mw-headline" id="{lang_title}"'
+        ]
+        
+        lang_content = None
+        for pattern in lang_patterns:
+            sections = html_content.split(pattern)
+            if len(sections) > 1:
+                lang_content = sections[1]
+                break
+        
+        if not lang_content:
+            logging.debug(f"No {language} section found for word: {word}")
+            return None
+        
+        # Find the end of the language section (next h2 heading)
+        next_lang = re.search(r'<h2[^>]*>', lang_content)
+        if next_lang:
+            lang_content = lang_content[:next_lang.start()]
+        
+        # Special handling for Spanish common words
+        if language.lower() == 'spanish':
+            common_meanings = {
+                'de': 'Of, from, or belonging to something or someone',
+                'en': 'In, on, or at a location or time',
+                'a': 'To, at, or towards a destination or recipient',
+                'por': 'For, by, or through something or someone',
+                'para': 'For, in order to, or intended for someone or something',
+                'con': 'With or along with someone or something',
+                'sin': 'Without or lacking something',
+                'que': 'That, which, or who; used to connect clauses or introduce subordinate clauses',
+                'y': 'And; used to connect words, phrases, clauses, or sentences',
+                'el': 'The; masculine singular definite article',
+                'la': 'The; feminine singular definite article',
+                'los': 'The; masculine plural definite article',
+                'las': 'The; feminine plural definite article',
+                'un': 'A or an; masculine singular indefinite article',
+                'una': 'A or an; feminine singular indefinite article',
+                'no': 'Not; used to express negation, denial, or refusal',
+                'sí': 'Yes; used to express affirmation or agreement',
+                'lo': 'The; neuter definite article used with adjectives',
+                'mi': 'My; first-person singular possessive adjective',
+                'tu': 'Your; second-person singular possessive adjective',
+                'su': 'His, her, its, or their; third-person possessive adjective'
+            }
+            if word.lower() in common_meanings:
+                meaning = common_meanings[word.lower()]
+                return [meaning] if isinstance(meaning, str) else meaning
+
+        # Special handling for English common words
+        if language.lower() == 'english' and len(word) <= 3:
+            common_meanings = {
+                'the': 'The definite article used to indicate specific nouns',
+                'of': 'Expressing the relationship between a part and a whole',
+                'and': 'Used to connect words, phrases, clauses, or sentences',
+                'to': 'Expressing motion or direction toward a point',
+                'in': 'Located inside or within something',
+                'is': 'Third-person singular present of be',
+                'it': 'Third-person singular neuter pronoun',
+                'for': 'Intended to belong to or be used in connection with',
+                'as': 'Used for comparisons',
+                'on': 'Physically in contact with and supported by',
+                'at': 'Indicating location or position',
+                'by': 'Identifying the agent performing an action'
+            }
+            if word.lower() in common_meanings:
+                meaning = common_meanings[word.lower()]
+                return [meaning] if isinstance(meaning, str) else meaning
+
+        # Look for definitions section
+        def_section = None
+        
+        # Try to find the section with definitions
+        section_titles = ['Article', 'Noun', 'Verb', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Particle']
+        section_matches = re.finditer(r'<h[34][^>]*>(?:<span[^>]*>)?([^<]+)', lang_content)
+        
+        for match in section_matches:
+            section_title = match.group(1)
+            if any(title in section_title for title in section_titles):
+                section_start = match.end()
+                next_section = re.search(r'<h[234][^>]*>', lang_content[section_start:])
+                if next_section:
+                    def_section = lang_content[section_start:section_start + next_section.start()]
+                else:
+                    def_section = lang_content[section_start:]
+                break
+        
+        # If no definition section found in headers, try looking for definition lists
+        if not def_section:
+            dl_match = re.search(r'<dl>(.+?)</dl>', lang_content, re.DOTALL)
+            if dl_match:
+                def_section = dl_match.group(1)
+        
+        if not def_section:
+            logging.debug(f"No definition section found for word: {word}")
+            return None
+        
+        # Look for numbered definitions
+        definitions = []
+        
+        # First try to find definitions in ordered lists
+        ol_sections = re.finditer(r'<ol[^>]*>(.+?)</ol>', def_section, re.DOTALL)
+        for ol in ol_sections:
+            ol_content = ol.group(1)
+            def_items = re.findall(r'<li[^>]*>(.+?)</li>', ol_content, re.DOTALL)
+            
+            for item in def_items:
+                # Remove citations, examples, and nested content
+                clean_def = re.sub(r'<ul>.+?</ul>', '', item, flags=re.DOTALL)
+                clean_def = re.sub(r'<dl>.+?</dl>', '', clean_def, flags=re.DOTALL)
+                clean_def = re.sub(r'\[\[.+?\]\]', '', clean_def)
+                clean_def = re.sub(r'\[.+?\]', '', clean_def)
+                
+                # Remove HTML tags but keep their text content
+                clean_def = re.sub(r'<[^>]+>', '', clean_def)
+                
+                # Remove dates, citations, and parenthetical notes
+                clean_def = re.sub(r'\[from \d+(?:th|st|nd|rd) c\.\]', '', clean_def)
+                clean_def = re.sub(r'\d{4}.*?:', '', clean_def)
+                clean_def = re.sub(r'\([^)]*(?:obsolete|dialectal|archaic|dated|rare|informal)[^)]*\)', '', clean_def)
+                
+                # Clean up HTML entities
+                clean_def = clean_def.replace('&nbsp;', ' ')
+                clean_def = clean_def.replace('&#32;', ' ')
+                clean_def = clean_def.replace('&#59;', ';')
+                clean_def = clean_def.replace('&#58;', ':')
+                
+                # Clean up whitespace and dots
+                clean_def = re.sub(r'\s+', ' ', clean_def)
+                clean_def = re.sub(r'\.{2,}', '.', clean_def)
+                clean_def = clean_def.strip(' .,')
+                
+                # Skip if empty or starts with unwanted prefixes
+                if not clean_def or clean_def.startswith('...') or any(clean_def.lower().startswith(x) for x in [
+                    '(', 'alternative', 'misspelling', 'present', 'past', 'obsolete',
+                    'archaic', 'dated', 'rare', 'informal', 'plural', 'singular',
+                    'countable', 'uncountable', 'transitive', 'intransitive',
+                    'see also', 'compare', 'often', 'usually', 'especially'
+                ]):
+                    continue
+                
+                # Skip if it's too short or looks like an example
+                if len(clean_def) < 10 or ': ' in clean_def or clean_def.startswith('"') or clean_def.startswith("'"):
+                    continue
+                
+                # Extract meaningful sentences
+                sentences = []
+                for sentence in re.split(r'[.!?](?:\s|$)', clean_def):
+                    sentence = sentence.strip()
+                    if sentence and len(sentence) >= 10 and not sentence.startswith('...'):
+                        # Remove grammatical notes at start of sentence
+                        sentence = re.sub(r'^(?:of|in|on|with|by|for|to|at|from|about|like|used|being|having)\s+', '', sentence, flags=re.IGNORECASE)
+                        # Remove articles at start
+                        sentence = re.sub(r'^(?:a|an|the)\s+', '', sentence, flags=re.IGNORECASE)
+                        
+                        if sentence and len(sentence) >= 10:
+                            # Remove examples and parenthetical notes
+                            sentence = sentence.split(';')[0]  # Take part before first semicolon
+                            sentence = re.sub(r'\s*\([^)]*\)', '', sentence)  # Remove parenthetical notes
+                            sentence = sentence.strip()
+                            
+                            # Skip if it looks like a usage note, example, or letter name
+                            skip_phrases = [
+                                'example', 'see also', 'compare', 'often used',
+                                'usually', 'especially', 'note:', 'e.g.', 'i.e.',
+                                'name of', 'letter', 'alphabet', 'pronunciation',
+                                'spelling', 'variant of', 'alternative form',
+                                'abbreviation', 'initialism', 'acronym'
+                            ]
+                            
+                            if (sentence and len(sentence) >= 10 and  # Reduced minimum length
+                                not any(x in sentence.lower() for x in skip_phrases)):
+                                # Clean up the sentence
+                                sentence = re.sub(r'\s*\[[^\]]*\]', '', sentence)  # Remove square brackets
+                                sentence = re.sub(r'\s+', ' ', sentence)  # Normalize whitespace
+                                sentence = sentence.strip()
+                                
+                                # For Spanish words, look for translations and glosses
+                                if language.lower() == 'spanish':
+                                    # Try different patterns to find translations
+                                    translation = None
+                                    # Look for quoted translations
+                                    if '"' in sentence:
+                                        translations = re.findall(r'"([^"]+)"', sentence)
+                                        if translations:
+                                            translation = translations[0].strip()
+                                    # Look for translations after ":" or "="
+                                    if not translation and any(x in sentence for x in [':', '=']):
+                                        parts = re.split(r'[:=]', sentence)
+                                        if len(parts) > 1:
+                                            translation = parts[1].strip(' "\'')
+                                    # Look for glosses in parentheses
+                                    if not translation:
+                                        glosses = re.findall(r'\(([^)]+)\)', sentence)
+                                        if glosses:
+                                            translation = glosses[0].strip()
+                                    
+                                    if translation:
+                                        sentence = translation
+                                
+                                # Special handling for prepositions
+                                if word.lower() in ['de', 'en', 'a', 'por', 'para', 'con', 'sin']:
+                                    preposition_meanings = {
+                                        'de': 'Of, from, belonging to',
+                                        'en': 'In, on, at',
+                                        'a': 'To, at, towards',
+                                        'por': 'For, by, through',
+                                        'para': 'For, in order to, towards',
+                                        'con': 'With, along with',
+                                        'sin': 'Without, lacking'
+                                    }
+                                    sentence = preposition_meanings.get(word.lower(), sentence)
+                                
+                                # Skip if it's too generic or too specific
+                                if (sentence and
+                                    ((len(sentence) >= 15 and len(sentence.split()) >= 3) or  # Normal case
+                                     (word.lower() in ['de', 'en', 'a', 'por', 'para', 'con', 'sin'])) and  # Prepositions
+                                    not sentence.lower().startswith(('name of', 'form of', 'alternative', 'short for'))):
+                                    sentences.append(sentence)
+                
+                if sentences:
+                    clean_def = sentences[0]  # Take first good sentence
+                    # Capitalize first letter
+                    clean_def = clean_def[0].upper() + clean_def[1:]
+                    # Remove trailing punctuation
+                    clean_def = clean_def.rstrip('.,;')
+                    
+                    # Final length and quality check
+                    if (clean_def and 
+                        len(clean_def) >= 15 and
+                        len(clean_def.split()) > 3 and
+                        not any(x in clean_def.lower() for x in ['letter', 'alphabet', 'pronunciation'])):
+                        logging.debug(f"Found definition for {word}: {clean_def}")
+                        definitions.append(clean_def)
+                        if len(definitions) >= 3:  # Limit to first 3 definitions
+                            break
+            
+            if definitions:
+                break
+        
+        if not definitions:
+            logging.debug(f"No definitions found in ordered lists for word: {word}")
+            # Try alternative patterns if no definitions found in ordered lists
+            def_patterns = [
+                r'<dd[^>]*>([^<]+)</dd>',
+                r'<li[^>]*>([^<]+)</li>'
+            ]
+            for pattern in def_patterns:
+                def_items = re.findall(pattern, def_section)
+                for item in def_items:
+                    clean_def = re.sub(r'\s+', ' ', item).strip()
+                    if len(clean_def) >= 10 and not any(clean_def.startswith(x) for x in [
+                        '(', 'Alternative', 'Misspelling', 'present', 'past', 'Obsolete',
+                        'archaic', 'dated', 'rare', 'informal', 'plural', 'singular',
+                        'countable', 'uncountable', 'transitive', 'intransitive'
+                    ]):
+                        logging.debug(f"Found alternative definition for {word}: {clean_def}")
+                        definitions.append(clean_def)
+                        if len(definitions) >= 3:
+                            break
+                if definitions:
+                    break
+        
+        if not definitions:
+            logging.debug(f"No definitions found for word: {word}")
+            return None
+            
+        # Return first 3 definitions combined
+        return ' | '.join(definitions[:3])
+
+    except Exception as e:
+        logging.debug(f"Error fetching definition for {word}: {str(e)}")
+        return None
 
 def fetch_wiktionary_words(
     language: str,
     config: dict,
     num_words: int,
-) -> Optional[List[str]]:
-    """Fetch word frequency list from Wiktionary.
+) -> Optional[List[Tuple[str, Optional[str]]]]:
+    """Fetch word frequency list and definitions from Wiktionary.
 
     Args:
         language: Language name (e.g., "english")
@@ -44,7 +358,7 @@ def fetch_wiktionary_words(
         num_words: Maximum number of words to fetch
 
     Returns:
-        List of words in frequency order, or None if fetch fails
+        List of (word, definition) tuples, or None if fetch fails
     """
     try:
         all_words = []
@@ -94,7 +408,9 @@ def fetch_wiktionary_words(
                         if word and len(word) > 1 and not has_digits:
                             if word not in seen_words:
                                 seen_words.add(word)
-                                all_words.append(word)
+                                # Fetch definition for the word
+                                definition = fetch_definition(word, language)
+                                all_words.append((word, definition))
                                 if len(all_words) >= num_words:
                                     break
 
@@ -112,11 +428,11 @@ def fetch_wiktionary_words(
         return None
 
 
-def save_wordlist(words: List[str], language: str) -> bool:
+def save_wordlist(words: List[Tuple[str, Optional[str]]], language: str) -> bool:
     """Save word list to a file.
 
     Args:
-        words: List of words to save
+        words: List of (word, definition) tuples to save
         language: Language name (used for filename, e.g., "english.txt")
 
     Returns:
@@ -129,8 +445,11 @@ def save_wordlist(words: List[str], language: str) -> bool:
         output_file = wordlists_dir / f"{language}.txt"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(f"# {language.title()} word list\n")
-            for word in words:
-                f.write(f"{word}\n")
+            for word, definition in words:
+                if definition:
+                    f.write(f"{word}\t{definition}\n")
+                else:
+                    f.write(f"{word}\n")
         return True
     except Exception as e:
         logging.error(f"Error saving {language} word list: {str(e)}")
