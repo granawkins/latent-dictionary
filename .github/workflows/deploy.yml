@@ -2,7 +2,7 @@ name: Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "mentat-64-1" ]
 
 jobs:
   deploy:
