@@ -19,17 +19,18 @@ DB_PATH = Path("~/.latentdictionary").expanduser()
 DB_PATH.parent.mkdir(exist_ok=True)
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = chromadb.PersistentClient(path=DB_PATH.as_posix())
+# Configure HNSW index parameters for better performance and capacity
+hnsw_params = {
+    "hnsw:space": "cosine",
+    "hnsw:construction_ef": 100,
+    "hnsw:M": 16,
+    "hnsw:num_elements": 100000,
+}
+
 if openai_api_key:
     embedding_function = OpenAIEmbeddingFunction(
         api_key=openai_api_key, model_name="text-embedding-3-small"
     )
-    # Configure HNSW index parameters for better performance and capacity
-    hnsw_params = {
-        "hnsw:space": "cosine",
-        "hnsw:construction_ef": 100,
-        "hnsw:M": 16,
-        "hnsw:num_elements": 100000,
-    }
     collection = client.get_or_create_collection(
         name="latent-dictionary",
         embedding_function=embedding_function,
