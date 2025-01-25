@@ -56,7 +56,7 @@ const Dot: React.FC<DotProps> = ({
       fontPath,
       () => setFontError(false),
       undefined,
-      () => setFontError(true)
+      () => setFontError(true),
     );
   }, [fontPath]);
 
