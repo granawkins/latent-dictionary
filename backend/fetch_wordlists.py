@@ -197,8 +197,8 @@ def main():
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
         "chinese": {
-            "page_path": "Wiktionary:Frequency_lists/Mandarin_Chinese",
-            "sections": ["1"],  # Main section containing the word list
+            "page_path": "Appendix:Mandarin_Frequency_lists/1-1000",
+            "sections": ["0"],  # Main section containing the word list
         },
     }
 
