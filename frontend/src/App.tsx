@@ -169,6 +169,17 @@ const App: React.FC = () => {
     };
   }, [handleSearch]);
 
+  // Load fonts when text changes or when corpus updates
+  useEffect(() => {
+    // Load font for input text
+    loadFonts(inputText);
+
+    // Load fonts for corpus items
+    Object.values(corpus).forEach(item => {
+      loadFonts(item.word);
+    });
+  }, [inputText, corpus]);
+
   return (
     <div ref={appRef} className="app-container">
       <Navigation inputText={inputText} setInputText={setInputText} />

@@ -56,6 +56,51 @@ export const fetchWithAuth = async <T>(
   return res.json() as Promise<T>;
 };
 
+// Font loading utilities
+const FONT_CDN = "https://cdn.jsdelivr.net/npm/@fontsource";
+
+export const loadFonts = async (text: string) => {
+  // Always use system fonts as initial fallback
+  if (!text) return;
+
+  try {
+    // Load basic Latin font first
+    const basicFont = new FontFace(
+      "Noto Sans Basic",
+      `url(${FONT_CDN}/noto-sans/files/noto-sans-latin-400-normal.woff2)`
+    );
+    await basicFont.load();
+    document.fonts.add(basicFont);
+
+    // Check if we need Chinese font
+    const hasChineseChars = /[\u4E00-\u9FFF]/.test(text);
+    if (!hasChineseChars) return;
+
+    // Load common Chinese characters subset first
+    const commonChineseFont = new FontFace(
+      "Noto Sans SC Basic",
+      `url(${FONT_CDN}/noto-sans-sc/files/noto-sans-sc-chinese-400-normal.woff2)`
+    );
+    await commonChineseFont.load();
+    document.fonts.add(commonChineseFont);
+
+    // Start loading full Chinese font in background if needed
+    const uniqueChars = Array.from(new Set(text.match(/[\u4E00-\u9FFF]/g) || []));
+    if (uniqueChars.length > 100) {
+      const fullChineseFont = new FontFace(
+        "Noto Sans SC Full",
+        `url(${FONT_CDN}/noto-sans-sc/files/noto-sans-sc-chinese-400-full.woff2)`
+      );
+      fullChineseFont.load().then(() => {
+        document.fonts.add(fullChineseFont);
+      });
+    }
+  } catch (error) {
+    console.warn("Font loading error:", error);
+    // Fallback to system fonts on error
+  }
+};
+
 export function debounce<T extends (...args: unknown[]) => void>(
   func: T,
   delay: number,
