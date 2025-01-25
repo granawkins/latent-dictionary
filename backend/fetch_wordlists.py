@@ -83,12 +83,17 @@ def fetch_wiktionary_words(
                 # Extract words from the HTML content
                 html_content = data["parse"]["text"]["*"]
 
-                # Extract Simplified Chinese characters from spans
-                word_pattern = (
-                    r'<span class="Hans"[^>]*>'
-                    r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
-                    r'</span>'
-                )
+                if language == "chinese":
+                    # Extract Simplified Chinese characters from spans
+                    word_pattern = (
+                        r'<span class="Hans"[^>]*>'
+                        r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                        r"</span>"
+                    )
+                else:
+                    # Extract words from links (format: <a title="word">word</a>)
+                    word_pattern = r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+
                 for match in re.finditer(word_pattern, html_content):
                     title, word = match.groups()
                     # Check word validity: non-empty and not already seen
