@@ -24,7 +24,7 @@ import requests
 import re
 import time
 from pathlib import Path
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Tuple
 
 # Configure logging
 logging.basicConfig(
@@ -101,7 +101,10 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
                 'para': 'For, in order to, or intended for someone or something',
                 'con': 'With or along with someone or something',
                 'sin': 'Without or lacking something',
-                'que': 'That, which, or who; used to connect clauses or introduce subordinate clauses',
+                'que': (
+                    'That, which, or who; used to connect clauses or introduce '
+                    'subordinate clauses'
+                ),
                 'y': 'And; used to connect words, phrases, clauses, or sentences',
                 'el': 'The; masculine singular definite article',
                 'la': 'The; feminine singular definite article',
@@ -144,16 +147,30 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
         def_section = None
         
         # Try to find the section with definitions
-        section_titles = ['Article', 'Noun', 'Verb', 'Adjective', 'Adverb', 'Preposition', 'Conjunction', 'Particle']
-        section_matches = re.finditer(r'<h[34][^>]*>(?:<span[^>]*>)?([^<]+)', lang_content)
+        section_titles = [
+            'Article', 'Noun', 'Verb', 'Adjective', 'Adverb',
+            'Preposition', 'Conjunction', 'Particle'
+        ]
+        
+        # Pattern to find section headers
+        section_pattern = (
+            r'<h[34][^>]*>'  # h3 or h4 tag with any attributes
+            r'(?:<span[^>]*>)?'  # optional span with attributes
+            r'([^<]+)'  # capture the heading text
+        )
+        section_matches = re.finditer(section_pattern, lang_content)
         
         for match in section_matches:
             section_title = match.group(1)
             if any(title in section_title for title in section_titles):
                 section_start = match.end()
-                next_section = re.search(r'<h[234][^>]*>', lang_content[section_start:])
+                # Find next heading of any level (h2-h4)
+                next_pattern = r'<h[234][^>]*>'
+                next_section = re.search(next_pattern, lang_content[section_start:])
+                
                 if next_section:
-                    def_section = lang_content[section_start:section_start + next_section.start()]
+                    end = section_start + next_section.start()
+                    def_section = lang_content[section_start:end]
                 else:
                     def_section = lang_content[section_start:]
                 break
@@ -190,30 +207,53 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
                 # Remove dates, citations, and parenthetical notes
                 clean_def = re.sub(r'\[from \d+(?:th|st|nd|rd) c\.\]', '', clean_def)
                 clean_def = re.sub(r'\d{4}.*?:', '', clean_def)
-                clean_def = re.sub(r'\([^)]*(?:obsolete|dialectal|archaic|dated|rare|informal)[^)]*\)', '', clean_def)
+                # Remove obsolete/informal markers
+                obsolete_pattern = (
+                    r'\([^)]*'  # Opening paren and content
+                    r'(?:obsolete|dialectal|archaic|dated|rare|informal)'  # Keywords
+                    r'[^)]*\)'  # Rest of content and closing paren
+                )
+                clean_def = re.sub(obsolete_pattern, '', clean_def)
                 
                 # Clean up HTML entities
-                clean_def = clean_def.replace('&nbsp;', ' ')
-                clean_def = clean_def.replace('&#32;', ' ')
-                clean_def = clean_def.replace('&#59;', ';')
-                clean_def = clean_def.replace('&#58;', ':')
+                html_entities = {
+                    '&nbsp;': ' ',
+                    '&#32;': ' ',
+                    '&#59;': ';',
+                    '&#58;': ':'
+                }
+                for entity, replacement in html_entities.items():
+                    clean_def = clean_def.replace(entity, replacement)
                 
                 # Clean up whitespace and dots
-                clean_def = re.sub(r'\s+', ' ', clean_def)
-                clean_def = re.sub(r'\.{2,}', '.', clean_def)
-                clean_def = clean_def.strip(' .,')
+                clean_def = re.sub(r'\s+', ' ', clean_def)  # Normalize spaces
+                clean_def = re.sub(r'\.{2,}', '.', clean_def)  # Multiple dots to one
+                clean_def = clean_def.strip(' .,')  # Remove edge punctuation
                 
                 # Skip if empty or starts with unwanted prefixes
-                if not clean_def or clean_def.startswith('...') or any(clean_def.lower().startswith(x) for x in [
-                    '(', 'alternative', 'misspelling', 'present', 'past', 'obsolete',
-                    'archaic', 'dated', 'rare', 'informal', 'plural', 'singular',
-                    'countable', 'uncountable', 'transitive', 'intransitive',
-                    'see also', 'compare', 'often', 'usually', 'especially'
-                ]):
+                unwanted_prefixes = [
+                    '(', 'alternative', 'misspelling', 'present', 'past',
+                    'obsolete', 'archaic', 'dated', 'rare', 'informal',
+                    'plural', 'singular', 'countable', 'uncountable',
+                    'transitive', 'intransitive', 'see also', 'compare',
+                    'often', 'usually', 'especially'
+                ]
+                
+                if (not clean_def or
+                        clean_def.startswith('...') or
+                        any(clean_def.lower().startswith(x)
+                            for x in unwanted_prefixes)):
                     continue
                 
                 # Skip if it's too short or looks like an example
-                if len(clean_def) < 10 or ': ' in clean_def or clean_def.startswith('"') or clean_def.startswith("'"):
+                is_short = len(clean_def) < 10
+                has_colon = ': ' in clean_def
+                starts_with_quote = (
+                    clean_def.startswith('"') or
+                    clean_def.startswith("'")
+                )
+                
+                if is_short or has_colon or starts_with_quote:
                     continue
                 
                 # Extract meaningful sentences
