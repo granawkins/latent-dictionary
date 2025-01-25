@@ -155,7 +155,7 @@ def main():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish", "french", "german"],
+        choices=["english", "spanish", "french", "german", "chinese"],
         default="english",
         help="Language to fetch (default: english)",
     )
@@ -195,6 +195,10 @@ def main():
             "page_path": "Wiktionary:Frequency_lists/German/Mixed_web_3M",
             # Sections 1-10 correspond to ranges 1-1000 through 9001-10000
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        "chinese": {
+            "page_path": "Wiktionary:Frequency_lists/Mandarin_Chinese",
+            "sections": ["1"],  # Main section containing the word list
         },
     }
 
