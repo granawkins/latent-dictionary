@@ -56,12 +56,12 @@ const Dot: React.FC<DotProps> = ({
       <Html
         position={[0, 0.5, 0]}
         style={{
-          transform: 'translate(-50%, -100%)',
+          transform: "translate(-50%, -100%)",
         }}
       >
         <div
-          className={`dot-label ${selected ? 'selected' : ''} ${
-            langCode === 'zh' ? 'chinese-text' : ''
+          className={`dot-label ${selected ? "selected" : ""} ${
+            langCode === "zh" ? "chinese-text" : ""
           }`}
           style={{ color: dotColor }}
         >

@@ -1,14 +1,14 @@
 @font-face {
-  font-family: 'Noto Sans';
-  src: url('/NotoSans-Regular.ttf') format('truetype');
+  font-family: "Noto Sans";
+  src: url("/NotoSans-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Sans SC';
-  src: url('/NotoSansSC-VariableFont_wght.ttf') format('truetype');
+  font-family: "Noto Sans SC";
+  src: url("/NotoSansSC-VariableFont_wght.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -16,9 +16,19 @@
 
 body {
   margin: 0;
-  font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-    "Helvetica Neue", sans-serif;
+  font-family:
+    "Noto Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Roboto",
+    "Oxygen",
+    "Ubuntu",
+    "Cantarell",
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
@@ -27,7 +37,7 @@ body {
 }
 
 .chinese-text {
-  font-family: 'Noto Sans SC', sans-serif;
+  font-family: "Noto Sans SC", sans-serif;
 }
 
 code {
