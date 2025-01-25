@@ -24,10 +24,15 @@ if openai_api_key:
         api_key=openai_api_key, model_name="text-embedding-3-small"
     )
     collection = client.get_or_create_collection(
-        name="latent-dictionary", embedding_function=embedding_function
+        name="latent-dictionary",
+        embedding_function=embedding_function,
+        metadata={"hnsw:space": "cosine", "hnsw:construction_ef": 100, "hnsw:M": 16, "hnsw:num_elements": 100000}
     )
 else:
-    collection = client.get_or_create_collection(name="latent-dictionary")
+    collection = client.get_or_create_collection(
+        name="latent-dictionary",
+        metadata={"hnsw:space": "cosine", "hnsw:construction_ef": 100, "hnsw:M": 16, "hnsw:num_elements": 100000}
+    )
 
 
 def main() -> None:
@@ -68,6 +73,18 @@ def main() -> None:
         metadatas.append({"language": language})
     ids = [f"id{i}" for i in range(len(all_words), len(all_words) + len(documents))]
     batch_size = 1000
+    # First verify collection capacity
+    try:
+        collection_info = collection.get()
+        current_count = len(collection_info.get("ids", []))
+        if current_count + len(documents) > 100000:  # Match the hnsw:num_elements setting
+            print(f"Error: Total records ({current_count + len(documents)}) would exceed collection capacity (100000)")
+            return
+    except Exception as e:
+        print(f"Error checking collection capacity: {e}")
+        return
+
+    # Proceed with batch insertion
     for i in range(0, len(documents), batch_size):
         _end = min(i + batch_size, len(documents))
         try:
@@ -76,10 +93,12 @@ def main() -> None:
                 documents=documents[i:_end],
                 metadatas=metadatas[i:_end],
             )
+            print(f"Successfully added batch {i//batch_size + 1} of {(len(documents) + batch_size - 1)//batch_size}")
         except Exception as e:
-            print(f"Error adding {documents[i:_end]}: {e}")
+            print(f"Error adding batch {i//batch_size + 1}: {e}")
+            print(f"Failed at records {i} to {_end}")
             return
-    print("Success!")
+    print("Success! All records added.")
 
 
 if __name__ == "__main__":
