@@ -42,21 +42,11 @@ const Dot: React.FC<DotProps> = ({
     : null;
 
   return (
-    <mesh
-      ref={meshRef}
-      position={[x * SCALE, y * SCALE, z * SCALE]}
-      onClick={select}
-    >
-      <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
-      <meshBasicMaterial
-        color={dotColor}
-        transparent
-        opacity={searchPending ? 0.25 : selected ? 0.85 : 0.6}
-      />
+    <group position={[x * SCALE, y * SCALE, z * SCALE]} onClick={select}>
       <Html
-        position={[0, 0.5, 0]}
+        center
         style={{
-          transform: "translate(-50%, -100%)",
+          pointerEvents: "none",
         }}
       >
         <div
@@ -68,7 +58,7 @@ const Dot: React.FC<DotProps> = ({
           {word}
         </div>
       </Html>
-    </mesh>
+    </group>
   );
 };
 
