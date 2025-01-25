@@ -1,5 +1,5 @@
 import { Text } from "@react-three/drei";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef } from "react";
 import { Mesh } from "three";
 
 import { Languages, Language } from "./utils";
