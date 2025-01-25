@@ -83,20 +83,20 @@ def fetch_wiktionary_words(
                 # Extract words from the HTML content
                 html_content = data["parse"]["text"]["*"]
 
-                # Extract words from links (format: <a title="word">word</a>)
-                word_pattern = r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                # Extract Simplified Chinese characters from spans
+                word_pattern = (
+                    r'<span class="Hans"[^>]*>'
+                    r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                    r'</span>'
+                )
                 for match in re.finditer(word_pattern, html_content):
                     title, word = match.groups()
-                    # Skip disambiguation pages by only using exact matches
-                    if word == title:
-                        # Check word validity: non-empty, >1 char, no digits
-                        has_digits = any(c.isdigit() for c in word)
-                        if word and len(word) > 1 and not has_digits:
-                            if word not in seen_words:
-                                seen_words.add(word)
-                                all_words.append(word)
-                                if len(all_words) >= num_words:
-                                    break
+                    # Check word validity: non-empty and not already seen
+                    if word and word not in seen_words:
+                        seen_words.add(word)
+                        all_words.append(word)
+                        if len(all_words) >= num_words:
+                            break
 
                 if len(all_words) >= num_words:
                     break
@@ -155,7 +155,7 @@ def main():
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish", "french", "german", "italian"],
+        choices=["english", "spanish", "french", "german", "italian", "chinese"],
         default="english",
         help="Language to fetch (default: english)",
     )
@@ -199,6 +199,21 @@ def main():
         "italian": {
             "page_path": "Wiktionary:Frequency_lists/Italian50k",
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        },
+        "chinese": {
+            "pages": [
+                "Appendix:Mandarin_Frequency_lists/1-1000",
+                "Appendix:Mandarin_Frequency_lists/1001-2000",
+                "Appendix:Mandarin_Frequency_lists/2001-3000",
+                "Appendix:Mandarin_Frequency_lists/3001-4000",
+                "Appendix:Mandarin_Frequency_lists/4001-5000",
+                "Appendix:Mandarin_Frequency_lists/5001-6000",
+                "Appendix:Mandarin_Frequency_lists/6001-7000",
+                "Appendix:Mandarin_Frequency_lists/7001-8000",
+                "Appendix:Mandarin_Frequency_lists/8001-9000",
+                "Appendix:Mandarin_Frequency_lists/9001-10000",
+            ],
+            "sections": ["0"],  # Main section containing the word list
         },
     }
 
