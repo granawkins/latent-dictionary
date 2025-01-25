@@ -22,9 +22,8 @@ import sys
 import logging
 import requests
 import re
-import time
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -87,20 +86,25 @@ def fetch_wiktionary_words(
                 # Extract words from the HTML content
                 html_content = data["parse"]["text"]["*"]
 
-                # Extract words from links (format: <a title="word">word</a>)
-                word_pattern = r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                if language == "chinese":
+                    # Extract Simplified Chinese characters from spans
+                    word_pattern = (
+                        r'<span class="Hans"[^>]*>'
+                        r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+                        r"</span>"
+                    )
+                else:
+                    # Extract words from links (format: <a title="word">word</a>)
+                    word_pattern = r'<a[^>]+?title="([^"#]+)(?:#[^"]*)?">([^<]+)</a>'
+
                 for match in re.finditer(word_pattern, html_content):
                     title, word = match.groups()
-                    # Skip disambiguation pages by only using exact matches
-                    if word == title:
-                        # Check word validity: non-empty, >1 char, no digits
-                        has_digits = any(c.isdigit() for c in word)
-                        if word and len(word) > 1 and not has_digits:
-                            if word not in seen_words:
-                                seen_words.add(word)
-                                all_words.append(word)
-                                if len(all_words) >= num_words:
-                                    break
+                    # Check word validity: non-empty and not already seen
+                    if word and word not in seen_words:
+                        seen_words.add(word)
+                        all_words.append(word)
+                        if len(all_words) >= num_words:
+                            break
 
                 if len(all_words) >= num_words:
                     break
@@ -142,7 +146,7 @@ def save_wordlist(words: List[str], language: str) -> bool:
 
 
 def main():
-    """Fetch and save English frequency list."""
+    """Fetch and save word frequency lists."""
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -153,20 +157,24 @@ def main():
         "--num-words",
         type=int,
         default=10000,
-        help="Number of words to fetch (default: 10000)",
+        help="Number of words to fetch per language (default: 10000)",
     )
     parser.add_argument(
         "-l",
         "--language",
         type=str,
-        choices=["english", "spanish", "french", "german", "italian"],
-        default="english",
-        help="Language to fetch (default: english)",
+        choices=["english", "spanish", "french", "german", "italian", "chinese"],
+        help="Specific language to fetch (if not specified, fetches all languages)",
+    )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        default=True,
+        help="Process all configured languages (default: True)",
     )
     args = parser.parse_args()
 
     # Language configurations
-    # Comment out languages you don't want to use locally
     configs = {
         "english": {
             "page_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
@@ -204,24 +212,51 @@ def main():
             "page_path": "Wiktionary:Frequency_lists/Italian50k",
             "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         },
+        "chinese": {
+            "pages": [
+                "Appendix:Mandarin_Frequency_lists/1-1000",
+                "Appendix:Mandarin_Frequency_lists/1001-2000",
+                "Appendix:Mandarin_Frequency_lists/2001-3000",
+                "Appendix:Mandarin_Frequency_lists/3001-4000",
+                "Appendix:Mandarin_Frequency_lists/4001-5000",
+                "Appendix:Mandarin_Frequency_lists/5001-6000",
+                "Appendix:Mandarin_Frequency_lists/6001-7000",
+                "Appendix:Mandarin_Frequency_lists/7001-8000",
+                "Appendix:Mandarin_Frequency_lists/8001-9000",
+                "Appendix:Mandarin_Frequency_lists/9001-10000",
+            ],
+            "sections": ["0"],  # Main section containing the word list
+        },
     }
 
-    language = args.language
-    config = configs[language]
+    # Determine which languages to process
+    languages_to_process = []
+    if args.language:
+        languages_to_process = [args.language]
+    elif args.all:
+        languages_to_process = list(configs.keys())
 
-    logging.info(f"Fetching {language} frequency list...")
-    words = fetch_wiktionary_words(language, config, args.num_words)
+    if not languages_to_process:
+        logging.error("No languages specified to process")
+        return 1
 
-    if words:
-        if save_wordlist(words, language):
-            logging.info(f"Successfully saved {len(words)} words")
-            return 0
+    success = True
+    for language in languages_to_process:
+        config = configs[language]
+        logging.info(f"Fetching {language} frequency list...")
+        words = fetch_wiktionary_words(language, config, args.num_words)
+
+        if words:
+            if save_wordlist(words, language):
+                logging.info(f"Successfully saved {len(words)} {language} words")
+            else:
+                logging.error(f"Failed to save {language} word list")
+                success = False
         else:
-            logging.error(f"Failed to save {language} word list")
-    else:
-        logging.error(f"Failed to fetch {language} frequency list")
+            logging.error(f"Failed to fetch {language} frequency list")
+            success = False
 
-    return 1
+    return 0 if success else 1
 
 
 if __name__ == "__main__":

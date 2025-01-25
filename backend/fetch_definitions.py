@@ -14,7 +14,7 @@ import requests
 import re
 import time
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -24,7 +24,9 @@ logging.basicConfig(
 # Rate limiting parameters
 REQUEST_DELAY = 0.1  # 100ms between requests to be nice to the API
 
-def fetch_definitions_batch(words: List[str], language: str) -> dict[str, Optional[List[str]]]:
+WordDefs = Dict[str, Optional[List[str]]]
+
+def fetch_definitions_batch(words: List[str], language: str) -> WordDefs:
     """Fetch definitions for multiple words from Wiktionary using batch queries.
     
     Args:
@@ -82,11 +84,19 @@ def fetch_definitions_batch(words: List[str], language: str) -> dict[str, Option
                         'en': 'In, on, or at a location or time',
                         'a': 'To, at, or towards a destination or recipient',
                         'por': 'For, by, or through something or someone',
-                        'para': 'For, in order to, or intended for someone or something',
+                        'para': (
+                            'For, in order to, or intended for someone or something'
+                        ),
                         'con': 'With or along with someone or something',
                         'sin': 'Without or lacking something',
-                        'que': 'That, which, or who; used to connect clauses or introduce subordinate clauses',
-                        'y': 'And; used to connect words, phrases, clauses, or sentences',
+                        'que': (
+                            'That, which, or who; used to connect clauses or '
+                            'introduce subordinate clauses'
+                        ),
+                        'y': (
+                            'And; used to connect words, phrases, clauses, or '
+                            'sentences'
+                        ),
                         'el': 'The; masculine singular definite article',
                         'la': 'The; feminine singular definite article',
                         'los': 'The; masculine plural definite article',
@@ -98,7 +108,10 @@ def fetch_definitions_batch(words: List[str], language: str) -> dict[str, Option
                         'lo': 'The; neuter definite article used with adjectives',
                         'mi': 'My; first-person singular possessive adjective',
                         'tu': 'Your; second-person singular possessive adjective',
-                        'su': 'His, her, its, or their; third-person possessive adjective'
+                        'su': (
+                            'His, her, its, or their; third-person possessive '
+                            'adjective'
+                        )
                     }
                     if word.lower() in common_meanings:
                         definitions = [common_meanings[word.lower()]]
@@ -155,10 +168,15 @@ def fetch_definitions_batch(words: List[str], language: str) -> dict[str, Option
                         for match in matches:
                             definition = match.group(1).strip()
                             # Clean up wiki markup
-                            definition = re.sub(r"\{\{[^}]+\}\}", "", definition)
-                            definition = re.sub(r"\[\[([^]|]+\|)?([^]]+)\]\]", r"\2", definition)
-                            definition = re.sub(r"''([^']+)''", r"\1", definition)
-                            definition = re.sub(r"#\s*", "", definition)  # Remove list markers
+                            # Clean up wiki markup
+                            wiki_patterns = [
+                                (r"\{\{[^}]+\}\}", ""),  # Remove templates
+                                (r"\[\[([^]|]+\|)?([^]]+)\]\]", r"\2"),  # Links
+                                (r"''([^']+)''", r"\1"),  # Italics
+                                (r"#\s*", ""),  # List markers
+                            ]
+                            for pattern, repl in wiki_patterns:
+                                definition = re.sub(pattern, repl, definition)
                             
                             if definition and len(definition) >= 10:
                                 definitions.append(definition)
@@ -206,7 +224,7 @@ def read_wordlist(language: str) -> List[str]:
         logging.error(f"Error reading wordlist: {str(e)}")
         return []
 
-def save_definitions(words_with_defs: dict[str, Optional[List[str]]], language: str) -> bool:
+def save_definitions(words_with_defs: WordDefs, language: str) -> bool:
     """Save word definitions to a file.
     
     Args:
@@ -283,12 +301,15 @@ def main():
             definitions = fetch_definitions_batch(batch, language)
             processed_words.update(definitions)
             
-            logging.info(f"Processed {len(processed_words)}/{min(len(words), args.max_words)} words")
+            total_words = min(len(words), args.max_words)
+            msg = f"Processed {len(processed_words)}/{total_words} words"
+            logging.info(msg)
         
         # Save results
         if processed_words:
             if save_definitions(processed_words, language):
-                logging.info(f"Successfully saved {len(processed_words)} words with definitions")
+                num_words = len(processed_words)
+                logging.info(f"Successfully saved {num_words} words with definitions")
             else:
                 logging.error(f"Failed to save {language} definitions")
         else:

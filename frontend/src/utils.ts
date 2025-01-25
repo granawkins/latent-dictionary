@@ -70,7 +70,7 @@ export function debounce<T extends (...args: unknown[]) => void>(
   };
 }
 
-import { GB, ES, FR, DE, IT } from "country-flag-icons/react/3x2";
+import { GB, ES, FR, DE, IT, CN } from "country-flag-icons/react/3x2";
 
 export interface Language {
   code: string;
@@ -109,5 +109,11 @@ export const Languages: Language[] = [
     name: "italian",
     color: "#FF9B6B", // Orange to differentiate from other colors
     Flag: IT,
+  },
+  {
+    code: "zh",
+    name: "chinese",
+    color: "#FFD700", // Gold to differentiate from other colors
+    Flag: CN,
   },
 ];

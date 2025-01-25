@@ -19,15 +19,28 @@ DB_PATH = Path("~/.latentdictionary").expanduser()
 DB_PATH.parent.mkdir(exist_ok=True)
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = chromadb.PersistentClient(path=DB_PATH.as_posix())
+# Configure HNSW index parameters for better performance and capacity
+hnsw_params = {
+    "space": "cosine",
+    "construction_ef": 100,
+    "M": 16,
+    "max_elements": 100000,
+}
+
 if openai_api_key:
     embedding_function = OpenAIEmbeddingFunction(
         api_key=openai_api_key, model_name="text-embedding-3-small"
     )
     collection = client.get_or_create_collection(
-        name="latent-dictionary", embedding_function=embedding_function
+        name="latent-dictionary",
+        embedding_function=embedding_function,
+        metadata=hnsw_params,
     )
 else:
-    collection = client.get_or_create_collection(name="latent-dictionary")
+    collection = client.get_or_create_collection(
+        name="latent-dictionary",
+        metadata=hnsw_params,
+    )
 
 
 def main() -> None:
@@ -68,6 +81,23 @@ def main() -> None:
         metadatas.append({"language": language})
     ids = [f"id{i}" for i in range(len(all_words), len(all_words) + len(documents))]
     batch_size = 1000
+    # First verify collection capacity
+    try:
+        collection_info = collection.get()
+        current_count = len(collection_info.get("ids", []))
+        total_records = current_count + len(documents)
+        max_capacity = hnsw_params["max_elements"]
+        if total_records > max_capacity:
+            print(
+                f"Error: Total records ({total_records}) would exceed "
+                f"collection capacity ({max_capacity})"
+            )
+            return
+    except Exception as e:
+        print(f"Error checking collection capacity: {e}")
+        return
+
+    # Proceed with batch insertion
     for i in range(0, len(documents), batch_size):
         _end = min(i + batch_size, len(documents))
         try:
@@ -76,10 +106,14 @@ def main() -> None:
                 documents=documents[i:_end],
                 metadatas=metadatas[i:_end],
             )
+            total_batches = (len(documents) + batch_size - 1) // batch_size
+            current_batch = i // batch_size + 1
+            print(f"Successfully added batch {current_batch} of {total_batches}")
         except Exception as e:
-            print(f"Error adding {documents[i:_end]}: {e}")
+            print(f"Error adding batch {i//batch_size + 1}: {e}")
+            print(f"Failed at records {i} to {_end}")
             return
-    print("Success!")
+    print("Success! All records added.")
 
 
 if __name__ == "__main__":
