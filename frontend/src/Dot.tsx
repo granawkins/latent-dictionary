@@ -1,5 +1,6 @@
-import { Html } from "@react-three/drei";
-import React from "react";
+import { Text } from "@react-three/drei";
+import React, { useRef, useState, useEffect } from "react";
+import { Mesh } from "three";
 
 import { Languages, Language } from "./utils";
 
@@ -26,6 +27,8 @@ const Dot: React.FC<DotProps> = ({
   language,
   color,
 }) => {
+  const meshRef = useRef<Mesh>(null);
+  const [textError, setTextError] = useState<boolean>(false);
   const dotColor = color
     ? color
     : language
@@ -37,24 +40,38 @@ const Dot: React.FC<DotProps> = ({
     ? Languages.find((l: Language) => l.name === language)?.code
     : null;
 
+  // Reset error state when language changes
+  useEffect(() => {
+    setTextError(false);
+  }, [language]);
+
   return (
-    <group position={[x * SCALE, y * SCALE, z * SCALE]} onClick={select}>
-      <Html
-        center
-        style={{
-          pointerEvents: "none",
+    <mesh
+      ref={meshRef}
+      position={[x * SCALE, y * SCALE, z * SCALE]}
+      onClick={select}
+    >
+      <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
+      <meshBasicMaterial
+        color={dotColor}
+        transparent
+        opacity={selected ? 0.85 : 0.6}
+      />
+      <Text
+        position={[0, 0.5, 0]}
+        fontSize={0.3}
+        color={dotColor}
+        anchorX="center"
+        anchorY="middle"
+        font={langCode === "zh" ? "/NotoSansSC-VariableFont_wght.ttf" : "/NotoSans-Regular.ttf"}
+        onError={(e) => {
+          console.error(`Text rendering error for word "${word}":`, e);
+          setTextError(true);
         }}
       >
-        <div
-          className={`dot-label ${selected ? "selected" : ""} ${
-            langCode === "zh" ? "chinese-text" : ""
-          }`}
-          style={{ color: dotColor }}
-        >
-          {word}
-        </div>
-      </Html>
-    </group>
+        {word}
+      </Text>
+    </mesh>
   );
 };
 

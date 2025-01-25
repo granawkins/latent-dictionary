@@ -53,22 +53,3 @@ code {
   position: relative;
 }
 
-.dot-label {
-  position: absolute;
-  color: white;
-  font-size: 14px;
-  pointer-events: none;
-  user-select: none;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-  white-space: nowrap;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.dot-label.selected {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.5);
-}
