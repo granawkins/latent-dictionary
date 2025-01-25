@@ -53,7 +53,7 @@ const Dot: React.FC<DotProps> = ({
         fontSize={0.3}
         color={dotColor}
         transparent={!selected}
-        font="https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.woff"
+        font="https://fonts.gstatic.com/s/notosanssc/v36/k3kCo84MPvpLmixcA63oeALhL2O9.woff2"
       >
         {word}
       </Text>
