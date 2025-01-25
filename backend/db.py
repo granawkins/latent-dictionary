@@ -6,7 +6,7 @@ from typing import List, Tuple, Set, cast, Optional
 
 import chromadb
 from chromadb.api.types import Include
-from chromadb.types import Collection
+from chromadb.api.models.Collection import Collection
 from chromadb.utils.embedding_functions.openai_embedding_function import (
     OpenAIEmbeddingFunction,
 )
