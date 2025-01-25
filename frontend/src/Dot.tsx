@@ -56,7 +56,7 @@ const Dot: React.FC<DotProps> = ({
         font={
           language === "chinese"
             ? "/NotoSansSC-VariableFont_wght.ttf"
-            : "/NotoSans"
+            : "/NotoSans-Regular.ttf"
         }
       >
         {word}
