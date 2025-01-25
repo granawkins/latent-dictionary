@@ -13,7 +13,6 @@ interface DotProps {
   z: number;
   selected: boolean;
   select: () => void;
-  searchPending?: boolean;
   language?: string | null;
   color?: string;
 }
@@ -25,7 +24,6 @@ const Dot: React.FC<DotProps> = ({
   z,
   selected,
   select,
-  searchPending = false,
   language,
   color,
 }) => {
@@ -35,6 +33,11 @@ const Dot: React.FC<DotProps> = ({
     : language
       ? Languages.find((l: Language) => l.name === language)?.color
       : "white";
+
+  // Get the language code (zh for Chinese)
+  const langCode = language
+    ? Languages.find((l: Language) => l.name === language)?.code
+    : null;
 
   return (
     <mesh
@@ -46,18 +49,22 @@ const Dot: React.FC<DotProps> = ({
       <meshBasicMaterial
         color={dotColor}
         transparent
-        opacity={searchPending ? 0.25 : selected ? 0.85 : 0.6}
+        opacity={selected ? 0.85 : 0.6}
       />
       <Text
         position={[0, 0.5, 0]}
         fontSize={0.3}
         color={dotColor}
-        transparent={!selected}
+        anchorX="center"
+        anchorY="middle"
         font={
-          language === "chinese"
-            ? "/NotoSansSC-VariableFont_wght.ttf"
-            : "/NotoSans-Regular.ttf"
+          langCode === "zh"
+            ? "https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.ttf"
+            : "https://fonts.gstatic.com/s/notosans/v35/o-0IIpQlx3QUlC5A4PNr5TRG.ttf"
         }
+        onError={(e) => {
+          console.error(`Text rendering error for word "${word}":`, e);
+        }}
       >
         {word}
       </Text>
