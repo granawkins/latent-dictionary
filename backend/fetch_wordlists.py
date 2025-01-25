@@ -220,76 +220,105 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
                 sentences = []
                 for sentence in re.split(r'[.!?](?:\s|$)', clean_def):
                     sentence = sentence.strip()
-                    if sentence and len(sentence) >= 10 and not sentence.startswith('...'):
-                        # Remove grammatical notes at start of sentence
-                        sentence = re.sub(r'^(?:of|in|on|with|by|for|to|at|from|about|like|used|being|having)\s+', '', sentence, flags=re.IGNORECASE)
-                        # Remove articles at start
-                        sentence = re.sub(r'^(?:a|an|the)\s+', '', sentence, flags=re.IGNORECASE)
+                    if not (sentence and len(sentence) >= 10):
+                        continue
+                    if sentence.startswith('...'):
+                        continue
+
+                    # Remove grammatical notes at start of sentence
+                    grammar_prefixes = (
+                        'of|in|on|with|by|for|to|at|from|about|like|used|being|having'
+                    )
+                    sentence = re.sub(
+                        f'^(?:{grammar_prefixes})\\s+',
+                        '',
+                        sentence,
+                        flags=re.IGNORECASE
+                    )
+
+                    # Remove articles at start
+                    sentence = re.sub(
+                        r'^(?:a|an|the)\s+',
+                        '',
+                        sentence,
+                        flags=re.IGNORECASE
+                    )
+                    
+                    if not (sentence and len(sentence) >= 10):
+                        continue
+
+                    # Remove examples and parenthetical notes
+                    sentence = sentence.split(';')[0]  # Before first semicolon
+                    sentence = re.sub(r'\s*\([^)]*\)', '', sentence)  # No parentheses
+                    sentence = sentence.strip()
+                    
+                    # Skip if it looks like a usage note, example, or letter name
+                    skip_phrases = [
+                        'example', 'see also', 'compare', 'often used',
+                        'usually', 'especially', 'note:', 'e.g.', 'i.e.',
+                        'name of', 'letter', 'alphabet', 'pronunciation',
+                        'spelling', 'variant of', 'alternative form',
+                        'abbreviation', 'initialism', 'acronym'
+                    ]
+                    
+                    if any(x in sentence.lower() for x in skip_phrases):
+                        continue
+
+                    # Clean up the sentence
+                    sentence = re.sub(r'\s*\[[^\]]*\]', '', sentence)  # No brackets
+                    sentence = re.sub(r'\s+', ' ', sentence)  # Clean whitespace
+                    sentence = sentence.strip()
+                    
+                    # For Spanish words, look for translations and glosses
+                    if language.lower() == 'spanish':
+                        translation = None
+                        # Look for quoted translations
+                        if '"' in sentence:
+                            translations = re.findall(r'"([^"]+)"', sentence)
+                            if translations:
+                                translation = translations[0].strip()
+                        # Look for translations after ":" or "="
+                        if not translation:
+                            delimiters = [':', '=']
+                            if any(x in sentence for x in delimiters):
+                                parts = re.split(r'[:=]', sentence)
+                                if len(parts) > 1:
+                                    translation = parts[1].strip(' "\'')
+                        # Look for glosses in parentheses
+                        if not translation:
+                            glosses = re.findall(r'\(([^)]+)\)', sentence)
+                            if glosses:
+                                translation = glosses[0].strip()
                         
-                        if sentence and len(sentence) >= 10:
-                            # Remove examples and parenthetical notes
-                            sentence = sentence.split(';')[0]  # Take part before first semicolon
-                            sentence = re.sub(r'\s*\([^)]*\)', '', sentence)  # Remove parenthetical notes
-                            sentence = sentence.strip()
-                            
-                            # Skip if it looks like a usage note, example, or letter name
-                            skip_phrases = [
-                                'example', 'see also', 'compare', 'often used',
-                                'usually', 'especially', 'note:', 'e.g.', 'i.e.',
-                                'name of', 'letter', 'alphabet', 'pronunciation',
-                                'spelling', 'variant of', 'alternative form',
-                                'abbreviation', 'initialism', 'acronym'
-                            ]
-                            
-                            if (sentence and len(sentence) >= 10 and  # Reduced minimum length
-                                not any(x in sentence.lower() for x in skip_phrases)):
-                                # Clean up the sentence
-                                sentence = re.sub(r'\s*\[[^\]]*\]', '', sentence)  # Remove square brackets
-                                sentence = re.sub(r'\s+', ' ', sentence)  # Normalize whitespace
-                                sentence = sentence.strip()
-                                
-                                # For Spanish words, look for translations and glosses
-                                if language.lower() == 'spanish':
-                                    # Try different patterns to find translations
-                                    translation = None
-                                    # Look for quoted translations
-                                    if '"' in sentence:
-                                        translations = re.findall(r'"([^"]+)"', sentence)
-                                        if translations:
-                                            translation = translations[0].strip()
-                                    # Look for translations after ":" or "="
-                                    if not translation and any(x in sentence for x in [':', '=']):
-                                        parts = re.split(r'[:=]', sentence)
-                                        if len(parts) > 1:
-                                            translation = parts[1].strip(' "\'')
-                                    # Look for glosses in parentheses
-                                    if not translation:
-                                        glosses = re.findall(r'\(([^)]+)\)', sentence)
-                                        if glosses:
-                                            translation = glosses[0].strip()
-                                    
-                                    if translation:
-                                        sentence = translation
-                                
-                                # Special handling for prepositions
-                                if word.lower() in ['de', 'en', 'a', 'por', 'para', 'con', 'sin']:
-                                    preposition_meanings = {
-                                        'de': 'Of, from, belonging to',
-                                        'en': 'In, on, at',
-                                        'a': 'To, at, towards',
-                                        'por': 'For, by, through',
-                                        'para': 'For, in order to, towards',
-                                        'con': 'With, along with',
-                                        'sin': 'Without, lacking'
-                                    }
-                                    sentence = preposition_meanings.get(word.lower(), sentence)
-                                
-                                # Skip if it's too generic or too specific
-                                if (sentence and
-                                    ((len(sentence) >= 15 and len(sentence.split()) >= 3) or  # Normal case
-                                     (word.lower() in ['de', 'en', 'a', 'por', 'para', 'con', 'sin'])) and  # Prepositions
-                                    not sentence.lower().startswith(('name of', 'form of', 'alternative', 'short for'))):
-                                    sentences.append(sentence)
+                        if translation:
+                            sentence = translation
+                    
+                    # Special handling for prepositions
+                    prepositions = ['de', 'en', 'a', 'por', 'para', 'con', 'sin']
+                    if word.lower() in prepositions:
+                        preposition_meanings = {
+                            'de': 'Of, from, belonging to',
+                            'en': 'In, on, at',
+                            'a': 'To, at, towards',
+                            'por': 'For, by, through',
+                            'para': 'For, in order to, towards',
+                            'con': 'With, along with',
+                            'sin': 'Without, lacking'
+                        }
+                        sentence = preposition_meanings.get(word.lower(), sentence)
+                    
+                    # Skip if it's too generic or too specific
+                    is_normal_case = (
+                        len(sentence) >= 15 and
+                        len(sentence.split()) >= 3
+                    )
+                    is_preposition = word.lower() in prepositions
+                    unwanted_starts = ('name of', 'form of', 'alternative', 'short for')
+
+                    if (sentence and
+                            (is_normal_case or is_preposition) and
+                            not sentence.lower().startswith(unwanted_starts)):
+                        sentences.append(sentence)
                 
                 if sentences:
                     clean_def = sentences[0]  # Take first good sentence
@@ -299,10 +328,14 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
                     clean_def = clean_def.rstrip('.,;')
                     
                     # Final length and quality check
-                    if (clean_def and 
+                    bad_words = ['letter', 'alphabet', 'pronunciation']
+                    is_good_length = (
                         len(clean_def) >= 15 and
-                        len(clean_def.split()) > 3 and
-                        not any(x in clean_def.lower() for x in ['letter', 'alphabet', 'pronunciation'])):
+                        len(clean_def.split()) > 3
+                    )
+                    has_bad_words = any(x in clean_def.lower() for x in bad_words)
+
+                    if clean_def and is_good_length and not has_bad_words:
                         logging.debug(f"Found definition for {word}: {clean_def}")
                         definitions.append(clean_def)
                         if len(definitions) >= 3:  # Limit to first 3 definitions
@@ -318,16 +351,23 @@ def fetch_definition(word: str, language: str) -> Optional[str]:
                 r'<dd[^>]*>([^<]+)</dd>',
                 r'<li[^>]*>([^<]+)</li>'
             ]
+            
+            # Words to skip at start of definition
+            skip_words = [
+                '(', 'Alternative', 'Misspelling', 'present', 'past',
+                'Obsolete', 'archaic', 'dated', 'rare', 'informal',
+                'plural', 'singular', 'countable', 'uncountable',
+                'transitive', 'intransitive'
+            ]
+
             for pattern in def_patterns:
                 def_items = re.findall(pattern, def_section)
                 for item in def_items:
                     clean_def = re.sub(r'\s+', ' ', item).strip()
-                    if len(clean_def) >= 10 and not any(clean_def.startswith(x) for x in [
-                        '(', 'Alternative', 'Misspelling', 'present', 'past', 'Obsolete',
-                        'archaic', 'dated', 'rare', 'informal', 'plural', 'singular',
-                        'countable', 'uncountable', 'transitive', 'intransitive'
-                    ]):
-                        logging.debug(f"Found alternative definition for {word}: {clean_def}")
+                    if (len(clean_def) >= 10 and
+                            not any(clean_def.startswith(x) for x in skip_words)):
+                        msg = f"Found alternative definition for {word}: {clean_def}"
+                        logging.debug(msg)
                         definitions.append(clean_def)
                         if len(definitions) >= 3:
                             break
