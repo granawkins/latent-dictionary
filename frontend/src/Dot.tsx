@@ -16,7 +16,15 @@ interface DotProps {
   loading?: boolean;
 }
 
-const Dot: React.FC<DotProps> = ({ word, x, y, z, language, color, loading }) => {
+const Dot: React.FC<DotProps> = ({
+  word,
+  x,
+  y,
+  z,
+  language,
+  color,
+  loading,
+}) => {
   const meshRef = useRef<Mesh>(null);
   const dotColor = color
     ? color
@@ -31,13 +39,17 @@ const Dot: React.FC<DotProps> = ({ word, x, y, z, language, color, loading }) =>
 
   const { position } = useSpring({
     position: [x * SCALE, y * SCALE, z * SCALE],
-    config: { mass: 2, tension: 80, friction: 20 }
+    config: { mass: 2, tension: 80, friction: 20 },
   });
 
   return (
     <animated.mesh ref={meshRef} position={position}>
       <sphereGeometry args={[0.15, 32, 32]} />
-      <meshBasicMaterial color={dotColor} transparent opacity={loading ? 0.25 : 0.6} />
+      <meshBasicMaterial
+        color={dotColor}
+        transparent
+        opacity={loading ? 0.25 : 0.6}
+      />
       <Text
         position={[0, 0.5, 0]}
         fontSize={0.3}
