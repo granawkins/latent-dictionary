@@ -93,7 +93,7 @@ export interface Language {
 
 // Preload font in the background
 export const preloadFont = (fontUrl: string) => {
-  const font = new FontFace("Noto Sans SC", `url(${fontUrl})`);
+  const font = new window.FontFace("Noto Sans SC", `url(${fontUrl})`);
   font
     .load()
     .then((loadedFont) => {
