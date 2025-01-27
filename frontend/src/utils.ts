@@ -2,8 +2,12 @@ import React from "react";
 
 // Add FontFace type definition
 declare global {
-  class FontFace {
-    constructor(family: string, source: string | BinaryData);
+  interface Window {
+    FontFace: {
+      new (family: string, source: string): FontFace;
+    };
+  }
+  interface FontFace {
     load(): Promise<FontFace>;
   }
 }
