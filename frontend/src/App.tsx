@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [inputText, setInputText] = useState<string>(DEFAULT_SEARCH_TERM);
   const [activeText, setActiveText] = useState<string>("");
   const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
+  const [emptyDots, setEmptyDots] = useState<Record<string, CorpusItem[]>>({});
   const fetchSearch = useCallback(
     async (inputText: string, languages: string[]) => {
       setLoading(true);
@@ -76,7 +77,28 @@ const App: React.FC = () => {
       if (prev.includes(code)) {
         // Don't allow deselecting if it's the last language
         if (prev.length === 1) return prev;
-        return prev.filter((lang) => lang !== code);
+        const newSelected = prev.filter((lang) => lang !== code);
+        // Remove empty dots for deselected language
+        setEmptyDots(dots => {
+          const newDots = { ...dots };
+          delete newDots[code];
+          return newDots;
+        });
+        return newSelected;
+      }
+      // Add empty dots for new language
+      const langName = Languages.find(l => l.code === code)?.name;
+      if (langName) {
+        setEmptyDots(dots => ({
+          ...dots,
+          [code]: Array(WORDS_PER_LANGUAGE).fill(null).map(() => ({
+            word: "",
+            x: 0,
+            y: 0,
+            z: 0,
+            language: langName
+          }))
+        }));
       }
       return [...prev, code];
     });
@@ -113,6 +135,7 @@ const App: React.FC = () => {
       <Navigation inputText={inputText} setInputText={setInputText} />
       <Canvas>
         <Camera selectedCorpus={corpus} />
+        {/* Render corpus dots */}
         {corpus &&
           Object.entries(corpus)
             .filter(([, data]) => {
@@ -133,6 +156,20 @@ const App: React.FC = () => {
                 loading={loading}
               />
             ))}
+        {/* Render empty dots for selected languages */}
+        {Object.entries(emptyDots).map(([code, dots]) =>
+          dots.map((dot, index) => (
+            <DotMemo
+              key={`empty-${code}-${index}`}
+              word=""
+              x={0}
+              y={0}
+              z={0}
+              language={dot.language}
+              loading={loading}
+            />
+          ))
+        )}
         {/* A white dot at the origin to represent the search term */}
         <DotMemo
           word={inputText}
