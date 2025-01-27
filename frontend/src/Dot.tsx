@@ -31,8 +31,8 @@ const Dot: React.FC<DotProps> = ({
   const dotColor = color
     ? color
     : language
-      ? Languages.find((l: Language) => l.name === language)?.color
-      : "white";
+    ? Languages.find((l: Language) => l.name === language)?.color
+    : "white";
 
   // Get the language code (zh for Chinese)
   const langCode = language
