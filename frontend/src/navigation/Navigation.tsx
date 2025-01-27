@@ -55,20 +55,30 @@ const Navigation: React.FC<NavigationProps> = ({
         {inputText && (
           <button
             onClick={() => setInputText("")}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              setInputText("");
+            }}
             style={{
               position: "absolute",
-              right: "15px",
+              right: "8px",
               top: "50%",
               transform: "translateY(-50%)",
               background: "none",
               border: "none",
               color: "#999",
               cursor: "pointer",
-              fontSize: "16px",
-              padding: "0",
+              fontSize: "24px",
+              fontWeight: "bold",
+              padding: "8px 12px",
+              margin: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              minWidth: "44px", // Minimum touch target size
+              minHeight: "44px", // Minimum touch target size
+              touchAction: "manipulation", // Optimize for touch
+              WebkitTapHighlightColor: "transparent", // Remove tap highlight on iOS
             }}
             aria-label="Clear search"
           >
