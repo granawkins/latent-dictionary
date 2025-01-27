@@ -1,5 +1,13 @@
 import React from "react";
 
+// Add FontFace type definition
+declare global {
+  class FontFace {
+    constructor(family: string, source: string | BinaryData);
+    load(): Promise<FontFace>;
+  }
+}
+
 type Environment = "DEV" | "PROD";
 
 const origin = (): string => {
