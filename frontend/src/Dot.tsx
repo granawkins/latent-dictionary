@@ -59,7 +59,10 @@ const Dot: React.FC<DotProps> = ({
   });
 
   return (
-    <animated.mesh ref={meshRef} position={isEmptyOrLoading ? undefined : position}>
+    <animated.mesh
+      ref={meshRef}
+      position={isEmptyOrLoading ? undefined : position}
+    >
       <sphereGeometry args={[0.15, 32, 32]} />
       <meshBasicMaterial
         color={dotColor}

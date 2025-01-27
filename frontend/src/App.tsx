@@ -79,7 +79,7 @@ const App: React.FC = () => {
         if (prev.length === 1) return prev;
         const newSelected = prev.filter((lang) => lang !== code);
         // Remove empty dots for deselected language
-        setEmptyDots(dots => {
+        setEmptyDots((dots) => {
           const newDots = { ...dots };
           delete newDots[code];
           return newDots;
@@ -87,17 +87,19 @@ const App: React.FC = () => {
         return newSelected;
       }
       // Add empty dots for new language
-      const langName = Languages.find(l => l.code === code)?.name;
+      const langName = Languages.find((l) => l.code === code)?.name;
       if (langName) {
-        setEmptyDots(dots => ({
+        setEmptyDots((dots) => ({
           ...dots,
-          [code]: Array(WORDS_PER_LANGUAGE).fill(null).map(() => ({
-            word: "",
-            x: 0,
-            y: 0,
-            z: 0,
-            language: langName
-          }))
+          [code]: Array(WORDS_PER_LANGUAGE)
+            .fill(null)
+            .map(() => ({
+              word: "",
+              x: 0,
+              y: 0,
+              z: 0,
+              language: langName,
+            })),
         }));
       }
       return [...prev, code];
@@ -168,7 +170,7 @@ const App: React.FC = () => {
               language={dot.language}
               loading={loading}
             />
-          ))
+          )),
         )}
         {/* A white dot at the origin to represent the search term */}
         <DotMemo
