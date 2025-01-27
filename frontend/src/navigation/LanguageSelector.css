@@ -8,7 +8,7 @@
 
 .language-selector-legend {
   cursor: pointer;
-  padding: 24px;
+  padding: 12px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -19,13 +19,15 @@
   transform-origin: left bottom;
   opacity: 0.95;
   min-width: min-content;
+  max-width: 90vw;
 }
 
 .language-selector-legend.expanded {
   cursor: default;
+  padding: 24px;
   background: rgba(40, 40, 40, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  transform: scale(1) translateX(16px);
+  transform: scale(1);
   opacity: 1;
 }
 
@@ -36,6 +38,7 @@
   justify-content: flex-start;
   align-items: center;
   transition: all 0.3s ease;
+  width: fit-content;
 }
 
 .language-selector-flag {
@@ -95,8 +98,7 @@
   }
 
   .language-selector-legend.expanded {
-    max-width: calc(100vw - 64px);
-    transform: scale(1) translateX(8px);
+    max-width: calc(100vw - 82px);
   }
 
   .language-selector-flags {
