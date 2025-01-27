@@ -1,7 +1,7 @@
 import { Text } from "@react-three/drei";
 import React, { useRef } from "react";
 import { Mesh } from "three";
-
+import { animated, useSpring } from "@react-spring/three";
 import { Languages, Language } from "./utils";
 
 export const SCALE = 10;
@@ -37,8 +37,13 @@ const Dot: React.FC<DotProps> = ({
     ? Languages.find((l: Language) => l.name === language)?.code
     : null;
 
+  const { position } = useSpring({
+    position: [x * SCALE, y * SCALE, z * SCALE],
+    config: { mass: 2, tension: 80, friction: 20 },
+  });
+
   return (
-    <mesh ref={meshRef} position={[x * SCALE, y * SCALE, z * SCALE]}>
+    <animated.mesh ref={meshRef} position={position}>
       <sphereGeometry args={[0.15, 32, 32]} />
       <meshBasicMaterial
         color={dotColor}
@@ -63,7 +68,7 @@ const Dot: React.FC<DotProps> = ({
       >
         {word}
       </Text>
-    </mesh>
+    </animated.mesh>
   );
 };
 
