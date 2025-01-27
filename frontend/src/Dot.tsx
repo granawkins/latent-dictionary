@@ -59,7 +59,7 @@ const Dot: React.FC<DotProps> = ({
         anchorY="middle"
         font={
           langCode === "zh"
-            ? "/NotoSansSC-VariableFont_wght.woff2"
+            ? "/NotoSansSC-VariableFont_wght.woff"
             : "/NotoSans-Regular.ttf"
         }
         onError={(e) => {
