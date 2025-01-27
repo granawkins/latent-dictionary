@@ -52,10 +52,14 @@ const Dot: React.FC<DotProps> = ({
 
   // Use spring for positioned dots
   const { position } = useSpring({
-    position: isOriginDot 
-      ? [0, 0, 0] 
-      : isEmptyOrLoading 
-        ? [lastPosition.current.x, lastPosition.current.y, lastPosition.current.z]
+    position: isOriginDot
+      ? [0, 0, 0]
+      : isEmptyOrLoading
+        ? [
+            lastPosition.current.x,
+            lastPosition.current.y,
+            lastPosition.current.z,
+          ]
         : [x * SCALE, y * SCALE, z * SCALE],
     config: { mass: 2, tension: 80, friction: 20 },
   });
@@ -65,9 +69,12 @@ const Dot: React.FC<DotProps> = ({
     if (isEmptyOrLoading && !isOriginDot && meshRef.current) {
       time.current += delta * 0.2;
       const radius = 3;
-      meshRef.current.position.x = lastPosition.current.x + Math.cos(time.current) * radius;
-      meshRef.current.position.z = lastPosition.current.z + Math.sin(time.current) * radius;
-      meshRef.current.position.y = lastPosition.current.y + Math.sin(time.current * 0.5) * 1.5;
+      meshRef.current.position.x =
+        lastPosition.current.x + Math.cos(time.current) * radius;
+      meshRef.current.position.z =
+        lastPosition.current.z + Math.sin(time.current) * radius;
+      meshRef.current.position.y =
+        lastPosition.current.y + Math.sin(time.current * 0.5) * 1.5;
     }
   });
 
