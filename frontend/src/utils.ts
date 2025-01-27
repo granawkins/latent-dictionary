@@ -79,6 +79,16 @@ export interface Language {
   Flag: React.ComponentType<{ title: string; style?: React.CSSProperties }>;
 }
 
+// Preload font in the background
+export const preloadFont = (fontUrl: string) => {
+  const font = new FontFace('Noto Sans SC', `url(${fontUrl})`);
+  font.load().then((loadedFont) => {
+    document.fonts.add(loadedFont);
+  }).catch((error) => {
+    console.error('Error loading font:', error);
+  });
+};
+
 export const Languages: Language[] = [
   {
     code: "en",
