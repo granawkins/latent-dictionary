@@ -51,17 +51,27 @@ def optimize_chinese_font(input_ttf, output_woff):
     optimized_size = os.path.getsize(output_woff)
     reduction = (1 - optimized_size / original_size) * 100
 
-    logging.info(f"Font optimization complete:")
+    logging.info("Font optimization complete:")
     logging.info(f"Original TTF: {original_size/1024/1024:.2f}MB")
     logging.info(f"Optimized WOFF: {optimized_size/1024/1024:.2f}MB")
     logging.info(f"Size reduction: {reduction:.1f}%")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Optimize Chinese font by subsetting and converting to WOFF')
-    parser.add_argument('--input-ttf', type=str, required=True,
-                      help='Input TTF font file')
-    parser.add_argument('--output-woff', type=str, required=True,
-                      help='Output WOFF font file')
+    parser = argparse.ArgumentParser(
+        description="Optimize Chinese font by subsetting and converting to WOFF"
+    )
+    parser.add_argument(
+        "--input-ttf",
+        type=str,
+        required=True,
+        help="Input TTF font file"
+    )
+    parser.add_argument(
+        "--output-woff",
+        type=str,
+        required=True,
+        help="Output WOFF font file"
+    )
     args = parser.parse_args()
 
     optimize_chinese_font(args.input_ttf, args.output_woff)
