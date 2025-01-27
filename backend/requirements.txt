@@ -11,6 +11,11 @@ openai
 python-dotenv
 requests
 
+# Font Tools
+fonttools
+brotli  # Required for WOFF2 support
+zopfli  # Required for WOFF support
+
 # Development and Testing
 ruff
 pyright
