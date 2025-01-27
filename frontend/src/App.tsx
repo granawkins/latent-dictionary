@@ -3,6 +3,7 @@ import { useCallback, useState, useEffect, useRef } from "react";
 import { Canvas } from "@react-three/fiber";
 import Dot from "./Dot";
 import Camera from "./Camera";
+import { preloadFont } from "./utils";
 import ErrorModal from "./ErrorModal";
 import Navigation from "./navigation/Navigation";
 import SwipeIndicator from "./SwipeIndicator";
@@ -44,6 +45,11 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [inputText, setInputText] = useState<string>(DEFAULT_SEARCH_TERM);
+
+  // Preload Chinese font when app starts
+  useEffect(() => {
+    preloadFont("/NotoSansSC-VariableFont_wght.woff");
+  }, []);
   const [activeText, setActiveText] = useState<string>("");
   const [corpus, setCorpus] = useState<Record<string, CorpusItem>>({});
   const fetchSearch = useCallback(

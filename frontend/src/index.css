@@ -3,6 +3,7 @@ body {
   font-family:
     "Noto Sans",
     "Noto Sans SC",
+    system-ui,
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",

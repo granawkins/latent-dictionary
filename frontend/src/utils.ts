@@ -1,5 +1,17 @@
 import React from "react";
 
+// Add FontFace type definition
+declare global {
+  interface Window {
+    FontFace: {
+      new (family: string, source: string): FontFace;
+    };
+  }
+  interface FontFace {
+    load(): Promise<FontFace>;
+  }
+}
+
 type Environment = "DEV" | "PROD";
 
 const origin = (): string => {
@@ -78,6 +90,19 @@ export interface Language {
   color: string;
   Flag: React.ComponentType<{ title: string; style?: React.CSSProperties }>;
 }
+
+// Preload font in the background
+export const preloadFont = (fontUrl: string) => {
+  const font = new window.FontFace("Noto Sans SC", `url(${fontUrl})`);
+  font
+    .load()
+    .then((loadedFont) => {
+      document.fonts.add(loadedFont);
+    })
+    .catch((error) => {
+      console.error("Error loading font:", error);
+    });
+};
 
 export const Languages: Language[] = [
   {

@@ -15,7 +15,10 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          fonts: ['./public/NotoSans-Regular.ttf']
+          fonts: [
+            './public/NotoSans-Regular.ttf',
+            './public/NotoSansSC-VariableFont_wght.woff'
+          ]
         }
       }
     }
