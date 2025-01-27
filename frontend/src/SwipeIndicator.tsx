@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHandPointRight } from "@fortawesome/free-solid-svg-icons";
 import "./SwipeIndicator.css";
 
 interface SwipeIndicatorProps {
-  show: boolean;
+  hasData: boolean;
 }
 
-const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({ show }) => {
+const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({ hasData }) => {
   const [visible, setVisible] = useState(false);
+  const shownOnce = useRef(false);
 
   useEffect(() => {
-    if (show) {
+    if (hasData && !shownOnce.current) {
       // Wait 1s before showing
       const showTimer = setTimeout(() => {
+        shownOnce.current = true;
         setVisible(true);
         // Hide after animation completes
         const hideTimer = setTimeout(() => {
@@ -23,7 +25,7 @@ const SwipeIndicator: React.FC<SwipeIndicatorProps> = ({ show }) => {
       }, 1000);
       return () => clearTimeout(showTimer);
     }
-  }, [show]);
+  }, [hasData]);
 
   if (!visible) return null;
 

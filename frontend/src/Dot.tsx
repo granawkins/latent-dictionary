@@ -11,22 +11,12 @@ interface DotProps {
   x: number;
   y: number;
   z: number;
-  selected: boolean;
-  select: () => void;
   language?: string | null;
   color?: string;
+  loading?: boolean;
 }
 
-const Dot: React.FC<DotProps> = ({
-  word,
-  x,
-  y,
-  z,
-  selected,
-  select,
-  language,
-  color,
-}) => {
+const Dot: React.FC<DotProps> = ({ word, x, y, z, language, color, loading }) => {
   const meshRef = useRef<Mesh>(null);
   const dotColor = color
     ? color
@@ -40,27 +30,20 @@ const Dot: React.FC<DotProps> = ({
     : null;
 
   return (
-    <mesh
-      ref={meshRef}
-      position={[x * SCALE, y * SCALE, z * SCALE]}
-      onClick={select}
-    >
-      <sphereGeometry args={[0.15 * (selected ? 1.2 : 1), 32, 32]} />
-      <meshBasicMaterial
-        color={dotColor}
-        transparent
-        opacity={selected ? 0.85 : 0.6}
-      />
+    <mesh ref={meshRef} position={[x * SCALE, y * SCALE, z * SCALE]}>
+      <sphereGeometry args={[0.15, 32, 32]} />
+      <meshBasicMaterial color={dotColor} transparent opacity={loading ? 0.25 : 0.6} />
       <Text
         position={[0, 0.5, 0]}
         fontSize={0.3}
         color={dotColor}
+        fillOpacity={loading && color !== "white" ? 0.25 : 1}
         anchorX="center"
         anchorY="middle"
         font={
           langCode === "zh"
-            ? "https://fonts.gstatic.com/s/notosanssc/v36/k3kXo84MPvpLmixcA63oeALhLOCT-xWNm8Hqd37g1OkDRZe7lR4sg1IzSy-MNbE9VH8V.ttf"
-            : "https://fonts.gstatic.com/s/notosans/v35/o-0IIpQlx3QUlC5A4PNr5TRG.ttf"
+            ? "/NotoSansSC-VariableFont_wght.ttf"
+            : "/NotoSans-Regular.ttf"
         }
         onError={(e) => {
           console.error(`Text rendering error for word "${word}":`, e);
