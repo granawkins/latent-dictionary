@@ -54,11 +54,22 @@ def fetch_wiktionary_words(
         pages = config.get("pages", [config.get("page_path")])
         sections = config.get("sections", [])
 
-        for page in pages:
+        for page_idx, page in enumerate(pages):
             if len(all_words) >= num_words:
                 break
 
-            for section in sections:
+            # For English, first page uses sections 1-10, others use section 0
+            current_sections = (
+                [sections[-1]]  # Use last section (0) for paginated pages
+                if language == "english" and page_idx > 0
+                else sections[:-1] if language == "english"  # Use all sections except last for first page
+                else sections
+            )
+
+            for section in current_sections:
+                if len(all_words) >= num_words:
+                    break
+
                 params = {
                     "action": "parse",
                     "page": page,
@@ -174,9 +185,21 @@ def main():
     # Language configurations
     configs = {
         "english": {
-            "page_path": "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",
-            # Sections 1-1000 through 9001-10000
-            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+            # First 10k words are in the main page with sections
+            "pages": [
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)",  # 1-10000
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/10001-20000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/20001-30000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/30001-40000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/40001-50000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/50001-60000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/60001-70000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/70001-80000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/80001-90000",
+                "Wiktionary:Frequency_lists/English/Wikipedia_(2016)/90001-100000",
+            ],
+            # First page uses sections 1-10, others use section 0
+            "sections": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "0"],
         },
         "spanish": {
             # Spanish frequency lists in 1000-word segments
