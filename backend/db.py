@@ -17,6 +17,7 @@ load_dotenv()
 
 DB_PATH = Path("~/.latentdictionary").expanduser()
 DB_PATH.parent.mkdir(exist_ok=True)
+openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 client = chromadb.PersistentClient(path=DB_PATH.as_posix())
 # Configure HNSW index parameters for better performance and capacity
@@ -27,9 +28,25 @@ hnsw_params = {
     "max_elements": 100000,
 }
 
-if openai_api_key:
+if openrouter_api_key:
+    # Use the same OpenAI model and dimensions as the existing collection so
+    # queries remain compatible with the stored vectors.
     embedding_function = OpenAIEmbeddingFunction(
-        api_key=openai_api_key, model_name="text-embedding-3-small"
+        api_key=openrouter_api_key,
+        api_base="https://openrouter.ai/api/v1",
+        model_name="openai/text-embedding-3-small",
+        dimensions=1536,
+    )
+    collection = client.get_or_create_collection(
+        name="latent-dictionary",
+        embedding_function=embedding_function,
+        metadata=hnsw_params,
+    )
+elif openai_api_key:
+    embedding_function = OpenAIEmbeddingFunction(
+        api_key=openai_api_key,
+        model_name="text-embedding-3-small",
+        dimensions=1536,
     )
     collection = client.get_or_create_collection(
         name="latent-dictionary",
